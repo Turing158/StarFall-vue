@@ -2,7 +2,7 @@
   <div>
     <Book>
       <div class="opearte">
-        <McBtn text="发 布" />
+        <McBtn text="发 布" @click="addList()" />
       </div>
       <Empty :height="10" />
       <div class="ad">
@@ -45,14 +45,15 @@
   </div>
 </template>
 <script setup>
-import Book from '../components/Book.vue'
-import McBtn from '../components/McBtn.vue'
-import Empty from '../components/FitEmpty.vue'
-import TopicList from '../components/TopicList.vue'
-import TopicItem from '../components/TopicItem.vue'
-let data = []
-for (let i = 0; i < 20; i++) {
-  data.push({
+import Book from '../../components/Book.vue'
+import McBtn from '../../components/McBtn.vue'
+import Empty from '../../components/FitEmpty.vue'
+import TopicList from '../../components/TopicList.vue'
+import TopicItem from '../../components/TopicItem.vue'
+import { ref } from 'vue'
+const data = ref([])
+const addList = () => {
+  data.value.push({
     label: '视频',
     title: '震惊！竟有一人在路上走路',
     author: '某人',

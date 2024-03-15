@@ -6,9 +6,6 @@
     </div>
 </template>
 <script setup>
-import Book from '../components/Book.vue'
+import Book from '../../components/Book.vue'
+
 </script>
-
-<style scoped>
-
-</style>

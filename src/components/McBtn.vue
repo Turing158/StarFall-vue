@@ -1,12 +1,15 @@
 <template>
   <div v-if="(type == null) | 'spruce'" class="btn" @click="onClick">
     {{ text }}
+    <slot></slot>
   </div>
   <div v-if="type == 'oak'" class="btn oak" @click="onClick">
     {{ text }}
+    <slot></slot>
   </div>
   <div v-if="type == 'birch'" class="btn birch" @click="onClick">
     {{ text }}
+    <slot></slot>
   </div>
 </template>
 <script setup>

@@ -31,7 +31,7 @@
           ></span
         >
         <div class="operate">
-          <a class="ul_border" href="/set">设置</a>
+          <a class="ul_border" href="/personal">设置</a>
           <a class="ul_border" href="/signIn">签到</a>
           <a class="ul_border" href="/exit">退出</a>
         </div>
@@ -48,6 +48,12 @@
 <script setup>
 import { ref } from 'vue'
 import minSearch from './minSearch.vue'
+const props = defineProps({
+  pageIndex: {
+    type: Number,
+    default: -1
+  }
+})
 const isLogin = ref(true)
 const UlItem = ref([
   {
@@ -76,7 +82,7 @@ const UlItem = ref([
   }
 ])
 
-const PageIndex = ref(0)
+const PageIndex = ref(props.pageIndex)
 </script>
 
 <style scoped>
@@ -88,10 +94,10 @@ const PageIndex = ref(0)
   list-style: none;
   position: relative;
   justify-content: center;
-  overflow: none;
   font-family: cool_font;
   font-weight: bold;
   box-shadow: 0px 1px 5px #131313;
+  z-index: 999;
 }
 .ul_li {
   float: left;
