@@ -1,0 +1,166 @@
+*{
+    margin: 0;
+    padding: 0;
+    transition: all 250ms;
+    user-select: none;
+    font-weight: bold;
+    font-family: cool_font;
+}
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: url(../img/forgetBg.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.forgetDiv{
+    position: relative;
+    width: 500px;
+    height: 320px;
+    /* background-color: rgb(207, 206, 206); */
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px black;
+    backdrop-filter:blur(10px);
+}
+.back{
+    position: absolute;
+    background-color: none;
+    height: 35px;
+    width: 65px;
+    font-size: 18px;
+    overflow: hidden;
+    display: block;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: aliceblue;
+    border-radius: 5px;
+}
+.back span:first-child{
+    position: relative;
+    top: -20px;
+}
+.back span:last-child{
+    position: relative;
+    top: -14px;
+}
+.back:hover span:first-child{
+    top: 5px;
+}
+.back:hover span:last-child{
+    top: 18px;
+}
+h1{
+    position: relative;
+    left: 180px;
+}
+.user_input,.pass_input,.code_input{
+    position: relative;
+    outline: none;
+    border: 0;
+    height: 30px;
+    width: 280px;
+    font-size: 20px;
+    border-bottom: 2px solid rgb(206, 206, 206);
+    background-color: initial;
+    left: 46%;
+    margin-left: -25%;
+    font-family:Arial, Helvetica, sans-serif;
+}
+.code_input{
+    width: 165px;
+}
+.user_span,.pass_span,.code_span{
+    position: absolute;
+    pointer-events: none;
+    font-size: 20px;
+    left: 0;
+    left: 46%;
+    margin-left: -25%;
+}
+.user_underline,.pass_underline,.code_underline{
+    position: relative;
+    width: 280px;
+    height: 2px;
+    top: -2px;
+    left: 0;
+    transform: scaleX(0);
+    background-color: rgb(99, 191, 206);
+    left: 46%;
+    margin-left: -25%;
+    box-shadow: 0px 0px 1px rgb(170, 170, 170);
+}
+.code_underline{
+    width: 165px;
+}
+/* .user_span,.pass_span,.code_span */
+.user_input:focus ~ .user_span,
+.pass_input:focus ~ .pass_span,
+.code_input:focus ~ .code_span,
+.user_input:valid ~ .user_span,
+.pass_input:valid ~ .pass_span,
+.code_input:valid ~ .code_span{
+    font-size: 15px;
+    transform: translateY(-15px);
+}
+.user_input:focus ~ .user_underline,
+.pass_input:focus ~ .pass_underline,
+.code_input:focus ~ .code_underline,
+.user_input:valid ~ .user_underline,
+.pass_input:valid ~ .pass_underline,
+.code_input:valid ~ .code_underline{
+    transform: scaleX(1);
+}
+input[type=search]::-webkit-search-cancel-button{
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background-size: 100% 100%;
+    background-image: url(/img/icon/delete-icon.png);
+}
+input[type=password]::-ms-reveal{
+    width: 20px;
+    height: 20px;
+}
+img{
+    position: relative;
+    left: 280px;
+    top: -32px;
+    width: 80px;
+    height: 30px;
+    background-color: bisque;
+}
+.confirm,.reg,.login{
+    position: relative;
+    width: 80px;
+    height: 40px;
+    font-size: 20px;
+    border-radius: 10px;
+    margin: 0 20px;
+    background-color: rgb(223, 251, 252);
+}
+p{
+    text-align: center;
+    height: 40px;
+    left: 150px;
+}
+.operate{
+    display: flex;
+    justify-content: center;
+}
+.login{
+    width: 100px;
+}
+.confirm:hover,.reg:hover,.login:hover{
+    background-color: rgb(167, 211, 211);
+}
+h2{
+    position: absolute;
+    bottom: 50px;
+    backdrop-filter: blur(10px);
+    color: rgb(255, 127, 127);
+}

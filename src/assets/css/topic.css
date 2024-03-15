@@ -1,0 +1,291 @@
+:root{
+    --home_height:1000px;
+}
+.home{
+    display: block;
+    position: relative;
+    background-color: rgb(250, 243, 217);
+    width: 1129px;
+    height: var(--home_height);
+    top: 100px;
+    overflow: none;
+}
+.home_top{
+    position: relative;
+    width:1129px;
+    height: 59px;
+    top: -59px;
+    background-image: url(../img/home_top.png);
+}
+.home_foot{
+    position: relative;
+    width:1129px;
+    height: 59px;
+    top: 92%;
+    background-image: url(../img/home_foot.png);
+}
+.home_left{
+    position: absolute;
+    background-image: url(../img/left.png);
+    height: 1000px;
+    width: 84px;
+    top: 0%;
+}
+.home_right{
+    position: absolute;
+    background-image: url(../img/right.png);
+    height: 1000px;
+    width: 84px;
+    top: 0%;
+    left:1045px;
+}
+.home_content{
+    position: relative;
+    display: block;
+    left: 84px;
+    top: -100px;
+}
+#ad{
+    position: relative;
+    display: block;
+    background-color: antiquewhite;
+    width: 980px;
+    height: 350px;
+    border:4px solid #022a12;
+    overflow: hidden;
+}
+#ad .select{
+    position: absolute;
+    background-color: rgba(83, 83, 83, 0.527);
+    bottom: 0px;
+    height: 50px;
+    width: 974px;
+    opacity: 0.5;
+}
+#ad .select:hover{
+    opacity: 1;
+}
+#ad .select .selectImgDiv{
+    position: absolute;
+    height: 50px;
+    top: 0px;
+    left: 60px;
+    width: 860px;
+}
+#ad .select .selectImg{
+    height: 40px;
+    width: 112px;
+    overflow: hidden;
+    float: left;
+    margin: 5px 15px;
+}
+#ad .select .selectImg:hover{
+    filter:brightness(1.3);
+}
+#ad .select .selectImg img{
+    width: 100%;
+}
+#ad button{
+    background-image: url(../img/icon/arrow.png);
+    background-size: 100%;
+    background-color: initial;
+    border: 0;
+    width: 50px;
+    height: 50px;
+}
+#ad .select .pre{
+    transform: rotate(-90deg);
+}
+#ad .select .pre:hover{
+    transform: rotate(-90deg) scale(1.2) translateY(10px)
+}
+#ad .select .next{
+    transform: rotate(90deg);
+    float: right;
+}
+#ad .select .next:hover{
+    transform: rotate(90deg) scale(1.2) translateY(10px)
+}
+.topicDiv{
+    position: relative;
+    width: 990px;
+    left: -5px;
+    top: 35px;
+    height: 51px;
+    border: 3px solid rgb(201, 190, 174);
+    z-index: 10;
+}
+.topicContent{
+    margin: 5px;
+    margin-bottom: 9px;
+    position: relative;
+    width: 980px;
+    top: -36px;
+}
+.topic{
+    position: relative;
+    border-bottom: 1px solid rgb(194, 173, 142);
+    height: 50px;
+}
+.topicContent .icon img{
+    position: relative;
+    float: right;
+    right: 5px;
+}
+.topicContent .icon img,.topicContent .head img{
+    width: 35px;
+    height: 35px;
+}
+.topicContent .lab{
+    width: 60px;
+}
+.topicContent .lab span{
+    position:relative;
+    right:2px;
+    float: right;
+}
+.topicContent .title{
+    width: 600px;
+}
+.topicContent .lab a span,.topicContent .title a{
+    text-decoration: none;
+}
+.topicContent .lab a span:hover,.topicContent .title a:hover{
+    text-decoration: underline;
+}
+.topicContent .author{
+    width:100px
+}
+.topicContent .author span{
+    position: absolute;
+}
+.topicContent .author .span1{
+    top: 5px;
+}
+.topicContent .author .span1 a{
+    color: #131313;
+    text-decoration: none;
+}
+.topicContent .author .span1 a:hover{
+    text-decoration: underline;
+}
+.topicContent .author .date{
+    color: gray;
+    font-size: 10px;
+}
+.topicContent .number span{
+    position: absolute;
+}
+.topicContent .number .up{
+    top:10px;
+}
+.topicContent .number .down{
+    color: gray;
+    font-size: 10px;
+}
+.page{
+    position: relative;
+    display: flex;
+    top: 45px;
+    width: 980px;
+    justify-content: center;
+}
+.page a{
+    width: 50px;
+    height:50px;
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+.page .back{
+    position: relative;
+    width: 30px;
+    height: 30px;
+    left: -20px;
+    background-image: url(../img/icon/first.png);
+}
+.page .back:hover{
+    background-image: url(../img/icon/firsthover.png);
+}
+.page .pre{
+    background-image: url(../img/icon/left.png);
+
+}
+.page .pre:hover{
+    background-image: url(../img/icon/lefthover.png);
+
+}
+.page span{
+    position: relative;
+    top: -5px;
+    font-size: 30px;
+    font-family: block_font;
+    margin: 0 20px;
+}
+.page .next{
+    background-image: url(../img/icon/right.png);
+}
+.page .next:hover{
+    background-image: url(../img/icon/righthover.png);
+}
+.page .last{
+    position: relative;
+    width: 30px;
+    height: 30px;
+    left: 20px;
+    background-image: url(../img/icon/last.png);
+}
+.page .last:hover{
+    background-image: url(../img/icon/lasthover.png);
+}
+.showall{
+    position: relative;
+    top: -4px;
+    font-size: 15px;
+    width: 80px;
+    height: 30px;
+    background-color: rgb(241, 217, 185);
+    outline: 0;
+    border: 0;
+    border-radius: 5px;
+    font-weight: bold;
+    border: 2px solid rgba(0, 0, 0, 0);
+}
+.showall:hover{
+    background-color: rgb(224, 197, 160);
+    border-top: 2px solid rgb(201, 190, 174);
+    border-left: 2px solid rgb(201, 190, 174);
+    border-right: 2px solid rgb(102, 93, 80);
+    border-bottom: 2px solid rgb(102, 93, 80);
+}
+.showall:active{
+    background-color: rgb(187, 166, 136);
+    border-right: 2px solid rgb(201, 190, 174);
+    border-bottom: 2px solid rgb(201, 190, 174);
+    border-top: 2px solid rgb(102, 93, 80);
+    border-left: 2px solid rgb(102, 93, 80);
+}
+.createTopic{
+    position: absolute;
+    top: -43px;
+    width: 80px;
+    height: 40px;
+    background-image: url(../img/set/spruce.png);
+    background-size: 100%;
+    outline: 0;
+    border: 2px solid rgba(0, 0, 0, 0);
+    border-radius: 5px;
+
+    color: aliceblue;
+}
+.createTopic:hover{
+    border-top: 2px solid rgb(184, 147, 93);
+    border-left: 2px solid rgb(184, 147, 93);
+    border-right: 2px solid rgb(59, 37, 3);
+    border-bottom: 2px solid rgb(59, 37, 3);
+}
+.createTopic:active{
+    border-right: 2px solid rgb(184, 147, 93);
+    border-bottom: 2px solid rgb(184, 147, 93);
+    border-top: 2px solid rgb(59, 37, 3);
+    border-left: 2px solid rgb(59, 37, 3);
+}
