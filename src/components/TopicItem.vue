@@ -22,12 +22,30 @@
           <img class="img" src="" alt="" />
         </div>
       </td>
+      <td v-show="isEdit">
+        <McBtn text="edit" @click="onEdit"/>
+        <McBtn text="del" @click="onDel"/>
+      </td>
     </tr>
 </template>
 <script setup>
 import { ref } from 'vue'
+import McBtn from './McBtn.vue';
 const props = defineProps({
-  item: Object
+  item: Object,
+  isEdit:{
+    type:Boolean,
+    default:false,
+    require:false
+  },
+  onEdit:{
+    type:Function,
+    require:false
+  },
+  onDel:{
+    type:Function,
+    require:false
+  }
 })
 const item = ref(props.item)
 </script>

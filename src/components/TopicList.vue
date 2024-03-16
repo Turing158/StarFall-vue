@@ -32,7 +32,8 @@ import { ref } from "vue"
 const props = defineProps({
   isNull: {
     type:Boolean,
-    default:true
+    default:true,
+    require:false
   }
 })
 const isNull = ref(props.isNull)
