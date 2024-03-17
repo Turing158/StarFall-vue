@@ -21,40 +21,41 @@
       <div class="menu">
         <p th:text="${session.user.name}">User</p>
         <div class="exp">
-          <input class="expBarValue" type="hidden" th:value="${session.userExp.present}" />
-          <div class="expBar"></div>
+          <ExpBar :lv="1" :exp="30" :maxExp="382" />
         </div>
-        <span class="level"
-          ><span th:text="'Lv:'+${session.user.level}">Lv:1</span>&ensp;&ensp;<span
-            th:text="${session.userExp.exp}+'/'+${session.userExp.maxExp}"
-            >0/1</span
-          ></span
-        >
         <div class="operate">
-          <a class="ul_border" href="/personal">设置</a>
-          <a class="ul_border" href="/signIn">签到</a>
-          <a class="ul_border" href="/exit">退出</a>
+          <router-link class="ul_border" to="/personal">设置</router-link>
+          <router-link class="ul_border" to="/signIn">签到</router-link>
+          <router-link class="ul_border" to="/exit">退出</router-link>
         </div>
       </div>
     </div>
-    <div v-show="!isLogin" class="unuser ul_border" onclick="window.location.href='/login'">
-      <span>请登录，谢谢</span>
-      <br /><br />
-      <span>Login</span>
-    </div>
+    <router-link to="/login">
+      <div v-show="!isLogin" class="unuser ul_border">
+        <span>请登录，谢谢</span>
+        <br /><br />
+        <span>Login</span>
+      </div>
+    </router-link>
   </ul>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import minSearch from './minSearch.vue'
+import ExpBar from './ExpBar.vue'
 const props = defineProps({
   pageIndex: {
     type: Number,
     default: -1
+  },
+  isLogin: {
+    type: Boolean,
+    default: false,
+    require: false
   }
 })
-const isLogin = ref(true)
+const isLogin = ref(props.isLogin)
 const UlItem = ref([
   {
     name: '主页',
@@ -164,7 +165,7 @@ ul .head_img {
 }
 .user:hover .head_img {
   border-radius: 10px 10px 0px 0px;
-  width: 148px;
+  width: 150px;
 }
 .user {
   position: absolute;
@@ -176,7 +177,6 @@ ul .head_img {
   text-align: center;
   width: 50px;
   height: 50px;
-  line-height: 55px;
 }
 .user:hover {
   border-bottom: 0;
@@ -191,10 +191,10 @@ ul .head_img {
   border-radius: 0px 0px 5px 5px;
   width: 150px;
   height: 115px;
+  top: -2px;
   /* right: 108px; */
   right: -100px;
-  opacity: 0;
-  top: -20px;
+  opacity: 1;
   color: #131313;
   box-shadow: 0px 4px 4px rgb(0, 0, 0);
   border-top: 0;
@@ -203,7 +203,7 @@ ul .head_img {
   border-left: 2px solid #8f8568;
   border-right: 2px solid #3f3a2c;
   border-bottom: 2px solid #3f3a2c;
-  font-weight: 100;
+  font-weight: bold;
 }
 .menu p {
   position: relative;
@@ -215,46 +215,25 @@ ul .head_img {
   text-align: center;
 }
 .menu .exp {
-  margin: 0 5px;
+  position: relative;
   width: 135px;
-  height: 10px;
-  background-image: url(../assets/img/lv0.png);
-  background-size: 100%;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 0;
-}
-.menu .exp div {
-  position: relative;
-  width: 0%;
-  height: 10px;
-  background-image: url(../assets/img/lv1.png);
-  background-repeat: no-repeat;
-  border-radius: 10px;
-  border: 0;
-}
-.menu .level {
-  position: relative;
-  top: -15px;
-}
-.menu .level span:nth-child(1) {
-  color: #046404;
-}
-.menu .level span:nth-child(2) {
-  color: #044964;
+  margin: 2px 5px;
 }
 .menu .operate {
   position: relative;
-  top: -40px;
+  height: 20px;
+  margin-top: 15px;
 }
 .menu .operate a {
   background-image: url(../assets/img/set/oak.png);
   font-size: 14px;
   padding: 3px 5px;
-  margin: 0 1px;
   border-radius: 3px;
   text-decoration: none;
   color: #131313;
+}
+.menu .operate a:nth-child(2) {
+  margin: 0 5px;
 }
 .menu .operate a:hover {
   color: #f1f1f1;

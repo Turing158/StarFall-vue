@@ -37,18 +37,38 @@ const router = createRouter({
       path: '/personal',
       name: 'personal',
       component: PersonalView,
-      children:[
+      children: [
         {
           path: '/personal',
           name: 'PersonalInfo',
-          component: ()=>import('../views/content/PersonalContent.vue')
+          component: () => import('../views/content/PersonalContent.vue')
         },
         {
           path: '/personal/setting',
           name: 'PersonalSetContent',
-          component: ()=>import('../views/content/PersonalSetContent.vue')
+          component: () => import('../views/content/PersonalSetContent.vue')
+        },
+        {
+          path: '/personal/password',
+          name: 'PersonalPasswordContent',
+          component: () => import('../views/content/PersonPasswordContent.vue')
+        },
+        {
+          path: '/personal/email',
+          name: 'PersonalEmailContent',
+          component: () => import('../views/content/PersonEmailContent.vue')
         }
       ]
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/LoginView.vue')
+    },
+    {
+      path: '/reg',
+      name: 'reg',
+      component: () => import('../views/RegView.vue')
     },
     {
       path: '/admin',

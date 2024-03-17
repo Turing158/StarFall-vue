@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="top"></div>
-    <div class="left" :style="{height:mainDivHeight+'px'}"></div>
-    <div class="right" :style="{height:mainDivHeight+'px'}"></div>
+    <div class="left" :style="{ height: mainDivHeight + 'px' }"></div>
+    <div class="right" :style="{ height: mainDivHeight + 'px' }"></div>
     <div class="main" ref="mainDiv">
       <slot></slot>
     </div>
@@ -10,21 +10,22 @@
   </div>
 </template>
 <script setup>
-import { onMounted, ref } from 'vue';
-const mainDiv = ref();
-const mainDivHeight = ref(0);
+import { onMounted, ref } from 'vue'
+const mainDiv = ref()
+const mainDivHeight = ref(0)
 const setHeight = () => {
-    mainDivHeight.value = mainDiv.value.clientHeight;
-    console.log(mainDivHeight.value);
+  mainDivHeight.value = mainDiv.value.clientHeight
+  console.log(mainDivHeight.value)
 }
+
 onMounted(setHeight)
 </script>
 <style scoped>
 .main {
-    position: relative;
-    background-color: #FBF2DB;
-    width: 961px;
-    left: 84px;
+  position: relative;
+  background-color: #fbf2db;
+  width: 961px;
+  left: 84px;
 }
 .top {
   position: relative;

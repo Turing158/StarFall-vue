@@ -1,11 +1,15 @@
 <template>
   <div>
     <table>
-      <tr>
-        <th></th>
+      <tr v-show="!props.isNull" class="top">
+        <th>主题</th>
+        <th>作者</th>
+        <th style="text-align: left">观看/评论</th>
+        <th>头像</th>
+        <th v-show="props.isEdit">操作</th>
       </tr>
-      <tr v-show="isNull">
-        <td class="item" colspan="5"><div class="null">未找到数据！</div></td>
+      <tr v-show="props.isNull">
+        <td class="item" colspan="6"><div class="null">未找到数据！</div></td>
       </tr>
       <slot> </slot>
     </table>
@@ -24,17 +28,27 @@ table {
   text-align: center;
   line-height: 40px;
 }
+.top {
+  border: 1px solid #a58960;
+  background-color: #f3debf;
+  height: 30px;
+  font-size: 12px;
+}
 </style>
 
 <script setup>
-import { ref } from "vue"
+import { ref } from 'vue'
 
 const props = defineProps({
   isNull: {
-    type:Boolean,
-    default:true,
-    require:false
+    type: Boolean,
+    default: true,
+    require: false
+  },
+  isEdit: {
+    type: Boolean,
+    default: false,
+    require: false
   }
 })
-const isNull = ref(props.isNull)
 </script>

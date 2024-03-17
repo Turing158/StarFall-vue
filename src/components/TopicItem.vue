@@ -1,50 +1,52 @@
 <template>
-    <tr class="item">
-      <td style="width: 710px">
-        <div class="info">
-          &nbsp;[<span class="label">{{ item.label }}</span
-          >]
-          <span class="title">{{ item.title }}</span>
-        </div>
-      </td>
-      <td style="width: 100px">
-        <div class="author">
-          <span>{{ item.author }}</span>
-          <br />
-          <span>{{ item.date }}</span>
-        </div>
-      </td>
-      <td style="width: 100px">
-        <div class="num">{{ item.viewNum }}/{{ item.commentNum }}</div>
-      </td>
-      <td style="width: 40px">
-        <div class="head">
-          <img class="img" src="" alt="" />
-        </div>
-      </td>
-      <td v-show="isEdit">
-        <McBtn text="edit" @click="onEdit"/>
-        <McBtn text="del" @click="onDel"/>
-      </td>
-    </tr>
+  <tr class="item">
+    <td style="width: 710px">
+      <div class="info">
+        &nbsp;[<span class="label">{{ item.label }}</span
+        >]
+        <span class="title">{{ item.title }}</span>
+      </div>
+    </td>
+    <td style="width: 100px">
+      <div class="author">
+        <span>{{ item.author }}</span>
+        <br />
+        <span>{{ item.date }}</span>
+      </div>
+    </td>
+    <td style="width: 80px">
+      <div class="num">{{ item.viewNum }}/{{ item.commentNum }}</div>
+    </td>
+    <td style="width: 40px">
+      <div class="head">
+        <img class="img" src="" alt="" />
+      </div>
+    </td>
+    <td v-show="isEdit" class="operate" style="width: 140px">
+      &ensp;
+      <McBtn text="编 辑" type="oak" @click="onEdit" />
+      &ensp;
+      <McBtn text="删 除" type="oak" @click="onDel" />
+    </td>
+  </tr>
 </template>
 <script setup>
 import { ref } from 'vue'
-import McBtn from './McBtn.vue';
+import McBtn from './McBtn.vue'
 const props = defineProps({
   item: Object,
-  isEdit:{
-    type:Boolean,
-    default:false,
-    require:false
+  isEdit: {
+    type: Boolean,
+    default: false,
+    require: false
   },
-  onEdit:{
-    type:Function,
-    require:false
+  onEdit: {
+    type: Function,
+    require: false
   },
-  onDel:{
-    type:Function,
-    require:false
+  onDel: {
+    type: Function,
+    require: false
   }
 })
 const item = ref(props.item)
@@ -60,7 +62,6 @@ const item = ref(props.item)
 }
 
 .info {
-  width: 600px;
   text-align: left;
   line-height: 30px;
 }
@@ -102,7 +103,7 @@ const item = ref(props.item)
   color: #666;
 }
 .num {
-  width: 100px;
+  width: 50px;
   font-size: 13px;
 }
 .head {
@@ -114,5 +115,9 @@ const item = ref(props.item)
   width: 30px;
   height: 30px;
   background-color: #a58960;
+}
+.operate {
+  display: flex;
+  padding: 2.5px 5px;
 }
 </style>

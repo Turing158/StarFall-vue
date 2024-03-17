@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <Empty :height="20" />
+  <Book>
+    <Empty :height="30" />
     <div class="basicInfo">
       <div class="headOut">
         <img class="head" src="" alt="" />
@@ -18,18 +18,40 @@
       </div>
     </div>
     <div class="topic">
-      <TopicList :isNull="data == null || data.length == 0">
-        <TopicItem v-for="(item,index) in data" :key="index" :item="item" :isEdit="true"/>
+      <TopicList :isNull="data == null || data.length == 0" :isEdit="true">
+        <TopicItem v-for="(item, index) in data" :key="index" :item="item" :isEdit="true" />
       </TopicList>
+      <Empty :height="10" />
+      <div class="pageOperate">
+        <el-pagination
+          class="custom"
+          layout="prev, pager, next"
+          :total="100"
+          :page-size="20"
+          :background="true"
+        />
+      </div>
     </div>
-  </div>
+  </Book>
 </template>
 <script setup>
 import ExpBar from '../../components/ExpBar.vue'
 import Empty from '../../components/FitEmpty.vue'
-import TopicList from '@/components/TopicList.vue';
-import TopicItem from '@/components/TopicItem.vue';
-const data = []
+import TopicList from '@/components/TopicList.vue'
+import TopicItem from '@/components/TopicItem.vue'
+import Book from '@/components/Book.vue'
+import { ref } from 'vue'
+const data = ref([])
+for (let i = 0; i < 20; i++) {
+  data.value.push({
+    label: '视频',
+    title: '震惊！竟有一人在路上走路',
+    author: '某人',
+    date: '2022-02-14',
+    viewNum: 10,
+    commentNum: 20
+  })
+}
 </script>
 <style scoped>
 .basicInfo {
@@ -69,5 +91,13 @@ const data = []
 }
 .gender {
   font-size: 12px;
+}
+.topic {
+  position: relative;
+  padding: 10px 0;
+}
+.pageOperate {
+  display: flex;
+  justify-content: end;
 }
 </style>

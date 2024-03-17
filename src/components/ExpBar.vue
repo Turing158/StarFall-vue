@@ -49,6 +49,7 @@ const present = ref((props.exp / props.maxExp) * 100)
   font-size: 12px;
 }
 .level {
+  text-align: left;
   flex: 1;
 }
 .expNum {

@@ -1,12 +1,10 @@
 <script setup>
-
-
-import MainView from './views/MainView.vue';
+import MainView from './views/MainView.vue'
 </script>
 
 <template>
   <div class="main">
-    <MainView/>
+    <MainView />
     <div class="bottom"></div>
   </div>
 </template>
@@ -20,7 +18,6 @@ import MainView from './views/MainView.vue';
   position: relative;
   width: 100vw;
   height: 100px;
-  margin-top: 80px;
   background-image: url(./assets/img/tail.png);
   background-size: 2%;
 }

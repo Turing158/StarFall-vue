@@ -1,13 +1,28 @@
 <template>
-  <div v-if="(type == null) | 'spruce'" class="btn" @click="onClick">
+  <div
+    v-if="(type == null) | 'spruce'"
+    class="btn"
+    @click="onClick"
+    :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px' }"
+  >
     {{ text }}
     <slot></slot>
   </div>
-  <div v-if="type == 'oak'" class="btn oak" @click="onClick">
+  <div
+    v-if="type == 'oak'"
+    class="btn oak"
+    @click="onClick"
+    :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px' }"
+  >
     {{ text }}
     <slot></slot>
   </div>
-  <div v-if="type == 'birch'" class="btn birch" @click="onClick">
+  <div
+    v-if="type == 'birch'"
+    class="btn birch"
+    @click="onClick"
+    :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px' }"
+  >
     {{ text }}
     <slot></slot>
   </div>
@@ -17,7 +32,17 @@ import { ref } from 'vue'
 const props = defineProps({
   text: String,
   onClick: Function,
-  type: String
+  type: String,
+  margin: {
+    type: Number,
+    require: false,
+    defalut: 0
+  },
+  padding: {
+    type: Number,
+    require: false,
+    defalut: 0
+  }
 })
 const text = ref(props.text)
 </script>

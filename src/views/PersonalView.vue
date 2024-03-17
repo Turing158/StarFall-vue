@@ -2,14 +2,18 @@
   <div>
     <Ul class="ul"></Ul>
     <div class="outContent">
-      <Book>
-        <div class="operate">
-          <router-link v-for="(item,index) in pages" :key="index" :to="item.path" @click="pageIndex = index"><mc-btn :text="item.name" :type="pageIndex==index?'birch':null"/></router-link>
-        </div>
-        <div class="insideContent">
-          <router-view />
-        </div>
-      </Book>
+      <div class="operate">
+        <router-link
+          v-for="(item, index) in pages"
+          :key="index"
+          :to="item.path"
+          @click="pageIndex = index"
+          ><mc-btn :text="item.name" :type="pageIndex == index ? 'birch' : null"
+        /></router-link>
+      </div>
+      <div class="insideContent">
+        <router-view />
+      </div>
     </div>
   </div>
 </template>
@@ -39,12 +43,11 @@ const pages = [
 ]
 const route = useRoute()
 const pageIndex = ref(0)
-console.log(route.path)
 if (route.path == '/personal') {
   pageIndex.value = 0
-} else if (route.path == '/personalSet') {
+} else if (route.path == '/personal/setting') {
   pageIndex.value = 1
-} else if (route.path == '/personalSet') {
+} else if (route.path == '/personal/password') {
   pageIndex.value = 2
 } else {
   pageIndex.value = 3
@@ -55,14 +58,17 @@ if (route.path == '/personal') {
   position: fixed;
 }
 .outContent {
-  min-height: 100vh;
-  margin-top: 50px;
+  min-height: calc(100vh - 200px);
+  margin: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 .operate {
+  position: absolute;
+  margin: 50px 0;
   display: flex;
+  z-index: 999;
 }
 .operate a {
   margin: 0 10px;
