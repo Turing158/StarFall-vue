@@ -13,7 +13,16 @@
         </tr>
         <tr>
           <td>性别 :</td>
-          <td><el-cascader :options="options" placeholder="请选择性别" /></td>
+          <td>
+            <el-select placeholder="请选择性别" v-model="gender">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </td>
         </tr>
         <tr>
           <td>生日 :</td>
@@ -51,6 +60,7 @@ const options = [
     label: '沃尔玛购物袋'
   }
 ]
+const gender = ref()
 const date = ref()
 </script>
 <style scoped>

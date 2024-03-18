@@ -42,6 +42,11 @@ const props = defineProps({
     type: Number,
     require: false,
     defalut: 0
+  },
+  width: {
+    type: Number,
+    require: false,
+    defalut: 64
   }
 })
 const text = ref(props.text)

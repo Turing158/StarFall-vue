@@ -25,7 +25,7 @@
         </div>
         <div class="operate">
           <router-link class="ul_border" to="/personal">设置</router-link>
-          <router-link class="ul_border" to="/signIn">签到</router-link>
+          <router-link class="ul_border" to="/signIn" @click="PageIndex = -1">签到</router-link>
           <router-link class="ul_border" to="/exit">退出</router-link>
         </div>
       </div>

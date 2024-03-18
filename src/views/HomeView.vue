@@ -28,8 +28,10 @@ const pageIndex = ref(0)
 const router = useRoute()
 if (router.path == '/') {
   pageIndex.value = 0
-} else {
+} else if (router.path == '/topic') {
   pageIndex.value = 2
+} else {
+  pageIndex.value = -1
 }
 const imgWidth = ref('100%')
 const imgHeight = ref('100%')
