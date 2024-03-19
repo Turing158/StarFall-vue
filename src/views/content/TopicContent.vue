@@ -50,6 +50,7 @@ import McBtn from '../../components/McBtn.vue'
 import Empty from '../../components/FitEmpty.vue'
 import TopicList from '../../components/TopicList.vue'
 import TopicItem from '../../components/TopicItem.vue'
+import router from '@/router/index.js'
 import { ref } from 'vue'
 const data = ref([])
 const appendTopic = ()=>{
@@ -66,7 +67,7 @@ for (let i=0;i<20;i++) {
   })
 }
 const clickTopic = (i)=>{
-
+  router.push("/topic/detail")
 }
 const clickAuthor = (i)=>{
 

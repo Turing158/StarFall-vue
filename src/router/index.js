@@ -34,7 +34,7 @@ const router = createRouter({
       ]
     },
     {
-      path: '/topic/detial',
+      path: '/topic/detail',
       name: 'detial',
       component: TopicDetailView
     },
