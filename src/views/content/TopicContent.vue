@@ -2,7 +2,7 @@
   <div>
     <Book>
       <div class="opearte">
-        <McBtn text="发 布" @click="addList()" />
+        <McBtn text="发 布" @click="appendTopic()" />
       </div>
       <Empty :height="10" />
       <div class="ad">
@@ -29,7 +29,7 @@
       </div>
       <Empty :height="10" />
       <TopicList :isNull="data == null || data.length == 0">
-        <TopicItem v-for="(item, index) in data" :key="index" :item="item" />
+        <TopicItem v-for="(item, index) in data" :key="index" :item="item" :onClickTitle="clickTopic(item)" :onClickAuthor="clickAuthor(item)"/>
       </TopicList>
       <Empty :height="10" />
       <div class="pageOperate">
@@ -52,7 +52,10 @@ import TopicList from '../../components/TopicList.vue'
 import TopicItem from '../../components/TopicItem.vue'
 import { ref } from 'vue'
 const data = ref([])
-const addList = () => {
+const appendTopic = ()=>{
+  
+}
+for (let i=0;i<20;i++) {
   data.value.push({
     label: '视频',
     title: '震惊！竟有一人在路上走路',
@@ -61,6 +64,12 @@ const addList = () => {
     viewNum: 10,
     commentNum: 20
   })
+}
+const clickTopic = (i)=>{
+
+}
+const clickAuthor = (i)=>{
+
 }
 </script>
 <style>

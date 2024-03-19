@@ -35,6 +35,14 @@ import { ref } from 'vue'
 import McBtn from './McBtn.vue'
 const props = defineProps({
   item: Object,
+  onClickTitle: {
+    type: Boolean,
+    require: false
+  },
+  onClickAuthor: {
+    type: Boolean,
+    require: false
+  },
   isEdit: {
     type: Boolean,
     default: false,

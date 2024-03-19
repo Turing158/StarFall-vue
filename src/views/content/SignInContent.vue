@@ -6,17 +6,28 @@
           <div class="headOut"></div>
           <div class="info">
             <span class="date">0000-00-00</span>
-            <span>今天暂未签到</span>
-            <span>已连续签到n天</span>
+            <span v-show="!isSignIn">今天暂未签到</span>
+            <span v-show="isSignIn">已连续签到n天</span>
           </div>
-          <div class="sign"><McBtn text="签 到" /><McBtn text="已 签 到" /></div>
+          <div class="sign">
+            <div v-show="!isSignIn">
+              <McBtn text="签 到"/>
+            </div>
+            <div v-show="isSignIn">
+              <McBtn text="已 签 到"/>
+            </div>
+          </div>
         </div>
         <div class="right">
-          <el-table :data="data" style="background-color: transparent;">
-            <el-table-column prop="date" label="日期" />
-            <el-table-column prop="msg" label="消息" />
-            <el-table-column prop="mood" label="心情" />
+          <el-table :data="data" empty-text="未找到签到记录">
+            <el-table-column prop="date" label="日期" width="120"/>
+            <el-table-column prop="msg" label="消息"/>
+            <el-table-column prop="mood" label="心情" width="60" align="center"/>
           </el-table>
+          <Empty height="20"/>
+          <div class="operate">
+            <el-pagination :total="100" :page-count="10" background="true" layout="prev, pager, next"/>
+          </div>
         </div>
       </div>
     </Book>
@@ -25,6 +36,7 @@
 <script setup>
 import Book from '../../components/Book.vue'
 import McBtn from '@/components/McBtn.vue'
+import Empty from '@/components/FitEmpty.vue'
 import { ref } from 'vue'
 const data = ref([
   {
@@ -33,6 +45,8 @@ const data = ref([
     mood: '好'
   }
 ])
+const isSignIn = ref(false)
+const date = ref("0000-00-00")
 </script>
 <style scoped>
 .content {
@@ -41,7 +55,7 @@ const data = ref([
 .left {
   width: 200px;
   min-height: 300px;
-  background-color: #f3debf;
+  background-color: #f7e9d4;
   border: 1px solid #a58960;
   margin-right: 20px;
 }
@@ -75,5 +89,10 @@ const data = ref([
   min-height: 300px;
   background-color: #f3debf;
   border: 1px solid #a58960;
+}
+.operate{
+  display: flex;
+  justify-content: end;
+  padding: 0 10px;
 }
 </style>

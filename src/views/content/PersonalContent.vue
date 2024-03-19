@@ -19,7 +19,7 @@
     </div>
     <div class="topic">
       <TopicList :isNull="data == null || data.length == 0" :isEdit="true">
-        <TopicItem v-for="(item, index) in data" :key="index" :item="item" :isEdit="true" />
+        <TopicItem v-for="(item, index) in data" :key="index" :item="item" :isEdit="true" :onClickTopic="clickTopic(item)" :onClickAuthor="clickAuthor(item)" :onEdit="clickEdit(item)" :onDel="clickDel(item)"/>
       </TopicList>
       <Empty :height="10" />
       <div class="pageOperate">
@@ -51,6 +51,18 @@ for (let i = 0; i < 20; i++) {
     viewNum: 10,
     commentNum: 20
   })
+}
+const clickTopic = (i)=>{
+
+}
+const clickAuthor = (i)=>{
+  
+}
+const clickEdit = (i)=>{
+
+}
+const clickDel = (i)=>{
+
 }
 </script>
 <style scoped>
