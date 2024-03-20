@@ -1,5 +1,8 @@
 <template>
   <div class="main">
+    <div class="">
+      <Notice/>
+    </div>
     <el-carousel height="500px" trigger="click">
       <el-carousel-item>
         <img src="../assets/img/top/top1.png" alt="" :width="imgWidth" :height="imgHeight" />
@@ -23,6 +26,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import Ul from '../components/UlBar.vue'
+import Notice from '@/components/Notice.vue'
 import { useRoute } from 'vue-router'
 const pageIndex = ref(0)
 const router = useRoute()

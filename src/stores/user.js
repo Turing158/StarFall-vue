@@ -10,16 +10,19 @@ export const useUserStore = defineStore('user-Sf', () => {
   const gender = ref(0)
   const brith = ref('')
 
-  const setUserObject = (user, name, level, exp, maxExp, gender, brith) => {
-    user.value = user
-    name.value = name
-    level.value = level
-    exp.value = exp
-    maxExp.value = maxExp
-    gender.value = gender
-    brith.value = brith
+  const setUserObject = (User, Name, Level, Exp, MaxExp, Gender, Brith) => {
+    user.value = User
+    name.value = Name
+    level.value = Level
+    exp.value = Exp
+    maxExp.value = MaxExp
+    gender.value = Gender
+    brith.value = Brith
   }
 
   return { user, name, level, exp, maxExp, gender, brith, setUserObject }
+},
+{
+  persist: true,
 })
 export default useUserStore
