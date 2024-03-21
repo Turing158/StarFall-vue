@@ -1,21 +1,28 @@
 <template>
   <div class="notice-con">
     <div class="notice-main-con">
-      <div class="notice-main">
-        <div class="notice" ref="notice">好不错已占据</div>
-        <div class="notice" ref="notice">好不错已占据1</div>
-        <div class="notice" ref="notice">好不错已占据</div>
-        <div class="notice" ref="notice">好不错已占据</div>
+      <div class="notice-main" :style="{width:NoticeMainWidth+'px',animation:'move '+notices.length+'0s infinite linear'}">
+        <div class="notice-item" ref="noticeItem" v-for="(item,index) in notices" :key="index">{{ item }}</div>
       </div>
     </div>
   </div>
 </template>
 <script setup>
 import { onMounted, ref } from 'vue'
-const width = ref(0)
-const notice = ref()
+const notices = ref([
+  "6666666666",
+  "你真是个天才",
+  "好不错已占据"
+])
+const NoticeMainWidth = ref(0)
+const noticeItem = ref()
 const setWidth = () => {
-  console.log(notice.value)
+  for(let i=0;i<notices.value.length;i++){
+    let width = noticeItem.value[1].offsetWidth
+    NoticeMainWidth.value += (width)
+  }
+
+  console.log();
 }
 onMounted(setWidth)
 </script>
@@ -26,7 +33,7 @@ onMounted(setWidth)
   line-height: 24px;
   margin: 0 auto 15px;
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   overflow: hidden;
   background-color: #131313aa;
 }
@@ -40,56 +47,11 @@ onMounted(setWidth)
   display: inline-block;
   white-space: nowrap;
   width: auto;
-  -moz-animation: move 10s infinite linear;
-  -webkit-animation: move 10s infinite linear;
-  animation: move 10s infinite linear;
 }
 
-.notice {
+.notice-item {
   display: inline-block;
-  padding: 0 80%;
+  padding-right: 500px;
   line-height: 40px;
-}
-
-@-moz-keyframes move {
-  0% {
-    transform: translateX(110%);
-  }
-
-  50% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-110%);
-  }
-}
-
-@-webkit-keyframes move {
-  0% {
-    transform: translateX(110%);
-  }
-
-  50% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-110%);
-  }
-}
-
-@keyframes move {
-  0% {
-    transform: translateX(110%);
-  }
-
-  50% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-110%);
-  }
 }
 </style>

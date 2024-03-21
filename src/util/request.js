@@ -1,7 +1,8 @@
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
 
 const instance = axios.create({
-  baseURL: 'localhost:8080/',
+  baseURL: 'http://localhost:8080',
   timeout: 1000
 })
 

@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <div class="">
+    <div class="notice">
       <Notice/>
     </div>
     <el-carousel height="500px" trigger="click">
@@ -60,5 +60,11 @@ console.log()
   flex-direction: column;
   align-items: center;
   margin: 50px;
+}
+.notice{
+  position: absolute;
+  top: 10px;
+  width: 100vw;
+  z-index: 999;
 }
 </style>

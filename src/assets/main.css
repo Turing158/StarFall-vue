@@ -5,3 +5,28 @@
     transition: all 250ms;
     -webkit-transition: all 250ms;
 }
+@keyframes move {
+    0% {
+      transform: translateX(100vw);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  @-moz-keyframes move {
+    0% {
+      transform: translateX(100vw);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  
+  @-webkit-keyframes move {
+    0% {
+      transform: translateX(100vw);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
