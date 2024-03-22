@@ -9,13 +9,13 @@
     </td>
     <td style="width: 100px">
       <div class="author">
-        <span>{{ item.author }}</span>
+        <span>{{ item.user }}</span>
         <br />
         <span>{{ item.date }}</span>
       </div>
     </td>
     <td style="width: 80px">
-      <div class="num">{{ item.viewNum }}/{{ item.commentNum }}</div>
+      <div class="num">{{ item.view }}/{{ item.comment }}</div>
     </td>
     <td style="width: 40px">
       <div class="head">

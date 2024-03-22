@@ -9,11 +9,9 @@
 </template>
 <script setup>
 import { onMounted, ref } from 'vue'
-const notices = ref([
-  "6666666666",
-  "你真是个天才",
-  "好不错已占据"
-])
+import {findAllNotice} from '@/api/notice'
+import { ElMessage } from 'element-plus'
+const notices = ref([])
 const NoticeMainWidth = ref(0)
 const noticeItem = ref()
 const setWidth = () => {
@@ -21,10 +19,19 @@ const setWidth = () => {
     let width = noticeItem.value[1].offsetWidth
     NoticeMainWidth.value += (width)
   }
-
-  console.log();
 }
-onMounted(setWidth)
+const getNotice = async()=>{
+  await findAllNotice().then(res=>{
+    let data = res.data.object
+    for(let i=0;i<data.length;i++){
+      notices.value.push(data[i].content)
+    }
+  }).catch(err=>{
+    ElMessage.error("获取公告失败")
+  })
+  setWidth()
+}
+onMounted(getNotice)
 </script>
 <style scoped>
 .notice-con {

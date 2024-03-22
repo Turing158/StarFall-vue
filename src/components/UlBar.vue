@@ -26,7 +26,7 @@
         <div class="operate">
           <router-link class="ul_border" to="/personal">设置</router-link>
           <router-link class="ul_border" to="/signIn" @click="PageIndex = -1">签到</router-link>
-          <router-link class="ul_border" to="/exit">退出</router-link>
+          <a class="ul_border" @click="exit()">退出</a>
         </div>
       </div>
     </div>
@@ -48,14 +48,8 @@ const props = defineProps({
   pageIndex: {
     type: Number,
     default: -1
-  },
-  isLogin: {
-    type: Boolean,
-    default: false,
-    require: false
   }
 })
-const isLogin = ref(props.isLogin)
 const UlItem = ref([
   {
     name: '主页',
@@ -84,6 +78,16 @@ const UlItem = ref([
 ])
 
 const PageIndex = ref(props.pageIndex)
+
+import useUserStore from '@/stores/user'
+import { ElMessage } from 'element-plus'
+const userStore = useUserStore()
+const isLogin = ref(userStore.isLogin)
+const exit = ()=>{
+  userStore.exit()
+  ElMessage.success("已退出登录")
+  isLogin.value = false
+}
 </script>
 
 <style scoped>

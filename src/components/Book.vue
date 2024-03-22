@@ -15,10 +15,12 @@ const mainDiv = ref()
 const mainDivHeight = ref(0)
 const setHeight = () => {
   mainDivHeight.value = mainDiv.value.clientHeight
-  console.log(mainDivHeight.value)
 }
 
 onMounted(setHeight)
+defineExpose({
+  setHeight
+})
 </script>
 <style scoped>
 .main {

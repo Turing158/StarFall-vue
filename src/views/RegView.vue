@@ -24,6 +24,11 @@
         <span class="email_span">邮&emsp;箱：</span>
         <div class="email_underline"></div>
         <br />
+        <input type="text" class="emailCode_input" name="emailCode" required />
+        <div class="getCode" @click="onGetEmailCode()"><McBtn text="获取验证码"/></div>
+        <span class="emailCode_span">邮箱验证码：</span>
+        <div class="emailCode_underline"></div>
+        <br />
         <input type="text" class="code_input" name="code" maxlength="4" required />
         <span class="code_span">验证码：</span>
         <div class="code_underline"></div>
@@ -40,8 +45,9 @@
 </template>
 <script setup>
 import McBtn from '@/components/McBtn.vue'
-const toHref = (s)=>{
-  window.location.href=s
+import {getEmailCode} from '@/api/user'
+const onGetEmailCode = ()=>{
+
 }
 </script>
 <style scoped>
@@ -57,7 +63,7 @@ const toHref = (s)=>{
 .regDiv {
   position: relative;
   width: 500px;
-  height: 400px;
+  height: 440px;
   border-radius: 10px;
   box-shadow: 0px 0px 10px black;
   backdrop-filter: blur(10px);
@@ -82,7 +88,7 @@ const toHref = (s)=>{
 }
 .back span:last-child {
   position: relative;
-  top: -14px;
+  top: -18px;
 }
 .back:hover span:first-child {
   top: 5px;
@@ -97,7 +103,8 @@ h1 {
 .user_input,
 .pass_input,
 .code_input,
-.email_input {
+.email_input,
+.emailCode_input {
   position: relative;
   outline: none;
   border: 0;
@@ -110,13 +117,14 @@ h1 {
   margin-left: -25%;
   font-family: Arial, Helvetica, sans-serif;
 }
-.code_input {
+.code_input,.emailCode_input {
   width: 165px;
 }
 .user_span,
 .pass_span,
 .code_span,
-.email_span {
+.email_span,
+.emailCode_span {
   position: absolute;
   pointer-events: none;
   font-size: 20px;
@@ -124,10 +132,14 @@ h1 {
   left: 46%;
   margin-left: -25%;
 }
+.emailCode_span{
+  font-size: 18px;
+}
 .user_underline,
 .pass_underline,
 .code_underline,
-.email_underline {
+.email_underline,
+.emailCode_underline {
   position: relative;
   width: 280px;
   height: 2px;
@@ -139,17 +151,19 @@ h1 {
   margin-left: -25%;
   box-shadow: 0px 0px 1px rgb(170, 170, 170);
 }
-.code_underline {
+.code_underline,.emailCode_underline {
   width: 165px;
 }
 .user_input:focus ~ .user_span,
 .pass_input:focus ~ .pass_span,
 .code_input:focus ~ .code_span,
 .email_input:focus ~ .email_span,
+.emailCode_input:focus ~ .emailCode_span,
 .user_input:valid ~ .user_span,
 .pass_input:valid ~ .pass_span,
 .code_input:valid ~ .code_span,
-.email_input:valid ~ .email_span {
+.email_input:valid ~ .email_span ,
+.emailCode_input:valid ~ .emailCode_span{
   font-size: 15px;
   transform: translateY(-15px);
 }
@@ -160,7 +174,8 @@ h1 {
 .user_input:valid ~ .user_underline,
 .pass_input:valid ~ .pass_underline,
 .code_input:valid ~ .code_underline,
-.email_input:valid ~ .email_underline {
+.email_input:valid ~ .email_underline ,
+.emailCode_input:valid ~ .emailCode_underline{
   transform: scaleX(1);
 }
 input[type='search']::-webkit-search-cancel-button {
@@ -186,5 +201,10 @@ img {
 .operate {
   display: flex;
   justify-content: center;
+}
+.getCode{
+  position: absolute;
+  right: 120px;
+  margin-top: -35px;
 }
 </style>

@@ -2,43 +2,33 @@
   <div class="out">
     <div class="loginDIv">
       <router-link to="/">
-        <button class="back" >
-        <span>home</span>
-        <br />
-        <span>首页</span>
-      </button> 
+        <button class="back">
+          <span>home</span>
+          <br />
+          <span>首页</span>
+        </button>
       </router-link>
       <form method="get">
         <br /><br />
         <h1>登&emsp;录</h1>
         <br /><br />
-        <input
-          type="text"
-          class="user_input"
-          name="user"
-          required
-        />
+        <input type="text" class="user_input" name="user" required v-model="account" />
         <span class="user_span">用户名：</span>
         <div class="user_underline"></div>
         <br />
-        <input
-          type="password"
-          class="pass_input"
-          name="password"
-          required
-        />
+        <input type="password" class="pass_input" name="password" required v-model="password" />
         <span class="pass_span">密&emsp;码：</span>
         <div class="pass_underline"></div>
         <br />
-        <input type="text" class="code_input" name="login_code" required />
+        <input type="text" class="code_input" name="login_code" required v-model="code" />
         <span class="code_span">验证码：</span>
         <div class="code_underline"></div>
         <img src="" alt="VerifyCode" onclick="Change()" id="img_code" />
         <div class="operate">
           <router-link to="/reg">
-            <McBtn text="注册" :margin="0"/>
+            <McBtn text="注册" :margin="0" />
           </router-link>
-          <McBtn text="登录" :margin="50" />
+          <McBtn text="登录" :margin="50" @click="confirm()" />
           <router-link to="/forget">
             <McBtn text="忘记密码" :margin="0" />
           </router-link>
@@ -49,7 +39,58 @@
 </template>
 <script setup>
 import McBtn from '@/components/McBtn.vue'
-
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { login } from '@/api/user'
+import { ElMessage } from 'element-plus'
+import useUserStore from '@/stores/user'
+const router = useRouter()
+const account = ref('')
+const password = ref('')
+const code = ref('')
+const userStore = useUserStore()
+const confirm = async () => {
+  if (account.value.length == 0) {
+    ElMessage.error('账户不能为空')
+  } else if (password.value.length == 0) {
+    ElMessage.error('密码不能为空')
+  } else if (code.value.length == 0) {
+    ElMessage.error('验证码不能为空')
+  } else {
+    await login(account.value, password.value, code.value)
+      .then((res) => {
+        let msg = res.data.msg
+        if(msg == "USER_PASSWORD"){
+          ElMessage.error("用户名错误或不存在")
+        }
+        else if(msg == "EMAIL_ERROR"){
+          ElMessage.error("邮箱错误或不存在")
+        }
+        else if(msg == "PASSWORD_ERROR"){
+          ElMessage.error("密码错误")
+        }
+        else{
+          ElMessage.success("登录成功")
+          let data = res.data.object
+          userStore.setUserObject(
+            data.user,
+            data.name,
+            data.level,
+            data.exp,
+            data.maxExp,
+            data.gender,
+            data.birthday
+            )
+            userStore.setLogin(true)
+            router.push('/')
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+        ElMessage.error('服务异常')
+      })
+  }
+}
 </script>
 <style scoped>
 .out {

@@ -17,7 +17,7 @@
         <img src="../assets/img/top/top4.png" alt="" :width="imgWidth" :height="imgHeight" />
       </el-carousel-item>
     </el-carousel>
-    <Ul :pageIndex="pageIndex" :isLogin="true"></Ul>
+    <Ul :pageIndex="pageIndex"></Ul>
     <div class="content">
       <router-view />
     </div>
@@ -28,11 +28,12 @@ import { onMounted, ref } from 'vue'
 import Ul from '../components/UlBar.vue'
 import Notice from '@/components/Notice.vue'
 import { useRoute } from 'vue-router'
+
 const pageIndex = ref(0)
-const router = useRoute()
-if (router.path == '/') {
+const route = useRoute()
+if (route.path == '/') {
   pageIndex.value = 0
-} else if (router.path == '/topic') {
+} else if (route.path == '/topic') {
   pageIndex.value = 2
 } else {
   pageIndex.value = -1
@@ -51,7 +52,6 @@ const checkWindowWidth = () => {
 }
 onMounted(checkWindowWidth)
 window.addEventListener('resize', checkWindowWidth)
-console.log()
 </script>
 <style scoped>
 .content {

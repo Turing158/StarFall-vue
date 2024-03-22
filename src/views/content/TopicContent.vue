@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Book>
+    <Book ref="bookOut">
       <div class="opearte">
         <McBtn text="发 布" @click="appendTopic()" />
       </div>
@@ -28,17 +28,24 @@
         </el-carousel>
       </div>
       <Empty :height="10" />
-      <TopicList :isNull="data == null || data.length == 0">
-        <TopicItem v-for="(item, index) in data" :key="index" :item="item" :onClickTitle="clickTopic(item)" :onClickAuthor="clickAuthor(item)"/>
+      <TopicList :isNull="topicData == null || topicData.length == 0">
+        <TopicItem
+          v-for="(item, index) in topicData"
+          :key="index"
+          :item="item"
+          :onClickTitle="clickTopic(item)"
+          :onClickAuthor="clickAuthor(item)"
+        />
       </TopicList>
       <Empty :height="10" />
       <div class="pageOperate">
         <el-pagination
           class="custom"
           layout="prev, pager, next"
-          :total="100"
-          :page-size="20"
+          :total="12"
+          :page-size="10"
           :background="true"
+          @current-change="changePage"
         />
       </div>
     </Book>
@@ -50,28 +57,34 @@ import McBtn from '../../components/McBtn.vue'
 import Empty from '../../components/FitEmpty.vue'
 import TopicList from '../../components/TopicList.vue'
 import TopicItem from '../../components/TopicItem.vue'
-import router from '@/router/index.js'
-import { ref } from 'vue'
-const data = ref([])
-const appendTopic = ()=>{
-  
+import { findAllTopic } from '@/api/topic'
+import { onMounted, ref } from 'vue'
+import { ElMessage } from 'element-plus'
+const bookOut = ref()
+const topicData = ref([])
+const appendTopic = () => {}
+const page = ref(1)
+const changePage = (e)=>{
+  page.value = e
+  console.log(page.value);
+  getTopic()
 }
-for (let i=0;i<20;i++) {
-  data.value.push({
-    label: '视频',
-    title: '震惊！竟有一人在路上走路',
-    author: '某人',
-    date: '2022-02-14',
-    viewNum: 10,
-    commentNum: 20
+const getTopic = async()=>{
+  await findAllTopic(page.value).then(res=>{
+    let data = res.data.object
+    topicData.value = data
+  }).catch(err=>{
+    ElMessage.error("获取主题失败")
   })
+  bookOut.value.setHeight()
 }
-const clickTopic = (i)=>{
-  router.push("/topic/detail")
-}
-const clickAuthor = (i)=>{
 
+
+const clickTopic = (i) => {
+  // router.push("/topic/detail")
 }
+const clickAuthor = (i) => {}
+onMounted(getTopic)
 </script>
 <style>
 .ad {
