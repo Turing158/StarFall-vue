@@ -14,7 +14,7 @@
     @click="onClick"
     :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px' }"
   >
-    {{ text }}
+    {{ props.text }}
     <slot></slot>
   </div>
   <div
@@ -23,7 +23,7 @@
     @click="onClick"
     :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px' }"
   >
-    {{ text }}
+    {{ props.text }}
     <slot></slot>
   </div>
 </template>
