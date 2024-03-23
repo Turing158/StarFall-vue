@@ -3,30 +3,37 @@
     <Book>
       <div class="content">
         <div class="left">
-          <div class="headOut"></div>
+          <div class="headOut">
+            <img :src="userStore.head" alt="">
+          </div>
           <div class="info">
-            <span class="date">0000-00-00</span>
+            <span class="date">{{ date }}</span>
             <span v-show="!isSignIn">今天暂未签到</span>
             <span v-show="isSignIn">已连续签到n天</span>
           </div>
           <div class="sign">
             <div v-show="!isSignIn">
-              <McBtn text="签 到"/>
+              <McBtn text="签 到" />
             </div>
             <div v-show="isSignIn">
-              <McBtn text="已 签 到"/>
+              <McBtn text="已 签 到" />
             </div>
           </div>
         </div>
         <div class="right">
           <el-table :data="data" empty-text="未找到签到记录">
-            <el-table-column prop="date" label="日期" width="120"/>
-            <el-table-column prop="msg" label="消息"/>
-            <el-table-column prop="mood" label="心情" width="60" align="center"/>
+            <el-table-column prop="date" label="日期" width="120" />
+            <el-table-column prop="msg" label="消息" />
+            <el-table-column prop="mood" label="心情" width="60" align="center" />
           </el-table>
-          <Empty height="20"/>
+          <Empty height="20" />
           <div class="operate">
-            <el-pagination :total="100" :page-count="10" background="true" layout="prev, pager, next"/>
+            <el-pagination
+              :total="100"
+              :page-count="10"
+              background="true"
+              layout="prev, pager, next"
+            />
           </div>
         </div>
       </div>
@@ -38,6 +45,7 @@ import Book from '../../components/Book.vue'
 import McBtn from '@/components/McBtn.vue'
 import Empty from '@/components/FitEmpty.vue'
 import { ref } from 'vue'
+import useUserStore from '@/stores/user'
 const data = ref([
   {
     date: '2024-10-10',
@@ -46,7 +54,11 @@ const data = ref([
   }
 ])
 const isSignIn = ref(false)
-const date = ref("0000-00-00")
+let dateUtil = new Date()
+const date = ref(
+  dateUtil.getFullYear() + '-' + (dateUtil.getMonth() + 1) + '-' + dateUtil.getDate()
+)
+const userStore = useUserStore()
 </script>
 <style scoped>
 .content {
@@ -90,7 +102,7 @@ const date = ref("0000-00-00")
   background-color: #f3debf;
   border: 1px solid #a58960;
 }
-.operate{
+.operate {
   display: flex;
   justify-content: end;
   padding: 0 10px;

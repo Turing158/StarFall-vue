@@ -23,7 +23,7 @@
         <input type="text" class="code_input" name="login_code" required v-model="code" />
         <span class="code_span">验证码：</span>
         <div class="code_underline"></div>
-        <img src="" alt="VerifyCode" onclick="Change()" id="img_code" />
+        <img :src="codeImg" alt="VerifyCode" @click="changeCode()" id="img_code" />
         <div class="operate">
           <router-link to="/reg">
             <McBtn text="注册" :margin="0" />
@@ -69,6 +69,9 @@ const confirm = async () => {
         else if(msg == "PASSWORD_ERROR"){
           ElMessage.error("密码错误")
         }
+        else if(msg == "CODE_ERROR"){
+          ElMessage.error("验证码错误")
+        }
         else{
           ElMessage.success("登录成功")
           let data = res.data.object
@@ -84,12 +87,18 @@ const confirm = async () => {
             userStore.setLogin(true)
             router.push('/')
         }
+        changeCode()
       })
       .catch((err) => {
         console.log(err)
         ElMessage.error('服务异常')
       })
   }
+}
+let date = new Date()
+const codeImg = ref('http://localhost:8080/getCodeImage?r'+date.getTime())
+const changeCode = () => {
+  codeImg.value = "http://localhost:8080/getCodeImage?r"+new Date().getTime()
 }
 </script>
 <style scoped>
@@ -221,10 +230,11 @@ input[type='password']::-ms-reveal {
 img {
   position: relative;
   left: 280px;
-  top: -32px;
-  width: 80px;
-  height: 30px;
+  top: -45px;
+  width: 100px;
+  height: 40px;
   background-color: bisque;
+  cursor: pointer;
 }
 .operate {
   display: flex;

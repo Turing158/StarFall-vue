@@ -4,12 +4,12 @@
       <div class="info">
         &nbsp;[<span class="label">{{ item.label }}</span
         >]
-        <span class="title">{{ item.title }}</span>
+        <span class="title" @click="onClickTitle()">{{ item.title }}</span>
       </div>
     </td>
     <td style="width: 100px">
       <div class="author">
-        <span>{{ item.user }}</span>
+        <span @click="onClickUser()">{{ item.user }}</span>
         <br />
         <span>{{ item.date }}</span>
       </div>
@@ -24,40 +24,33 @@
     </td>
     <td v-show="isEdit" class="operate" style="width: 140px">
       &ensp;
-      <McBtn text="编 辑" type="oak" @click="onEdit" />
+      <McBtn text="编 辑" type="oak" @click="onEdit()" />
       &ensp;
-      <McBtn text="删 除" type="oak" @click="onDel" />
+      <McBtn text="删 除" type="oak" @click="onDel()" />
     </td>
   </tr>
 </template>
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import McBtn from './McBtn.vue'
 const props = defineProps({
   item: Object,
-  onClickTitle: {
-    type: Boolean,
-    require: false
-  },
-  onClickAuthor: {
-    type: Boolean,
-    require: false
-  },
   isEdit: {
     type: Boolean,
     default: false,
     require: false
-  },
-  onEdit: {
-    type: Function,
-    require: false
-  },
-  onDel: {
-    type: Function,
-    require: false
   }
 })
 const item = ref(props.item)
+
+const router = useRouter()
+const onClickTitle = () => {
+  router.push('/topic/detail/'+item.value.id)
+}
+const onClickUser = () => {}
+const onEdit = () => {}
+const onDel = () => {}
 </script>
 <style scoped>
 .item {

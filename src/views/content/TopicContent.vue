@@ -33,8 +33,6 @@
           v-for="(item, index) in topicData"
           :key="index"
           :item="item"
-          :onClickTitle="clickTopic(item)"
-          :onClickAuthor="clickAuthor(item)"
         />
       </TopicList>
       <Empty :height="10" />
@@ -60,6 +58,7 @@ import TopicItem from '../../components/TopicItem.vue'
 import { findAllTopic } from '@/api/topic'
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 const bookOut = ref()
 const topicData = ref([])
 const appendTopic = () => {}
@@ -80,11 +79,12 @@ const getTopic = async()=>{
 }
 
 
+onMounted(getTopic)
+const router = useRouter()
 const clickTopic = (i) => {
-  // router.push("/topic/detail")
+  router.push("/topic/detail")
 }
 const clickAuthor = (i) => {}
-onMounted(getTopic)
 </script>
 <style>
 .ad {

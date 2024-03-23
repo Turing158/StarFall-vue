@@ -2,13 +2,18 @@
   <div class="topicContent">
     <table class="title">
       <th class="titleLeft">
-        <div>查看：<span class="num1">{{ data.view }}</span> &ensp; 评论：<span class="num2">{{ data.comment }}</span></div>
+        <div>
+          查看：<span class="num1">{{ data.view }}</span> &ensp; 评论：<span class="num2">{{
+            data.comment
+          }}</span>
+        </div>
       </th>
       <th class="titleRight">
         <h1>
-          [<a href="/topic">{{ data.label }}</a>]
+          [<a href="/topic">{{ data.label }}</a
+          >]
           <span>{{ data.title }}</span>
-          <a href="" class="copyHref">[复制链接]</a>
+          <a class="copyHref">[复制链接]</a>
         </h1>
       </th>
     </table>
@@ -20,13 +25,15 @@
       <td class="author">
         <div class="authorContent">
           <div class="authorName">
-            <span><a class="user">{{ data.username }}</a></span>
+            <span
+              ><a :href="'/person/others/' + data.user" class="user">{{ data.name }}</a></span
+            >
           </div>
           <div class="authorHead">
-            <a><img :img="data.img" alt="" /></a>
+            <a><img :img="data.head" alt="" /></a>
           </div>
           <div class="authorInf">
-            <ExpBar :lv="data.level" :exp="data.exp" :maxExp="data.maxExp"/>
+            <ExpBar :lv="data.level" :exp="data.exp" :maxExp="data.maxExp" />
           </div>
         </div>
       </td>
@@ -36,8 +43,10 @@
             <td class="contentTop">
               <div>
                 <div>
-                  <img style="width: 15px" src="@/assets/img/Cicon.gif" alt="" />
-                  <span>发表于<span>{{ data.date }}</span></span>
+                  <img style="width: 15px; margin-top: -5px" src="@/assets/img/Cicon.gif" alt="" />
+                  <span
+                    >发表于<span>{{ data.date }}</span></span
+                  >
                 </div>
               </div>
               <div>
@@ -65,7 +74,8 @@
             <td style="background-color: initial; border: 0">
               <table class="contentInf">
                 <caption>
-                  <span>{{ data.label }}</span>作品发布
+                  <span>{{ data.label }}</span
+                  >作品发布
                 </caption>
                 <tr>
                   <th>作品名称：</th>
@@ -73,7 +83,7 @@
                 </tr>
                 <tr>
                   <th>Title：</th>
-                  <td>{{ data.englishTitle }}</td>
+                  <td>{{ data.enTitle }}</td>
                 </tr>
                 <tr>
                   <th>来源 source：</th>
@@ -94,13 +104,13 @@
                 <tr>
                   <th>原帖 address：</th>
                   <td>
-                    <a>{{ data.address }}</a>
+                    <a :href="data.address">{{ data.address }}</a>
                   </td>
                 </tr>
                 <tr>
                   <th>下载 download：</th>
                   <td>
-                    <a>{{ data.download }}</a>
+                    <a :href="data.download">{{ data.download }}</a>
                   </td>
                 </tr>
               </table>
@@ -117,37 +127,53 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import ExpBar from '@/components/ExpBar.vue'
 const props = defineProps({
-  data:{
-    type:Object,
-    require:false,
-    default:{
-      title:"title",
-      label:"label",
-      date:"0000-00-00",
-      view:1,
-      comment:2,
-      topicTitle:"topicTitle",
-      englishTitle:"EnglishTitle",
-      source:"no",
-      version:"0.00.0",
-      author:"TuringICE",
-      language:"中文",
-      address:"www.baidu.com",
-      download:"www.baidu.com",
-      user:"123",
-      username:"TuringICE",
-      img:"",
-      level:1,
-      exp:10,
-      maxExp:100
+  data: {
+    type: Object,
+    require: false,
+    default: {
+      title: 'title',
+      label: 'label',
+      date: '0000-00-00',
+      view: 1,
+      comment: 2,
+      topicTitle: 'topicTitle',
+      enTitle: 'EnglishTitle',
+      source: 'no',
+      version: '0.00.0',
+      author: 'TuringICE',
+      language: '中文',
+      address: 'www.baidu.com',
+      download: 'www.baidu.com',
+      user: '123',
+      name: 'TuringICE',
+      img: '',
+      level: 1,
+      exp: 10,
+      maxExp: 100
     }
   }
 })
 const data = ref(props.data)
 const isLike = ref(0)
+import ClipboardJS from 'clipboard'
+import { ElMessage } from 'element-plus'
+const copyText = () => {
+  const clipboard = new ClipboardJS('.copyHref', {
+    text() {
+      return window.location.href
+    }
+  })
+  clipboard.on('success', () => {
+    ElMessage.success('复制成功')
+  })
+  clipboard.on('error', () => {
+    ElMessage.error('复制失败')
+  })
+}
+onMounted(copyText)
 </script>
 <style scoped>
 .bookCenter {
@@ -198,6 +224,13 @@ const isLike = ref(0)
   font-size: 10px;
   color: gray;
 }
+.titleRight a {
+  cursor: pointer;
+  text-decoration: none;
+}
+.titleRight a:hover {
+  text-decoration: underline;
+}
 .line {
   background-color: #e3c99e;
   height: 5px;
@@ -243,6 +276,11 @@ const isLike = ref(0)
   position: relative;
   margin: auto;
 }
+.authorName a {
+  color: #131313;
+  text-decoration: none;
+  cursor: pointer;
+}
 .authorHead {
   display: flex;
   width: 180px;
@@ -283,6 +321,7 @@ const isLike = ref(0)
   background-color: initial;
   display: flex;
 }
+
 .contentTop div:nth-child(1) {
   flex: 1;
   text-align: left;
@@ -330,6 +369,13 @@ const isLike = ref(0)
   border: 0;
   border-bottom: 1px solid #99876c;
   background-color: initial;
+}
+.contentInf td a {
+  color: #131313;
+  text-decoration: none;
+}
+.contentInf td a:hover {
+  text-decoration: underline;
 }
 .contentMd {
   position: relative;

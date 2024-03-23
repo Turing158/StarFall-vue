@@ -17,11 +17,11 @@
       </a>
     </li>
     <div v-show="isLogin" class="user ul_border">
-      <img th:src="@{'/head_img/'+${session.user.head}}" alt="" class="head_img" />
+      <img :src="userStore.head" alt="" class="head_img" />
       <div class="menu">
-        <p th:text="${session.user.name}">User</p>
+        <p>{{ userStore.name }}</p>
         <div class="exp">
-          <ExpBar :lv="1" :exp="30" :maxExp="382" />
+          <ExpBar :lv="userStore.level" :exp="userStore.exp" :maxExp="userStore.maxExp" />
         </div>
         <div class="operate">
           <router-link class="ul_border" to="/personal">设置</router-link>
