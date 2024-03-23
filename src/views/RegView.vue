@@ -33,7 +33,8 @@
           @input="upper"
           maxlength="6"
         />
-        <div class="getCode" @click="onGetEmailCode()"><McBtn text="获取验证码" /></div>
+        <div class="getCode" v-show="flag" @click="test()"><McBtn text="获取验证码" /></div>
+        <div class="getCode" v-show="!flag"><McBtn :text="second + '秒后重试'" /></div>
         <span class="emailCode_span">邮箱验证码：</span>
         <div class="emailCode_underline"></div>
         <br />
@@ -65,8 +66,9 @@ const email = ref('')
 const emailCode = ref('')
 const code = ref('')
 const flag = ref(true)
+const second = ref(30)
 const onGetEmailCode = async () => {
-  if(flag.value){
+  if (flag.value) {
     if (email.value.length != 0) {
       await getEmailCode(email.value)
         .then((res) => {
@@ -76,9 +78,16 @@ const onGetEmailCode = async () => {
           } else {
             ElMessage.success('验证码已发至邮箱')
             flag.value = false
-            setTimeout(30000,()=>{
+            setTimeout(() => {
               flag.value = true
-            })
+            },30000)
+            let time = setInterval(()=>{
+              second.value--
+              if(second.value <= 0){
+                clearInterval(time)
+                second.value = 30
+              }
+            },1000)
           }
         })
         .catch((err) => {
@@ -90,7 +99,9 @@ const onGetEmailCode = async () => {
     }
   }
 }
-
+const test = () => {
+  
+}
 const onReg = async () => {
   if (user.value.length < 6 || user.value.length > 15) {
     ElMessage.error('用户名不能小于6位或大于15位')
@@ -103,28 +114,25 @@ const onReg = async () => {
   } else if (code.value.length == 0) {
     ElMessage.error('验证码不能为空')
   } else {
-    await register(user.value, password.value, email.value, emailCode.value, code.value)
-      .then((res) => {
+    await register(user.value, password.value, email.value, emailCode.value, code.value).then(
+      (res) => {
         let msg = res.data.msg
-        if(msg == 'EMAIL_ERROR'){
+        if (msg == 'EMAIL_ERROR') {
           ElMessage.error('邮箱已存在')
-        }
-        else if(msg == 'EMAIL_CODE_ERROR'){
+        } else if (msg == 'EMAIL_CODE_ERROR') {
           ElMessage.error('邮箱验证码错误')
-        }
-        else if(msg == 'USER_ERROR'){
+        } else if (msg == 'USER_ERROR') {
           ElMessage.error('用户名已存在')
-        }
-        else{
+        } else {
           ElMessage.success('注册成功')
           router.push('/login')
         }
-      })
-      changeCode()
-      .catch((err) => {
-        console.log(err)
-        ElMessage.error('服务异常')
-      })
+      }
+    )
+    changeCode().catch((err) => {
+      console.log(err)
+      ElMessage.error('服务异常')
+    })
   }
 }
 const upper = (e) => {

@@ -5,7 +5,7 @@
     @click="onClick"
     :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px' }"
   >
-    {{ text }}
+    {{ props.text }}
     <slot></slot>
   </div>
   <div
@@ -49,7 +49,6 @@ const props = defineProps({
     defalut: 64
   }
 })
-const text = ref(props.text)
 </script>
 <style scoped>
 .btn {
