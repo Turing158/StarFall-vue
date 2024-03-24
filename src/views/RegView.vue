@@ -33,7 +33,7 @@
           @input="upper"
           maxlength="6"
         />
-        <div class="getCode" v-show="flag" @click="test()"><McBtn text="获取验证码" /></div>
+        <div class="getCode" v-show="flag" @click="onGetEmailCode()"><McBtn text="获取验证码" /></div>
         <div class="getCode" v-show="!flag"><McBtn :text="second + '秒后重试'" /></div>
         <span class="emailCode_span">邮箱验证码：</span>
         <div class="emailCode_underline"></div>
@@ -99,9 +99,7 @@ const onGetEmailCode = async () => {
     }
   }
 }
-const test = () => {
-  
-}
+
 const onReg = async () => {
   if (user.value.length < 6 || user.value.length > 15) {
     ElMessage.error('用户名不能小于6位或大于15位')

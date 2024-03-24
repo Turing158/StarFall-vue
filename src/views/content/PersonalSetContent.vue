@@ -9,7 +9,7 @@
       <table>
         <tr>
           <td>昵称 :</td>
-          <td><el-input /></td>
+          <td><el-input v-model="name"/></td>
         </tr>
         <tr>
           <td>性别 :</td>
@@ -42,26 +42,41 @@ import { ref } from 'vue'
 import Book from '@/components/Book.vue'
 import Empty from '@/components/FitEmpty.vue'
 import McBtn from '@/components/McBtn.vue'
+import useUserStore from '@/stores/user'
 const options = [
   {
-    value: 'hide',
+    value: '0',
     label: '隐藏'
   },
   {
-    value: 'man',
+    value: '1',
     label: '男'
   },
   {
-    value: 'woman',
+    value: '2',
     label: '女'
   },
   {
-    value: 'unknow',
+    value: '3',
     label: '沃尔玛购物袋'
   }
 ]
-const gender = ref()
-const date = ref()
+const userStore = useUserStore()
+const name = ref(userStore.name)
+const gender = ref('')
+if(userStore.gender == 0){
+  gender.value = '隐藏'
+}
+else if(userStore.gender == 1){
+  gender.value = '男'
+}
+else if(userStore.gender == 2){
+  gender.value = '女'
+}
+else if(userStore.gender == 3){
+  gender.value = '沃尔玛购物袋'
+}
+const date = ref(userStore.birthday)
 </script>
 <style scoped>
 .setHead {

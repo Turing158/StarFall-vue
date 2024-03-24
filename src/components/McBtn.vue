@@ -3,7 +3,7 @@
     v-if="(type == null) | 'spruce'"
     class="btn"
     @click="onClick"
-    :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px' }"
+    :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px',fontSize: props.fontSize+'px',width: props.width+'px',height: props.height+'px' }"
   >
     {{ props.text }}
     <slot></slot>
@@ -12,7 +12,7 @@
     v-if="type == 'oak'"
     class="btn oak"
     @click="onClick"
-    :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px' }"
+    :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px',fontSize: props.fontSize+'px' }"
   >
     {{ props.text }}
     <slot></slot>
@@ -21,14 +21,13 @@
     v-if="type == 'birch'"
     class="btn birch"
     @click="onClick"
-    :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px' }"
+    :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px',fontSize: props.fontSize+'px' }"
   >
     {{ props.text }}
     <slot></slot>
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
 const props = defineProps({
   text: String,
   onClick: Function,
@@ -43,10 +42,25 @@ const props = defineProps({
     require: false,
     defalut: 0
   },
+  paddingTB:{
+    type: Number,
+    require: false,
+    defalut: 0
+  },
   width: {
     type: Number,
     require: false,
     defalut: 64
+  },
+  height:{
+    type:Number,
+    require:false,
+    default:30
+  },
+  fontSize:{
+    type:Number,
+    require:false,
+    defalut:15
   }
 })
 </script>

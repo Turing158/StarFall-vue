@@ -11,3 +11,10 @@ export const getTopicInfo = (id) => {
   param.append('id', id)
   return request.post('/getTopicInfo', param)
 }
+
+export const findAllTopicByUser = (page,user) => {
+  let param = new URLSearchParams()
+  param.append('page', page)
+  param.append('user', user)
+  return request.post('/findAllTopicByUser', param)
+}

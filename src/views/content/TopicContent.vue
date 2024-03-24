@@ -29,18 +29,14 @@
       </div>
       <Empty :height="10" />
       <TopicList :isNull="topicData == null || topicData.length == 0">
-        <TopicItem
-          v-for="(item, index) in topicData"
-          :key="index"
-          :item="item"
-        />
+        <TopicItem v-for="(item, index) in topicData" :key="index" :item="item" />
       </TopicList>
       <Empty :height="10" />
       <div class="pageOperate">
         <el-pagination
           class="custom"
           layout="prev, pager, next"
-          :total="12"
+          :total="topicTotal"
           :page-size="10"
           :background="true"
           @current-change="changePage"
@@ -61,30 +57,29 @@ import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 const bookOut = ref()
 const topicData = ref([])
+const topicTotal = ref(0)
 const appendTopic = () => {}
 const page = ref(1)
-const changePage = (e)=>{
+const changePage = (e) => {
   page.value = e
-  console.log(page.value);
+  console.log(page.value)
   getTopic()
 }
-const getTopic = async()=>{
-  await findAllTopic(page.value).then(res=>{
-    let data = res.data.object
-    topicData.value = data
-  }).catch(err=>{
-    ElMessage.error("获取主题失败")
-  })
+const getTopic = async () => {
+  await findAllTopic(page.value)
+    .then((res) => {
+      let data = res.data.object
+      let num = res.data.num
+      topicData.value = data
+      topicTotal.value = num
+    })
+    .catch((err) => {
+      ElMessage.error('获取主题失败')
+    })
   bookOut.value.setHeight()
 }
 
-
 onMounted(getTopic)
-const router = useRouter()
-const clickTopic = (i) => {
-  router.push("/topic/detail")
-}
-const clickAuthor = (i) => {}
 </script>
 <style>
 .ad {

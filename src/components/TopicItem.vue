@@ -2,31 +2,31 @@
   <tr class="item">
     <td style="width: 710px">
       <div class="info">
-        &nbsp;[<span class="label">{{ item.label }}</span
+        &nbsp;[<span class="label">{{ props.item.label }}</span
         >]
-        <span class="title" @click="onClickTitle()">{{ item.title }}</span>
+        <span class="title" @click="onClickTitle(props.item.id)">{{ props.item.title }}</span>
       </div>
     </td>
     <td style="width: 100px">
       <div class="author">
-        <span @click="onClickUser()">{{ item.user }}</span>
+        <span @click="onClickUser(props.item.id)">{{ props.item.name }}</span>
         <br />
-        <span>{{ item.date }}</span>
+        <span>{{ props.item.date }}</span>
       </div>
     </td>
     <td style="width: 80px">
-      <div class="num">{{ item.view }}/{{ item.comment }}</div>
+      <div class="num">{{ props.item.view }}/{{ props.item.comment }}</div>
     </td>
     <td style="width: 40px">
       <div class="head">
         <img class="img" src="" alt="" />
       </div>
     </td>
-    <td v-show="isEdit" class="operate" style="width: 140px">
+    <td v-show="isEdit" class="operate" style="width: 130px">
       &ensp;
-      <McBtn text="编 辑" type="oak" @click="onEdit()" />
+      <McBtn :font-size="14" :padding="5" text="编 辑" type="oak" @click="onEdit(props.item.id)" />
       &ensp;
-      <McBtn text="删 除" type="oak" @click="onDel()" />
+      <McBtn :font-size="14" :padding="5" text="删 除" type="oak" @click="onDel(props.item.id)" />
     </td>
   </tr>
 </template>
@@ -42,11 +42,10 @@ const props = defineProps({
     require: false
   }
 })
-const item = ref(props.item)
 
 const router = useRouter()
-const onClickTitle = () => {
-  router.push('/topic/detail/'+item.value.id)
+const onClickTitle = (id) => {
+  router.push('/topic/detail/'+id)
 }
 const onClickUser = () => {}
 const onEdit = () => {}
