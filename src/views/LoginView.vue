@@ -12,11 +12,11 @@
         <br /><br />
         <h1>登&emsp;录</h1>
         <br /><br />
-        <input type="text" class="user_input" name="user" required v-model="account" />
+        <input type="text" class="user_input" name="user" required v-model="account" maxlength="15"/>
         <span class="user_span">用户名：</span>
         <div class="user_underline"></div>
         <br />
-        <input type="password" class="pass_input" name="password" required v-model="password" />
+        <input type="password" class="pass_input" name="password" required v-model="password" maxlength="25"/>
         <span class="pass_span">密&emsp;码：</span>
         <div class="pass_underline"></div>
         <br />

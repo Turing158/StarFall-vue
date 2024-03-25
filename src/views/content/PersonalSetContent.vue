@@ -9,7 +9,7 @@
       <table>
         <tr>
           <td>昵称 :</td>
-          <td><el-input v-model="name" /></td>
+          <td><el-input v-model="name" maxlength="10"/></td>
         </tr>
         <tr>
           <td>性别 :</td>
@@ -117,34 +117,40 @@ const onSaveInfo = async () => {
       type: 'warning'
     })
   } else {
-    if(code.value.length != 0){
-      changeCode()
-      await saveInfo(userStore.user, name.value, checkGenderToValue(gender.value),birthday.value,code.value)
-        .then((res) => {
-          let msg = res.data.msg
-          let data = res.data.object
-          if (msg == 'CODE_ERROR') {
-            ElMessage.error('验证码错误')
-          } else {
-            userStore.setUserObject(data.user,data.name,data.level,data.exp,data.maxExp,data.gender,data.birthday,data.avatar,data.email)
-            name.value = data.name,
-            gender.value = checkGenderToLabel(data.gender)
-            birthday.value = data.birthday
-            ElNotification({
-              title: '保存成功',
-              message: '已将用户信息保存',
-              type: 'success'
-            })
-          }
-        })
-        .catch((err) => {
-          ElMessage.error('服务异常')
-        })
-        code.value = ''
-    }
-    else{
+    if(name.value.length <= 10){
+      if(code.value.length != 0){
+        changeCode()
+        await saveInfo(userStore.user, name.value, checkGenderToValue(gender.value),birthday.value,code.value)
+          .then((res) => {
+            let msg = res.data.msg
+            let data = res.data.object
+            if (msg == 'CODE_ERROR') {
+              ElMessage.error('验证码错误')
+            } else {
+              userStore.setUserObject(data.user,data.name,data.level,data.exp,data.maxExp,data.gender,data.birthday,data.avatar,data.email)
+              name.value = data.name,
+              gender.value = checkGenderToLabel(data.gender)
+              birthday.value = data.birthday
+              ElNotification({
+                title: '保存成功',
+                message: '已将用户信息保存',
+                type: 'success'
+              })
+            }
+          })
+          .catch((err) => {
+            ElMessage.error('服务异常')
+          })
+          code.value = ''
+      }
+      else{
       ElMessage.error('验证码不能为空')
     }
+    }
+    else{
+      ElMessage.error('昵称长度不能超过10位')
+    }
+    
   }
 }
 const reset = () => {
