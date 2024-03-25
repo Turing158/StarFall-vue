@@ -2,7 +2,7 @@
   <Book>
     <Empty :height="30" />
     <div class="setHead">
-      <img class="avatar" :src="'/src/assets/avatar/'+userStore.avatar" alt="" />
+      <img class="avatar" :src="'/src/assets/avatar/' + userStore.avatar" alt="" />
       <McBtn text="保存头像" />
     </div>
     <div class="setInfo">
@@ -26,12 +26,12 @@
         </tr>
         <tr>
           <td>生日 :</td>
-          <td><el-date-picker v-model="birthday" type="date" placeholder="请选择出生日期" /></td>
+          <td><el-date-picker v-model="birthday" type="date" placeholder="请选择出生日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD"/></td>
         </tr>
         <tr>
           <td>验证码:</td>
           <td>
-            <el-input placeholder="请输入验证码" style="width: 140px" />
+            <el-input placeholder="请输入验证码" style="width: 140px" v-model="code" />
             <img class="code" :src="codeImg" alt="" @click="changeCode()" />
           </td>
         </tr>
@@ -39,8 +39,8 @@
     </div>
     <Empty :height="20" />
     <div class="operate">
-      <McBtn text="重置" :margin="10" @click="reset()"/>
-      <McBtn text="保存" :margin="10" @click="onSaveInfo()"/>
+      <McBtn text="重置" :margin="10" @click="reset()" />
+      <McBtn text="保存" :margin="10" @click="onSaveInfo()" />
     </div>
   </Book>
 </template>
@@ -77,55 +77,83 @@ const options = [
 ]
 const userStore = useUserStore()
 const name = ref(userStore.name)
-const gender = ref('')
-const checkGender = ()=>{
-  if (userStore.gender == 0) {
-    gender.value = '隐藏'
-  } else if (userStore.gender == 1) {
-    gender.value = '男'
-  } else if (userStore.gender == 2) {
-    gender.value = '女'
-  } else if (userStore.gender == 3) {
-    gender.value = '沃尔玛购物袋'
+const checkGenderToLabel = (value) => {
+  switch (value) {
+    case 0:
+      return '隐藏'
+    case 1:
+      return '男'
+    case 2:
+      return '女'
+    case 3:
+      return '沃尔玛购物袋'
   }
 }
-checkGender()
+const checkGenderToValue = (label) => {
+  switch (label) {
+    case '隐藏':
+      return 0
+    case '男':
+      return 1
+    case '女':
+      return 2
+    case '沃尔玛购物袋':
+      return 3
+    default: return label
+  }
+}
+const gender = ref(checkGenderToLabel(userStore.gender))
 const birthday = ref(userStore.birthday)
-const onSaveInfo = async()=>{
-  if(
+const code = ref('')
+const onSaveInfo = async () => {
+  if (
     name.value == userStore.name &&
-    gender.value == userStore.gender &&
+    gender.value == checkGenderToLabel(userStore.gender) &&
     birthday.value == userStore.birthday
-  ){
+  ) {
     ElNotification({
-      title:'保存成功',
-      message: '已将用户信息保存',
-      type:'success'
+      title: '未修改',
+      message: '用户信息未修改',
+      type: 'warning'
     })
-  }
-  else{
-    await saveInfo(userStore.user,name.value,gender.value,birthday.value).then(res=>{
-      let msg = res.data.msg
-      if(msg == "CODE_ERROR"){
-        ElMessage.error('验证码错误')
-      }
-      else{
-        ElNotification({
-          title:'保存成功',
-          message: '已将用户信息保存',
-          type:'success'
+  } else {
+    if(code.value.length != 0){
+      changeCode()
+      await saveInfo(userStore.user, name.value, checkGenderToValue(gender.value),birthday.value,code.value)
+        .then((res) => {
+          let msg = res.data.msg
+          let data = res.data.object
+          if (msg == 'CODE_ERROR') {
+            ElMessage.error('验证码错误')
+          } else {
+            userStore.setUserObject(data.user,data.name,data.level,data.exp,data.maxExp,data.gender,data.birthday,data.avatar,data.email)
+            name.value = data.name,
+            gender.value = checkGenderToLabel(data.gender)
+            birthday.value = data.birthday
+            ElNotification({
+              title: '保存成功',
+              message: '已将用户信息保存',
+              type: 'success'
+            })
+          }
         })
-      }
-    }).catch(err=>{
-      ElMessage.error('服务异常')
-    })
+        .catch((err) => {
+          ElMessage.error('服务异常')
+        })
+        code.value = ''
+    }
+    else{
+      ElMessage.error('验证码不能为空')
+    }
   }
 }
-const reset = ()=>{
+const reset = () => {
   name.value = userStore.name
-  gender.value = userStore.gender
+  gender.value = checkGenderToLabel(userStore.gender)
   birthday.value = userStore.birthday
-  checkGender()
+}
+const test = () => {
+  console.log(birthday.value)
 }
 </script>
 <style scoped>

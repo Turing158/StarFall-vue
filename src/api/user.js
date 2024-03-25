@@ -34,5 +34,5 @@ export const saveInfo = (user,name,gender,birthday,code)=>{
     param.append('gender',gender)
     param.append('birthday',birthday)
     param.append('code',code)
-    return request.post('/updataUserInfo',param)
+    return request.post('/updateUserInfo',param)
 }
