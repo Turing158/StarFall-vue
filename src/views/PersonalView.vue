@@ -19,7 +19,6 @@
 </template>
 <script setup>
 import Ul from '../components/UlBar.vue'
-import Book from '../components/Book.vue'
 import McBtn from '../components/McBtn.vue'
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'

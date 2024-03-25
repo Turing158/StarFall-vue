@@ -2,24 +2,33 @@
   <Book ref="bookOut">
     <Empty :height="30" />
     <div class="basicInfo">
-      <div class="headOut">
-        <img class="head" src="" alt="" />
+      <div class="avatarOut">
+        <img class="avatar" :src="'/src/assets/avatar/'+userStore.avatar" alt="" width="100%" height="100%"/>
       </div>
       <div class="info">
         <div class="exp">
           <ExpBar :lv="userStore.level" :exp="userStore.exp" :maxExp="userStore.maxExp" />
         </div>
         <div class="infomation">
-          <span>{{ userStore.name }} <span class="user">({{ userStore.user }})</span></span
+          <span
+            >{{ userStore.name }} <span class="user">({{ userStore.user }})</span></span
           ><br />
-          <span class="birth">出生日期：{{ userStore.birthday }}</span><br />
+          <span class="birth">出生日期：{{ userStore.birthday }}</span
+          ><br />
           <span class="gender">性别：{{ gender }}</span>
         </div>
       </div>
     </div>
     <div class="topic">
-      <TopicList :isNull="topicData == null || topicData.length == 0" :isEdit="true">
-        <TopicItem v-for="(item, index) in topicData" :key="index" :item="item" :isEdit="true"/>
+      <TopicList
+        :isNull="topicData == null || topicData.length == 0"
+        :isEdit="true"
+        v-loading="loading"
+        :loading="loading"
+        element-loading-background="#11111100"
+        element-loading-text="加载中..."
+      >
+        <TopicItem v-for="(item, index) in topicData" :key="index" :item="item" :isEdit="true" />
       </TopicList>
       <Empty :height="10" />
       <div class="pageOperate">
@@ -40,57 +49,50 @@ import ExpBar from '../../components/ExpBar.vue'
 import Empty from '../../components/FitEmpty.vue'
 import TopicList from '@/components/TopicList.vue'
 import TopicItem from '@/components/TopicItem.vue'
-import {useUserStore} from '@/stores/user'
+import { useUserStore } from '@/stores/user'
 import Book from '@/components/Book.vue'
 import { onMounted, ref } from 'vue'
 import { findAllTopicByUser } from '@/api/topic'
 import { ElMessage } from 'element-plus'
+const loading = ref(true)
 const userStore = useUserStore()
 const bookOut = ref()
 const gender = ref('')
-if(userStore.gender == 0){
+if (userStore.gender == 0) {
   gender.value = '隐藏'
-}
-else if(userStore.gender == 1){
+} else if (userStore.gender == 1) {
   gender.value = '男'
-}
-else if(userStore.gender == 2){
+} else if (userStore.gender == 2) {
   gender.value = '女'
-}
-else if(userStore.gender == 3){
+} else if (userStore.gender == 3) {
   gender.value = '沃尔玛购物袋'
 }
 const topicData = ref([])
 const topicTotal = ref()
 const page = ref(1)
-const changePage = (e)=>{
+const changePage = (e) => {
   page.value = e
   getTopic()
 }
-const getTopic = async() =>{
-  await findAllTopicByUser(page.value,userStore.user).then(res=>{
-    let data = res.data.object
-    let num = res.data.num
-    topicData.value = data
-    topicTotal.value = num
-  }).catch(err=>{
-    console.log(err);
-    ElMessage.error('获取主题列表失败')
-  })
+const getTopic = async () => {
+  await findAllTopicByUser(page.value, userStore.user)
+    .then((res) => {
+      let data = res.data.object
+      let num = res.data.num
+      topicData.value = data
+      topicTotal.value = num
+      loading.value = false
+    })
+    .catch((err) => {
+      ElMessage.error('获取主题列表失败')
+      loading.value = false
+    })
   bookOut.value.setHeight()
 }
-const clickTopic = (i)=>{
-
-}
-const clickAuthor = (i)=>{
-  
-}
-const clickEdit = (i)=>{
-
-}
-const clickDel = (i)=>{
-
-}
+const clickTopic = (i) => {}
+const clickAuthor = (i) => {}
+const clickEdit = (i) => {}
+const clickDel = (i) => {}
 onMounted(getTopic)
 </script>
 <style scoped>
@@ -100,7 +102,7 @@ onMounted(getTopic)
   display: flex;
   flex-direction: row;
 }
-.headOut {
+.avatarOut {
   width: 80px;
   height: 80px;
   padding: 5px;

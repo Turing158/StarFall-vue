@@ -4,12 +4,10 @@
     <div class="contentOut">
       <Book ref="bookOut">
         <div v-if="!error">
-          <TopicDetailContent :data="topicInfo"/>
+          <TopicDetailContent :data="topicInfo" />
         </div>
         <div class="error" v-if="error">
-          <div>
-            此主题不存在或已被删除-><span @click="router.back()">点此返回</span>
-          </div>
+          <div>此主题不存在或已被删除-><span @click="router.back()">点此返回</span></div>
         </div>
       </Book>
     </div>
@@ -28,24 +26,22 @@ const router = useRouter()
 const bookOut = ref()
 const topicInfo = ref()
 const error = ref(true)
-const init = async()=>{
+const init = async () => {
   await getTopicInfo(route.params.id)
     .then((res) => {
       let msg = res.data.msg
-      if(msg == 'ID_ERROR'){
+      if (msg == 'ID_ERROR') {
         ElMessage.error('此主题帖已被删除或不存在')
-      }
-      else{
+      } else {
         let data = res.data.object
         topicInfo.value = data
         error.value = false
       }
     })
     .catch((err) => {
-      console.log(err)
       ElMessage.error('服务异常')
     })
-    bookOut.value.setHeight()
+  bookOut.value.setHeight()
 }
 onMounted(init)
 </script>
@@ -61,7 +57,7 @@ onMounted(init)
   flex-direction: column;
   align-items: center;
 }
-.error{
+.error {
   width: 100%;
   height: 300px;
   display: flex;
@@ -69,10 +65,10 @@ onMounted(init)
   align-items: center;
   font-size: 20px;
 }
-.error span{
+.error span {
   cursor: pointer;
 }
-.error span:hover{
+.error span:hover {
   text-decoration: underline;
 }
 </style>

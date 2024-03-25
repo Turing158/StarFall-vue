@@ -30,7 +30,7 @@
             >
           </div>
           <div class="authorHead">
-            <a><img :img="data.head" alt="" /></a>
+            <a><img :img="'@/assets/avatar/'+data.avatar" alt="" /></a>
           </div>
           <div class="authorInf">
             <ExpBar :lv="data.level" :exp="data.exp" :maxExp="data.maxExp" />
@@ -118,7 +118,7 @@
           </tr>
           <tr>
             <td style="border: 0; background-color: initial">
-              <div class="contentMd" id="contentMd"></div>
+              <div class="contentMd" id="contentMd" v-highlight v-html="content"></div>
             </td>
           </tr>
         </table>
@@ -147,6 +147,7 @@ const props = defineProps({
       language: '中文',
       address: 'www.baidu.com',
       download: 'www.baidu.com',
+      content: '',
       user: '123',
       name: 'TuringICE',
       img: '',
@@ -173,6 +174,12 @@ const copyText = () => {
     ElMessage.error('复制失败')
   })
 }
+import { marked } from 'marked'
+const content = ref('')
+const toMd = () => {
+  content.value = marked(data.value.content)
+}
+toMd()
 onMounted(copyText)
 </script>
 <style scoped>
@@ -388,68 +395,8 @@ onMounted(copyText)
   font-weight: 400;
   overflow: hidden;
 }
-.contentMd a {
-  color: midnightblue;
-}
-blockquote {
-  display: block;
-  padding: 2px;
-  border-left: 3px solid #dddfe4;
-  background: #eef0f4;
-  overflow: auto;
-  word-break: break-word !important;
-}
-hr {
-  margin: 10px 0;
-}
-pre code {
-  color: aliceblue;
-  display: block;
-  padding: 5px;
-  -webkit-text-size-adjust: none;
-  overflow-x: auto;
-  white-space: pre;
-  background-color: rgb(77, 77, 77);
-  font-size: 14px;
-  line-height: 22px;
-}
-p code {
-  padding: 5px;
-  background-color: rgba(252, 179, 179, 0.603);
-  color: rgb(192, 2, 2);
-  font-size: 14px;
-  line-height: 22px;
-  font-family:
-    Source Code Pro,
-    DejaVu Sans Mono,
-    Ubuntu Mono,
-    Anonymous Pro,
-    Droid Sans Mono,
-    Menlo,
-    Monaco,
-    Consolas,
-    Inconsolata,
-    Courier,
-    monospace,
-    PingFang SC,
-    Microsoft YaHei,
-    sans-serif;
-}
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  width: 100%;
-  display: table;
-}
-table td,
-table th {
-  border: 1px solid #7c6229;
-}
-table th {
-  background-color: #ebcfa3;
-}
-table td {
-  background-color: #f5dfbd;
+.contentMd h2{
+  color: #c2a678;
 }
 .likeDiv {
   right: 0;

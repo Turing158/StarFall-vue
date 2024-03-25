@@ -1,6 +1,6 @@
 <template>
   <div class="out">
-    <div class="regDiv">
+    <div class="regDiv" v-on:keydown.enter="onReg">
       <router-link to="/">
         <button class="back">
           <span>home</span>
@@ -57,7 +57,7 @@
 <script setup>
 import McBtn from '@/components/McBtn.vue'
 import { getEmailCode, register } from '@/api/user'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElNotification } from 'element-plus'
 import { ref } from 'vue'
 import router from '@/router'
 const user = ref('')
@@ -76,7 +76,11 @@ const onGetEmailCode = async () => {
           if (msg == 'EMAIL_ERROR') {
             ElMessage.error('邮箱已存在')
           } else {
-            ElMessage.success('验证码已发至邮箱')
+            ElNotification({
+              title: '验证码',
+              message:'已发送至邮箱'+email.value,
+              type:'success'
+            })
             flag.value = false
             setTimeout(() => {
               flag.value = true
@@ -122,13 +126,16 @@ const onReg = async () => {
         } else if (msg == 'USER_ERROR') {
           ElMessage.error('用户名已存在')
         } else {
-          ElMessage.success('注册成功')
+          ElNotification({
+              title: '注册成功',
+              message:'已前往登录界面，可进行登录',
+              type:'success'
+            })
           router.push('/login')
         }
       }
     )
     changeCode().catch((err) => {
-      console.log(err)
       ElMessage.error('服务异常')
     })
   }

@@ -1,7 +1,7 @@
 <template>
   <Book>
     <Empty :height="50" />
-    <div class="emailInfo">当前邮箱：{{ email }}</div>
+    <div class="emailInfo">当前邮箱：{{ userStore.email }}</div>
     <Empty :height="20" />
     <div class="change">
       <table>
@@ -22,7 +22,10 @@
 import Book from '@/components/Book.vue'
 import Empty from '@/components/FitEmpty.vue'
 import McBtn from '@/components/McBtn.vue'
+import useUserStore from '@/stores/user'
+
 import { ref } from 'vue'
+const userStore = useUserStore()
 const email = ref('123@163.com')
 const changeEmail = () => {}
 </script>

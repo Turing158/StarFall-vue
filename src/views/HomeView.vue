@@ -1,9 +1,9 @@
 <template>
   <div class="main">
     <div class="notice">
-      <Notice/>
+      <Notice />
     </div>
-    <el-carousel height="500px" trigger="click">
+    <el-carousel height="500px" trigger="click" motion-blur :interval="3000">
       <el-carousel-item>
         <img src="../assets/img/top/top1.png" alt="" :width="imgWidth" :height="imgHeight" />
       </el-carousel-item>
@@ -61,10 +61,29 @@ window.addEventListener('resize', checkWindowWidth)
   align-items: center;
   margin: 50px;
 }
-.notice{
+.notice {
   position: absolute;
   top: 10px;
   width: 100vw;
   z-index: 999;
+}
+.test {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.test1 {
+  background-color: #fff;
+}
+.test2 {
+  background-color: #aaa;
+}
+.test3 {
+  background-color: #888;
+}
+.test4 {
+  background-color: #444;
 }
 </style>

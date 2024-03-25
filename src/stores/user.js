@@ -9,11 +9,12 @@ export const useUserStore = defineStore('user-Sf', () => {
   const maxExp = ref(0)
   const gender = ref(0)
   const birthday = ref('')
-  const head = ref('')
+  const avatar = ref('')
+  const email = ref('')
   const isLogin = ref(false)
 
 
-  const setUserObject = (User, Name, Level, Exp, MaxExp, Gender, Birthday,Head) => {
+  const setUserObject = (User, Name, Level, Exp, MaxExp, Gender, Birthday,Avatar,Email) => {
     user.value = User
     name.value = Name
     level.value = Level
@@ -21,7 +22,8 @@ export const useUserStore = defineStore('user-Sf', () => {
     maxExp.value = MaxExp
     gender.value = Gender
     birthday.value = Birthday
-    head.value = Head
+    avatar.value = Avatar
+    email.value = Email
   }
   const setLogin = (bool)=>{
     isLogin.value = bool
@@ -35,11 +37,12 @@ export const useUserStore = defineStore('user-Sf', () => {
     maxExp.value = 0
     gender.value = 0
     birthday.value = ''
-    head.value = ''
+    avatar.value = ''
+    email.value = ''
     isLogin.value = false
   }
 
-  return { user, name, level, exp, maxExp, gender, birthday,isLogin, setUserObject,setLogin,exit }
+  return { user, name, level, exp, maxExp, gender, birthday,avatar,email,isLogin, setUserObject,setLogin,exit }
 },
 {
   persist: true,

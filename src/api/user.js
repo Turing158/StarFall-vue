@@ -25,3 +25,14 @@ export const register = (user,password,email,emailCode,code)=>{
     param.append('code',code)
     return request.post('/register',param)
 }
+
+
+export const saveInfo = (user,name,gender,birthday,code)=>{
+    let param = new URLSearchParams()
+    param.append('user',user)
+    param.append('name',name)
+    param.append('gender',gender)
+    param.append('birthday',birthday)
+    param.append('code',code)
+    return request.post('/updataUserInfo',param)
+}

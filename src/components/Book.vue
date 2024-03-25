@@ -46,11 +46,13 @@ defineExpose({
   position: absolute;
   background-image: url(../assets/img/left.png);
   width: 84px;
+  transition: all 250ms;
 }
 .right {
   position: absolute;
   background-image: url(../assets/img/right.png);
   width: 84px;
   margin-left: 1045px;
+  transition: all 250ms;
 }
 </style>

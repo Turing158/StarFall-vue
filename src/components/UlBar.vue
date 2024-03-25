@@ -17,7 +17,7 @@
       </a>
     </li>
     <div v-show="isLogin" class="user ul_border">
-      <img :src="userStore.head" alt="" class="head_img" />
+      <img :src="'/src/assets/avatar/'+userStore.avatar" alt="" class="avatar_img" />
       <div class="menu">
         <p>{{ userStore.name }}</p>
         <div class="exp">
@@ -80,12 +80,16 @@ const UlItem = ref([
 const PageIndex = ref(props.pageIndex)
 
 import useUserStore from '@/stores/user'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElNotification } from 'element-plus'
 const userStore = useUserStore()
 const isLogin = ref(userStore.isLogin)
 const exit = ()=>{
   userStore.exit()
-  ElMessage.success("已退出登录")
+  ElNotification({
+    title:'退出登录',
+    message:'成功退出登录，期待下次回来',
+    type:'success'
+  })
   isLogin.value = false
 }
 </script>
@@ -119,6 +123,7 @@ const exit = ()=>{
   background-image: url(../assets/img/set/spruce.png);
   border-radius: 5px;
   background-size: 100%;
+  transition: all 250ms;
 }
 .ul_li a:hover:not(.active) {
   color: #131313;
@@ -129,6 +134,7 @@ const exit = ()=>{
 .ul_li a span {
   position: relative;
   top: 0;
+  transition: all 250ms;
 }
 .ul_li a:hover:not(.active) b {
   display: inline-block;
@@ -159,15 +165,16 @@ ul form {
   height: 55px;
   line-height: 55px;
 }
-ul .head_img {
+ul .avatar_img {
   position: relative;
   background-color: #f1f1f1;
   width: 50px;
   height: 50px;
   border-radius: 10px;
   object-fit: cover;
+  transition: all 250ms;
 }
-.user:hover .head_img {
+.user:hover .avatar_img {
   border-radius: 10px 10px 0px 0px;
   width: 150px;
 }
@@ -181,6 +188,7 @@ ul .head_img {
   text-align: center;
   width: 50px;
   height: 50px;
+  transition: all 250ms;
 }
 .user:hover {
   border-bottom: 0;
@@ -196,7 +204,6 @@ ul .head_img {
   width: 150px;
   height: 115px;
   top: -2px;
-  /* right: 108px; */
   right: -100px;
   opacity: 1;
   color: #131313;
@@ -235,6 +242,7 @@ ul .head_img {
   border-radius: 3px;
   text-decoration: none;
   color: #131313;
+  transition: all 250ms;
 }
 .menu .operate a:nth-child(2) {
   margin: 0 5px;
@@ -262,6 +270,7 @@ ul .head_img {
   border-radius: 5px;
   font-size: 18px;
   overflow: hidden;
+  transition: all 250ms;
 }
 .unuser:hover {
   background-image: url(../assets/img/set/oak.png);
@@ -269,6 +278,7 @@ ul .head_img {
 .unuser span:nth-child(1) {
   position: relative;
   top: 10px;
+  transition: all 250ms;
 }
 .unuser span:nth-child(4) {
   position: relative;
@@ -276,6 +286,7 @@ ul .head_img {
   color: #131313;
   font-size: 35px;
   font-stretch: expanded;
+  transition: all 250ms;
 }
 .unuser:hover span:nth-child(1) {
   top: -40px;
@@ -288,6 +299,7 @@ ul .head_img {
   border-left: 2px solid #8f8568;
   border-right: 2px solid #3f3a2c;
   border-bottom: 2px solid #3f3a2c;
+  transition: all 250ms;
 }
 .ul_border:hover {
   border-top: 2px solid #ada27f;

@@ -1,6 +1,6 @@
 <template>
   <div class="out">
-    <div class="loginDIv">
+    <div class="loginDIv" v-on:keydown.enter="confirm">
       <router-link to="/">
         <button class="back">
           <span>home</span>
@@ -42,7 +42,7 @@ import McBtn from '@/components/McBtn.vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '@/api/user'
-import { ElMessage } from 'element-plus'
+import { ElMessage,ElNotification } from 'element-plus'
 import useUserStore from '@/stores/user'
 const router = useRouter()
 const account = ref('')
@@ -60,21 +60,22 @@ const confirm = async () => {
     await login(account.value, password.value, code.value)
       .then((res) => {
         let msg = res.data.msg
-        if(msg == "USER_PASSWORD"){
-          ElMessage.error("用户名错误或不存在")
-        }
-        else if(msg == "EMAIL_ERROR"){
-          ElMessage.error("邮箱错误或不存在")
-        }
-        else if(msg == "PASSWORD_ERROR"){
-          ElMessage.error("密码错误")
-        }
-        else if(msg == "CODE_ERROR"){
-          ElMessage.error("验证码错误")
-        }
-        else{
-          ElMessage.success("登录成功")
+        if (msg == 'USER_PASSWORD') {
+          ElMessage.error('用户名错误或不存在')
+        } else if (msg == 'EMAIL_ERROR') {
+          ElMessage.error('邮箱错误或不存在')
+        } else if (msg == 'PASSWORD_ERROR') {
+          ElMessage.error('密码错误')
+        } else if (msg == 'CODE_ERROR') {
+          ElMessage.error('验证码错误')
+        } else {
+          ElNotification({
+              title: '登录成功',
+              message:'已前往主页，愉快的进行探索吧！',
+              type:'success'
+            })
           let data = res.data.object
+          console.log(data);
           userStore.setUserObject(
             data.user,
             data.name,
@@ -82,23 +83,24 @@ const confirm = async () => {
             data.exp,
             data.maxExp,
             data.gender,
-            data.birthday
-            )
-            userStore.setLogin(true)
-            router.push('/')
+            data.birthday,
+            data.avatar,
+            data.email
+          )
+          userStore.setLogin(true)
+          router.push('/')
         }
         changeCode()
       })
       .catch((err) => {
-        console.log(err)
         ElMessage.error('服务异常')
       })
   }
 }
 let date = new Date()
-const codeImg = ref('http://localhost:8080/getCodeImage?r'+date.getTime())
+const codeImg = ref('http://localhost:8080/getCodeImage?r' + date.getTime())
 const changeCode = () => {
-  codeImg.value = "http://localhost:8080/getCodeImage?r"+new Date().getTime()
+  codeImg.value = 'http://localhost:8080/getCodeImage?r' + new Date().getTime()
 }
 </script>
 <style scoped>

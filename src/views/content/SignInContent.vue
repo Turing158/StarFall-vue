@@ -3,8 +3,8 @@
     <Book>
       <div class="content">
         <div class="left">
-          <div class="headOut">
-            <img :src="userStore.head" alt="">
+          <div class="avatarOut">
+            <img :src="userStore.avatar" alt="">
           </div>
           <div class="info">
             <span class="date">{{ date }}</span>
@@ -71,7 +71,7 @@ const userStore = useUserStore()
   border: 1px solid #a58960;
   margin-right: 20px;
 }
-.headOut {
+.avatarOut {
   margin: 30px 20px;
   width: 160px;
   height: 160px;

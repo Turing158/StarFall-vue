@@ -18,8 +18,8 @@
       <div class="num">{{ props.item.view }}/{{ props.item.comment }}</div>
     </td>
     <td style="width: 40px">
-      <div class="head">
-        <img class="img" src="" alt="" />
+      <div class="avatar">
+        <img class="img" :src="'/src/assets/avatar/'+props.item.avatar" alt="" />
       </div>
     </td>
     <td v-show="isEdit" class="operate" style="width: 130px">
@@ -106,7 +106,7 @@ const onDel = () => {}
   width: 50px;
   font-size: 13px;
 }
-.head {
+.avatar {
   width: 40px;
 }
 .img {
@@ -114,7 +114,6 @@ const onDel = () => {}
   top: 5px;
   width: 30px;
   height: 30px;
-  background-color: #a58960;
 }
 .operate {
   display: flex;

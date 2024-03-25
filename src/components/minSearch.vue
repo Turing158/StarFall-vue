@@ -15,6 +15,7 @@
     height: 55px;
     display: flex;
     align-items: center;
+    
 }
 .minSearch form{
     border: 0;
@@ -31,6 +32,7 @@
     border: 1px solid #111111;
     overflow: hidden;
     border-radius: 5px;
+    transition: all 250ms;
 }
 .minSearch div input{
     width: 150px;
@@ -57,6 +59,7 @@
     background-repeat: no-repeat;
     background-position: 50%;
     cursor: pointer;
+    transition: all 250ms;
 }
 .minSearch div button:hover{
     background-color: #131313;

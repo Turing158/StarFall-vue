@@ -16,6 +16,8 @@
     "clipboard": "^2.0.11",
     "element-plus": "^2.6.1",
     "element-ui": "^2.15.14",
+    "highlight.js": "^11.9.0",
+    "marked": "^12.0.1",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
     "vue": "^3.4.21",

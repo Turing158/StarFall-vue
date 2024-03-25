@@ -8,8 +8,11 @@
         <th>头像</th>
         <th v-show="props.isEdit">操作</th>
       </tr>
-      <tr v-show="props.isNull">
+      <tr v-show="props.isNull && !loading">
         <td class="item" colspan="6"><div class="null">未找到数据！</div></td>
+      </tr>
+      <tr v-show="loading">
+        <td class="item" colspan="6"><div class="loading"></div></td>
       </tr>
       <slot> </slot>
     </table>
@@ -34,6 +37,12 @@ table {
   height: 30px;
   font-size: 12px;
 }
+.loading{
+  height: 400px;
+  border: 1px solid #a58960;
+  background-color: #f3debf;
+  text-align: center;
+}
 </style>
 
 <script setup>
@@ -49,6 +58,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
     require: false
+  },
+  loading:{
+    type:Boolean,
+    default:true
   }
 })
 </script>
