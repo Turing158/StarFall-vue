@@ -75,7 +75,6 @@ const confirm = async () => {
               type:'success'
             })
           let data = res.data.object
-          console.log(data);
           userStore.setUserObject(
             data.user,
             data.name,

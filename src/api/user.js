@@ -36,3 +36,13 @@ export const saveInfo = (user,name,gender,birthday,code)=>{
     param.append('code',code)
     return request.post('/updateUserInfo',param)
 }
+
+
+export const settingPassword = (user,oldPassword,newPassword,code)=>{
+    let param = new URLSearchParams()
+    param.append('user',user)
+    param.append('oldPassword',oldPassword)
+    param.append('newPassword',newPassword)
+    param.append('code',code)
+    return request.post('/updatePassword',param)
+}
