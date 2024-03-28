@@ -62,6 +62,11 @@ const router = createRouter({
           path: '/personal/email',
           name: 'PersonalEmailContent',
           component: () => import('../views/content/PersonEmailContent.vue')
+        },
+        {
+          path: '/personal/other/:user?',
+          name: 'PersonalOtherContent',
+          component: () => import('../views/content/PersonalOtherContent.vue')
         }
       ]
     },

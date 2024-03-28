@@ -26,6 +26,12 @@ export const register = (user,password,email,emailCode,code)=>{
     return request.post('/register',param)
 }
 
+export const findUserinfo = (user)=>{
+    let param = new URLSearchParams()
+    param.append('user',user)
+    return request.post('/findUserByUser',param)
+}
+
 
 export const saveInfo = (user,name,gender,birthday,code)=>{
     let param = new URLSearchParams()

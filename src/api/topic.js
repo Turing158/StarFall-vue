@@ -23,3 +23,11 @@ export const findAllTopicByUser = (page,user) => {
 
 
 export const findTopicVersion = ()=>request.post('/findTopicVersion')
+
+
+export const findCommentByTopic = (id,page) => {
+  let param = new URLSearchParams()
+  param.append('id', id)
+  param.append('page', page)
+  return request.post('/findCommentByTopic', param)
+}

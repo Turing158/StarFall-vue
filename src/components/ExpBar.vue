@@ -5,13 +5,11 @@
       <div class="expNum">{{ props.exp }}/{{ props.maxExp }}</div>
     </div>
     <div class="expOut">
-      <div class="expIn" :style="{ width: present + '%' }"></div>
+      <div class="expIn" :style="{ width: (props.exp / props.maxExp) * 100 + '%' }"></div>
     </div>
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
-
 const props = defineProps({
   lv: {
     type: Number,
@@ -29,7 +27,6 @@ const props = defineProps({
     default: 2
   }
 })
-const present = ref((props.exp / props.maxExp) * 100)
 </script>
 <style scoped>
 .expOut {

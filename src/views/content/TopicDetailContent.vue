@@ -25,12 +25,13 @@
       <td class="author">
         <div class="authorContent">
           <div class="authorName">
+            
             <span
-              ><a :href="'/person/others/' + data.user" class="user">{{ data.name }}</a></span
+              ><a :href="'/personal/other/' + data.user" class="user"><img src="../../assets/img/name_tag.png" alt="">{{ data.name }}</a></span
             >
           </div>
           <div class="authorHead">
-            <a><img :img="'@/assets/avatar/'+data.avatar" alt="" /></a>
+            <a :href="'/personal/other/' + data.user"><img :src="'/src/assets/avatar/' + data.avatar" alt="" /></a>
           </div>
           <div class="authorInf">
             <ExpBar :lv="data.level" :exp="data.exp" :maxExp="data.maxExp" />
@@ -177,6 +178,7 @@ const copyText = () => {
 import { marked } from 'marked'
 const content = ref('')
 const toMd = () => {
+  if(data.value.content == null) return
   content.value = marked(data.value.content)
 }
 toMd()
@@ -278,6 +280,7 @@ onMounted(copyText)
   height: 40px;
   display: flex;
   border-bottom: 1px dashed #c2a678;
+  font-size: 14px;
 }
 .authorName span {
   position: relative;
@@ -288,6 +291,9 @@ onMounted(copyText)
   text-decoration: none;
   cursor: pointer;
 }
+.authorName a:hover {
+  text-decoration: underline;
+}
 .authorHead {
   display: flex;
   width: 180px;
@@ -295,9 +301,10 @@ onMounted(copyText)
 }
 .authorHead a {
   margin: auto;
-  border: 5px solid white;
+  border: 5px solid #f1f1f1;
   width: 130px;
   height: 130px;
+  background-color: #f1f1f1;
 }
 .authorHead img {
   width: 130px;
@@ -393,9 +400,10 @@ onMounted(copyText)
   word-wrap: break-word;
   font-size: 1rem;
   font-weight: 400;
+  padding-bottom: 50px;
   overflow: hidden;
 }
-.contentMd h2{
+.contentMd h2 {
   color: #c2a678;
 }
 .likeDiv {

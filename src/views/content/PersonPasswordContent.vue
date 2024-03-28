@@ -39,9 +39,9 @@
         </tr>
         <tr>
           <td>验证码&emsp;:</td>
-          <td>
-            <el-input placeholder="请输入验证码" style="width: 110px" v-model="code" />
-            <img class="code" :src="codeImg" alt="" @click="changeCode()" />
+          <td style="display: flex;">
+            <el-input placeholder="请输入验证码" style="width: 110px" v-model="code" maxlength="4"/>
+            <Code ref="codeImg" width="75px" height="30px" margin="0 2px" />
           </td>
         </tr>
       </table>
@@ -58,18 +58,16 @@ import Book from '@/components/Book.vue'
 import Empty from '@/components/FitEmpty.vue'
 import McBtn from '@/components/McBtn.vue'
 import useUserStore from '@/stores/user'
+import Code from '@/components/Code.vue'
 import { ElMessage, ElNotification } from 'element-plus'
 import { ref } from 'vue'
 
-let date = new Date()
-const codeImg = ref('http://localhost:8080/getCodeImage?r' + date.getTime())
-const changeCode = () => {
-  codeImg.value = 'http://localhost:8080/getCodeImage?r' + new Date().getTime()
-}
+
 const oldPassword = ref('')
 const newPassword = ref('')
 const againPassword = ref('')
 const code = ref('')
+const codeImg = ref()
 const userStroe = useUserStore()
 
 const confirm = async () => {
@@ -104,7 +102,7 @@ const confirm = async () => {
         ElMessage.error('服务异常')
       })
       code.value = ''
-    changeCode()
+      codeImg.value.changeCode()
   }
 }
 </script>
@@ -117,11 +115,5 @@ const confirm = async () => {
   display: flex;
   justify-content: center;
 }
-.code {
-  position: absolute;
-  width: 75px;
-  height: 30px;
-  margin: 0 5px;
-  cursor: pointer;
-}
+
 </style>

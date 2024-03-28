@@ -2,7 +2,7 @@
   <div>
     <Ul class="ul"></Ul>
     <div class="outContent">
-      <div class="operate">
+      <div class="operate" v-if="userStore.isLogin">
         <router-link
           v-for="(item, index) in pages"
           :key="index"
@@ -22,6 +22,8 @@ import Ul from '../components/UlBar.vue'
 import McBtn from '../components/McBtn.vue'
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
+import useUserStore from '@/stores/user';
+const userStore = useUserStore()
 const pages = [
   {
     name: '个人信息',
@@ -48,8 +50,10 @@ if (route.path == '/personal') {
   pageIndex.value = 1
 } else if (route.path == '/personal/password') {
   pageIndex.value = 2
-} else {
+} else if (route.path == '/personal/email') {
   pageIndex.value = 3
+} else {
+  pageIndex.value = -1
 }
 </script>
 <style scoped>

@@ -9,7 +9,7 @@
     </td>
     <td style="width: 100px">
       <div class="author">
-        <span @click="onClickUser(props.item.id)">{{ props.item.name }}</span>
+        <span @click="onClickUser(props.item.user)">{{ props.item.name }}</span>
         <br />
         <span>{{ props.item.date }}</span>
       </div>
@@ -47,7 +47,9 @@ const router = useRouter()
 const onClickTitle = (id) => {
   router.push('/topic/detail/'+id)
 }
-const onClickUser = () => {}
+const onClickUser = () => {
+  router.push('/personal/other/'+props.item.user)
+}
 const onEdit = () => {}
 const onDel = () => {}
 </script>

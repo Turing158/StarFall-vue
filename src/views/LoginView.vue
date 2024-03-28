@@ -23,7 +23,7 @@
         <input type="text" class="code_input" name="login_code" required v-model="code" />
         <span class="code_span">验证码：</span>
         <div class="code_underline"></div>
-        <img :src="codeImg" alt="VerifyCode" @click="changeCode()" id="img_code" />
+        <Code class="" ref="codeImg" width="100px" height="40px" margin="0 5px" />
         <div class="operate">
           <router-link to="/reg">
             <McBtn text="注册" :margin="0" />
@@ -43,11 +43,13 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '@/api/user'
 import { ElMessage,ElNotification } from 'element-plus'
+import Code from '@/components/Code.vue'
 import useUserStore from '@/stores/user'
 const router = useRouter()
 const account = ref('')
 const password = ref('')
 const code = ref('')
+const codeImg = ref()
 const userStore = useUserStore()
 const confirm = async () => {
   if (account.value.length == 0) {
@@ -89,18 +91,15 @@ const confirm = async () => {
           userStore.setLogin(true)
           router.push('/')
         }
-        changeCode()
+        codeImg.value.changeCode()
       })
       .catch((err) => {
         ElMessage.error('服务异常')
       })
+      code.value = ''
   }
 }
-let date = new Date()
-const codeImg = ref('http://localhost:8080/getCodeImage?r' + date.getTime())
-const changeCode = () => {
-  codeImg.value = 'http://localhost:8080/getCodeImage?r' + new Date().getTime()
-}
+
 </script>
 <style scoped>
 .out {
@@ -228,14 +227,10 @@ input[type='password']::-ms-reveal {
   width: 20px;
   height: 20px;
 }
-img {
+.code {
   position: relative;
   left: 280px;
   top: -45px;
-  width: 100px;
-  height: 40px;
-  background-color: bisque;
-  cursor: pointer;
 }
 .operate {
   display: flex;

@@ -1,7 +1,11 @@
 <template>
   <div class="main">
     <router-view/>
-    <el-backtop/>
+    <el-backtop>
+      <div class="backTop">
+        <img style="width: 100%;" src="../assets/img/icon/arrow.png" alt="">
+      </div>
+    </el-backtop>
   </div>
 </template>
 <script setup>
@@ -49,5 +53,12 @@ router.beforeResolve((to,from,next)=>{
 <style scoped>
 .main {
   overflow-x: hidden;
+}
+.backTop{
+  height: 100%;
+  width: 100%;
+  background-color: #e3c99e;
+  box-shadow: var(--el-box-shadow-lighter);
+  border-radius: 10px
 }
 </style>

@@ -3,17 +3,17 @@
     <Empty :height="30" />
     <div class="basicInfo">
       <div class="avatarOut">
-        <img class="avatar" :src="'/src/assets/avatar/'+userStore.avatar" alt="" width="100%" height="100%"/>
+        <img class="avatar" :src="'/src/assets/avatar/'+avatar" alt="" width="100%" height="100%"/>
       </div>
       <div class="info">
         <div class="exp">
-          <ExpBar :lv="userStore.level" :exp="userStore.exp" :maxExp="userStore.maxExp" />
+          <ExpBar :lv="level" :exp="exp" :maxExp="maxExp" />
         </div>
         <div class="infomation">
           <span
-            >{{ userStore.name }} <span class="user">({{ userStore.user }})</span></span
+            >{{ name }} <span class="user">({{ user }})</span></span
           ><br />
-          <span class="birth">出生日期：{{ userStore.birthday }}</span
+          <span class="birth">出生日期：{{ birthday }}</span
           ><br />
           <span class="gender">性别：{{ gender }}</span>
         </div>
@@ -22,13 +22,12 @@
     <div class="topic">
       <TopicList
         :isNull="topicData == null || topicData.length == 0"
-        :isEdit="true"
         v-loading="loading"
         :loading="loading"
         element-loading-background="#11111100"
         element-loading-text="加载中..."
       >
-        <TopicItem v-for="(item, index) in topicData" :key="index" :item="item" :isEdit="true" />
+        <TopicItem v-for="(item, index) in topicData" :key="index" :item="item" />
       </TopicList>
       <Empty :height="10" />
       <div class="pageOperate">
@@ -49,23 +48,33 @@ import ExpBar from '../../components/ExpBar.vue'
 import Empty from '../../components/FitEmpty.vue'
 import TopicList from '@/components/TopicList.vue'
 import TopicItem from '@/components/TopicItem.vue'
-import { useUserStore } from '@/stores/user'
+import { findUserinfo } from '@/api/user'
 import Book from '@/components/Book.vue'
 import { onMounted, ref } from 'vue'
 import { findAllTopicByUser } from '@/api/topic'
 import { ElMessage } from 'element-plus'
+import { useRoute } from 'vue-router'
 const loading = ref(true)
-const userStore = useUserStore()
 const bookOut = ref()
+const route = useRoute()
+const user = ref('')
+const name = ref('')
+const birthday = ref('')
+const avatar = ref('')
+const level = ref(0)
+const exp = ref(0)
+const maxExp = ref(0)
 const gender = ref('')
-if (userStore.gender == 0) {
-  gender.value = '隐藏'
-} else if (userStore.gender == 1) {
-  gender.value = '男'
-} else if (userStore.gender == 2) {
-  gender.value = '女'
-} else if (userStore.gender == 3) {
-  gender.value = '沃尔玛购物袋'
+const checkGender = (e)=>{
+  if (e == 0) {
+    gender.value = '隐藏'
+  } else if (e == 1) {
+    gender.value = '男'
+  } else if (e == 2) {
+    gender.value = '女'
+  } else if (e == 3) {
+    gender.value = '沃尔玛购物袋'
+  }
 }
 const topicData = ref([])
 const topicTotal = ref(0)
@@ -75,7 +84,7 @@ const changePage = (e) => {
   getTopic()
 }
 const getTopic = async () => {
-  await findAllTopicByUser(page.value, userStore.user)
+  await findAllTopicByUser(page.value, user.value)
     .then((res) => {
       let data = res.data.object
       let num = res.data.num
@@ -89,11 +98,31 @@ const getTopic = async () => {
     })
   bookOut.value.setHeight()
 }
-const clickTopic = (i) => {}
-const clickAuthor = (i) => {}
-const clickEdit = (i) => {}
-const clickDel = (i) => {}
-onMounted(getTopic)
+const getUserInfo = async()=>{
+  await findUserinfo(route.params.user).then(res=>{
+    let msg = res.data.msg
+    if(msg == 'USER_ERROR'){
+      ElMessage.error('用户不存在')
+    }
+    else{
+      let data = res.data.object
+      console.log(data);
+      user.value = data.user
+      name.value = data.name
+      birthday.value = data.birthday
+      avatar.value = data.avatar
+      level.value = data.level
+      exp.value = data.exp
+      maxExp.value = data.maxExp
+      checkGender(data.gender)
+      getTopic()
+    }
+    
+  }).catch(err=>{
+    ElMessage.error('获取用户信息失败')
+  })
+}
+onMounted(getUserInfo)
 </script>
 <style scoped>
 .basicInfo {

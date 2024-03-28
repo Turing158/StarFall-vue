@@ -30,9 +30,9 @@
         </tr>
         <tr>
           <td>验证码:</td>
-          <td>
+          <td style="display: flex">
             <el-input placeholder="请输入验证码" style="width: 140px" v-model="code" />
-            <img class="code" :src="codeImg" alt="" @click="changeCode()" />
+            <Code ref="codeImg" class="code" width="75px" height="30px" margin="0 2px" />
           </td>
         </tr>
       </table>
@@ -52,11 +52,8 @@ import McBtn from '@/components/McBtn.vue'
 import useUserStore from '@/stores/user'
 import { ElMessage, ElNotification } from 'element-plus'
 import { saveInfo } from '@/api/user'
-let date = new Date()
-const codeImg = ref('http://localhost:8080/getCodeImage?r' + date.getTime())
-const changeCode = () => {
-  codeImg.value = 'http://localhost:8080/getCodeImage?r' + new Date().getTime()
-}
+import Code from '@/components/Code.vue'
+const codeImg = ref()
 const options = [
   {
     value: '0',
@@ -119,7 +116,7 @@ const onSaveInfo = async () => {
   } else {
     if(name.value.length <= 10){
       if(code.value.length != 0){
-        changeCode()
+        codeImg.value.changeCode()
         await saveInfo(userStore.user, name.value, checkGenderToValue(gender.value),birthday.value,code.value)
           .then((res) => {
             let msg = res.data.msg
@@ -158,9 +155,7 @@ const reset = () => {
   gender.value = checkGenderToLabel(userStore.gender)
   birthday.value = userStore.birthday
 }
-const test = () => {
-  console.log(birthday.value)
-}
+
 </script>
 <style scoped>
 .setHead {
@@ -184,10 +179,8 @@ const test = () => {
   justify-content: center;
 }
 .code {
-  position: absolute;
-  width: 75px;
-  height: 30px;
-  margin: 0 5px;
-  cursor: pointer;
+  position: relative;
+  margin-top: -30px;
+  margin-left: 70px;
 }
 </style>

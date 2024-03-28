@@ -41,7 +41,7 @@
         <input type="text" class="code_input" name="code" maxlength="4" required v-model="code" />
         <span class="code_span">验证码：</span>
         <div class="code_underline"></div>
-        <img :src="codeImg" alt="VerifyCode" @click="changeCode()" id="img_code" />
+        <Code class="code" ref="codeImg" width="100px" height="40px" margin="0 5px" />
         <div class="operate">
           <router-link to="/login">
             <McBtn text="登录" :margin="25" />
@@ -58,6 +58,7 @@
 import McBtn from '@/components/McBtn.vue'
 import { getEmailCode, register } from '@/api/user'
 import { ElMessage, ElNotification } from 'element-plus'
+import Code from '@/components/Code.vue'
 import { ref } from 'vue'
 import router from '@/router'
 const user = ref('')
@@ -65,6 +66,7 @@ const password = ref('')
 const email = ref('')
 const emailCode = ref('')
 const code = ref('')
+const codeImg = ref()
 const flag = ref(true)
 const second = ref(30)
 const onGetEmailCode = async () => {
@@ -135,19 +137,16 @@ const onReg = async () => {
         }
       }
     )
-    changeCode().catch((err) => {
+    .catch((err) => {
       ElMessage.error('服务异常')
     })
+    codeImg.value.changeCode()
   }
 }
 const upper = (e) => {
   emailCode.value = emailCode.value.toUpperCase()
 }
-let date = new Date()
-const codeImg = ref('http://localhost:8080/getCodeImage?r' + date.getTime())
-const changeCode = () => {
-  codeImg.value = 'http://localhost:8080/getCodeImage?r' + new Date().getTime()
-}
+
 </script>
 <style scoped>
 .out {
@@ -308,5 +307,10 @@ img {
   position: absolute;
   right: 120px;
   margin-top: -35px;
+}
+.code {
+  position: relative;
+  left: 280px;
+  top: -45px;
 }
 </style>
