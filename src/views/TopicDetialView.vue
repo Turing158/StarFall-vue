@@ -4,7 +4,7 @@
     <div class="contentOut">
       <Book ref="bookOut">
         <div v-if="!error">
-          <TopicDetailContent :data="topicInfo" />
+          <TopicDetailContent :data="topicInfo" :id="route.params.id"/>
           <table class="comment">
             <TopicCommentContent
               v-for="(item, index) in comments"

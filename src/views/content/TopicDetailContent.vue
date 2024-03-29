@@ -25,13 +25,16 @@
       <td class="author">
         <div class="authorContent">
           <div class="authorName">
-            
             <span
-              ><a :href="'/personal/other/' + data.user" class="user"><img src="../../assets/img/name_tag.png" alt="">{{ data.name }}</a></span
+              ><a :href="'/personal/other/' + data.user" class="user"
+                ><img src="../../assets/img/name_tag.png" alt="" />{{ data.name }}</a
+              ></span
             >
           </div>
           <div class="authorHead">
-            <a :href="'/personal/other/' + data.user"><img :src="'/src/assets/avatar/' + data.avatar" alt="" /></a>
+            <a :href="'/personal/other/' + data.user"
+              ><img :src="'/src/assets/avatar/' + data.avatar" alt=""
+            /></a>
           </div>
           <div class="authorInf">
             <ExpBar :lv="data.level" :exp="data.exp" :maxExp="data.maxExp" />
@@ -51,22 +54,18 @@
                 </div>
               </div>
               <div>
-                <div class="likeDiv" v-show="isLike == -1">
-                  <a class="like"></a>
-                  <a class="dislike"></a>
-                </div>
-                <div class="likeDiv" v-show="isLike == 0">
-                  <a class="like"></a>
-                  <a class="dislike"></a>
+                <div class="noLike likeDiv" v-show="isLike == 0">
+                  <a class="like" @click="onLike(1)"></a>
+                  <a class="dislike" @click="onLike(2)"></a>
                 </div>
                 <div class="alreadyLike likeDiv" v-show="isLike == 1">
-                  <a class="like"></a>
-                  <span>1000</span>
-                  <a class="dislike"></a>
+                  <a class="like" @click="onLike(1)"></a>
+                  <span>{{likeNum}}</span>
+                  <a class="dislike" @click="onLike(2)"></a>
                 </div>
                 <div class="alreadyDislike likeDiv" v-show="isLike == 2">
-                  <a class="like"></a>
-                  <a class="dislike"></a>
+                  <a class="like" @click="onLike(1)"></a>
+                  <a class="dislike" @click="onLike(2)"></a>
                 </div>
               </div>
             </td>
@@ -131,6 +130,7 @@
 import { onMounted, ref } from 'vue'
 import ExpBar from '@/components/ExpBar.vue'
 const props = defineProps({
+  id: Number,
   data: {
     type: Object,
     require: false,
@@ -159,9 +159,8 @@ const props = defineProps({
   }
 })
 const data = ref(props.data)
-const isLike = ref(0)
 import ClipboardJS from 'clipboard'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElNotification } from 'element-plus'
 const copyText = () => {
   const clipboard = new ClipboardJS('.copyHref', {
     text() {
@@ -176,13 +175,90 @@ const copyText = () => {
   })
 }
 import { marked } from 'marked'
+import useUserStore from '@/stores/user'
+import { LikeOrDislike, getLike } from '@/api/topic'
 const content = ref('')
 const toMd = () => {
-  if(data.value.content == null) return
+  if (data.value.content == null) return
   content.value = marked(data.value.content)
 }
 toMd()
 onMounted(copyText)
+const userStore = useUserStore()
+const isLike = ref(0)
+const likeNum = ref(0)
+const initLike = async () => {
+  if (userStore.isLogin) {
+    console.log(props.id)
+    await getLike(props.id, userStore.user)
+      .then((res) => {
+        console.log(res)
+        let msg = res.data.msg
+        if (msg == 'IS_LIKE') {
+          isLike.value = 1
+          likeNum.value = res.data.num
+        } else if (msg == 'IS_DISLIKE') {
+          isLike.value = 2
+        } else {
+          isLike.value = 0
+        }
+      })
+      .catch((err) => {
+        ElMessage.error('获取点赞信息失败')
+      })
+  } else {
+    isLike.value = 0
+  }
+}
+initLike()
+const onLike = async (op) => {
+  if (userStore.isLogin) {
+    await LikeOrDislike(props.id, userStore.user, op)
+      .then((res) => {
+        let msg = res.data.msg
+        let num = res.data.num
+        console.log(res)
+        if (msg == 'ALREADY_LIKE') {
+          isLike.value = 0
+          ElNotification({
+              title: '你撤回评价了',
+              message: props.data.title,
+              type: 'warning',
+              duration: 2000
+            })
+        } else {
+          if (op == 1) {
+            isLike.value = 1
+            likeNum.value = num
+            ElNotification({
+              title: '你点赞了',
+              message: props.data.title,
+              type: 'success',
+              duration: 2000
+            })
+          } else {
+            isLike.value = 2
+            ElNotification({
+              title: '你踩了踩',
+              message: props.data.title,
+              type: 'warning',
+              duration: 2000
+            })
+          }
+        }
+      })
+      .catch((err) => {
+        ElMessage.error('点赞失败，服务异常')
+      })
+  } else {
+    ElNotification({
+      title: '提示',
+      message: '请先登录',
+      type: 'error'
+    })
+  }
+}
+const onCancelLike = async () => {}
 </script>
 <style scoped>
 .bookCenter {
@@ -434,6 +510,10 @@ onMounted(copyText)
 }
 .like:active {
   background-image: url(@/assets/img/icon/like2.png);
+}
+.noLike {
+  position: relative;
+  top: -2px;
 }
 .dislike {
   top: 5px;

@@ -44,7 +44,7 @@ import Code from '@/components/Code.vue'
 import useUserStore from '@/stores/user'
 const userStore = useUserStore()
 const content = ref('')
-const code = ref()
+const code = ref('')
 </script>
 <style scoped>
 .editComment {
