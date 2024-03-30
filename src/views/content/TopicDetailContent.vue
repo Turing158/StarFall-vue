@@ -189,10 +189,8 @@ const isLike = ref(0)
 const likeNum = ref(0)
 const initLike = async () => {
   if (userStore.isLogin) {
-    console.log(props.id)
     await getLike(props.id, userStore.user)
       .then((res) => {
-        console.log(res)
         let msg = res.data.msg
         if (msg == 'IS_LIKE') {
           isLike.value = 1
@@ -217,7 +215,6 @@ const onLike = async (op) => {
       .then((res) => {
         let msg = res.data.msg
         let num = res.data.num
-        console.log(res)
         if (msg == 'ALREADY_LIKE') {
           isLike.value = 0
           ElNotification({
@@ -258,7 +255,7 @@ const onLike = async (op) => {
     })
   }
 }
-const onCancelLike = async () => {}
+
 </script>
 <style scoped>
 .bookCenter {

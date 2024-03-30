@@ -27,9 +27,9 @@
       <template v-slot:bottom>
         <div class="bottom">
             <div class="operate">
-                <el-input style="width: 80px;" placeholder="验证码" maxlength="4"/>
-                <Code ref="code" width="75px" height="30px" margin="0 5px"/>
-                <McBtn text="发 话" :margin="10"/>
+                <el-input style="width: 80px;" placeholder="验证码" maxlength="4" v-model="code"/>
+                <Code ref="codeImg" width="75px" height="30px" margin="0 5px"/>
+                <slot></slot>
             </div>
         </div>
       </template>
@@ -39,12 +39,15 @@
 <script setup>
 import { ref } from 'vue'
 import UserContentModel from '@/components/UserContentModel.vue'
-import McBtn from '@/components/McBtn.vue'
+
 import Code from '@/components/Code.vue'
 import useUserStore from '@/stores/user'
+
 const userStore = useUserStore()
 const content = ref('')
 const code = ref('')
+const codeImg = ref()
+defineExpose({ content, code, codeImg })
 </script>
 <style scoped>
 .editComment {

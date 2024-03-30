@@ -52,3 +52,5 @@ export const settingPassword = (user,oldPassword,newPassword,code)=>{
     param.append('code',code)
     return request.post('/updatePassword',param)
 }
+
+

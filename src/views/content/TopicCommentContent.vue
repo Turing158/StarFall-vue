@@ -1,5 +1,5 @@
 <template>
-  <UserContentModel :data="data">
+  <UserContentModel :data="props.data">
     <template v-slot:top>
       <div class="top">
         <div class="date">
@@ -10,7 +10,7 @@
           <a href="" v-show="props.index == 1 && page == 1"># 板凳</a>
           <a href="" v-show="props.index == 2 && page == 1"># 地板</a>
           <a href="" v-show="props.index >= 3 && page == 1"># {{ props.index + 1 }}</a>
-          <a href="" v-show="page != 1"># {{ (props.index + 1) + (page - 1) * 10 }}</a>
+          <a href="" v-show="page != 1"># {{ props.index + 1 + (page - 1) * 10 }}</a>
         </div>
       </div>
     </template>
@@ -20,7 +20,11 @@
       </div>
     </template>
     <template v-slot:bottom>
-      <div class="bottom"></div>
+      <div class="bottom">
+        <span class="del" v-show="isMe">
+          <slot></slot>
+        </span>
+      </div>
     </template>
   </UserContentModel>
 </template>
@@ -30,15 +34,20 @@ import { ref } from 'vue'
 const props = defineProps({
   index: Number,
   data: Object,
-  page: Number
+  page: Number,
+  isMe: Boolean
 })
 import { marked } from 'marked'
 const content = ref('')
 const toMd = () => {
+  console.log(props.data);
   if (props.data.content == null) return
   content.value = marked(props.data.content)
 }
 toMd()
+defineExpose({
+  toMd
+})
 </script>
 <style scoped>
 .comment {
@@ -79,5 +88,19 @@ toMd()
 }
 .bottom {
   height: 48px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: end;
+}
+.del {
+  position: relative;
+  cursor: pointer;
+  color: #131313;
+  margin-right: 10px;
+  font-size: 13px;
+  top: -5px;
+}
+.del:hover {
+  text-decoration: underline;
 }
 </style>

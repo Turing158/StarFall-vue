@@ -2,7 +2,7 @@
   <div>
     <Book ref="bookOut">
       <div class="opearte">
-        <McBtn text="发 布" @click="appendTopic()" />
+        <div @click="appendTopic()"><McBtn text="发 布"/></div>
       </div>
       <Empty :height="10" />
       <div class="ad">
@@ -71,11 +71,15 @@ import TopicItem from '../../components/TopicItem.vue'
 import { findAllTopic, findTopicVersion } from '@/api/topic'
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const loading = ref(true)
 const bookOut = ref()
 const topicData = ref([])
 const topicTotal = ref(0)
-const appendTopic = () => {}
+const appendTopic = () => {
+  router.push('/topic/editTopic')
+}
 const page = ref(1)
 const changePage = (e) => {
   page.value = e

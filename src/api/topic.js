@@ -52,3 +52,15 @@ export const appendComment = (id, user, content, code) => {
   param.append('code', code)
   return request.post('/appendComment', param)
 }
+
+
+export const deleteComment = (id,user,date) => {
+  let param = new URLSearchParams()
+  param.append('id', id)
+  param.append('user', user)
+  param.append('date', date)
+  return request.post('/deleteComment', param)
+}
+
+
+export const appendTopic = (data)=>request.post('/appendTopic',data)

@@ -4,38 +4,46 @@
     <div class="contentOut">
       <Book ref="bookOut">
         <div v-if="!error">
-          <TopicDetailContent :data="topicInfo" :id="route.params.id"/>
+          <TopicDetailContent :data="topicInfo" :id="route.params.id" />
           <table class="comment">
             <TopicCommentContent
+              ref="commentContent"
               v-for="(item, index) in comments"
               :key="index"
               :index="index"
               :data="item"
               :page="page"
-            />
+              :isMe="item.user == userStore.user"
+              ><span @click="delComment(index,item.date)">删除</span></TopicCommentContent
+            >
             <tr v-show="comments.length == 0">
-              <td class="inCommentLeft">
-              </td>
+              <td class="inCommentLeft"></td>
               <td>
-                <div class="error inComment"><div>暂时没有评论，快来睿评一下</div><div v-if="!userStore.isLogin" @click="router.push('/login')">未登录，点此登录</div></div>
-                
+                <div class="error inComment">
+                  <div>暂时没有评论，快来睿评一下</div>
+                  <div v-if="!userStore.isLogin" @click="router.push('/login')">
+                    未登录，点此登录
+                  </div>
+                </div>
               </td>
             </tr>
           </table>
           <div class="operate" v-show="comments.length != 0">
             <div class="operateLeft"></div>
-              <div class="operateRight">
-                <el-pagination
+            <div class="operateRight">
+              <el-pagination
                 background
                 layout="prev, pager, next"
                 :total="commentsCount"
                 :page-size="10"
                 style="margin-top: 20px"
                 @current-change="changePage"
-                ></el-pagination>
-              </div>
+              ></el-pagination>
             </div>
-          <EditComment v-if="userStore.isLogin"/>
+          </div>
+          <EditComment v-if="userStore.isLogin" ref="editComment">
+            <McBtn text="发 话" :margin="10" @click="onComment()" />
+          </EditComment>
         </div>
         <div class="error" v-if="error">
           <div>此主题不存在或已被删除-><span @click="router.back()">点此返回</span></div>
@@ -50,12 +58,12 @@ import Book from '../components/Book.vue'
 import TopicDetailContent from './content/TopicDetailContent.vue'
 import TopicCommentContent from './content/TopicCommentContent.vue'
 import EditComment from '../components/EditComment.vue'
-import Empty from '../components/FitEmpty.vue'
 import useUserStore from '@/stores/user'
+import McBtn from '@/components/McBtn.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { onMounted, ref } from 'vue'
-import { findCommentByTopic, getTopicInfo } from '@/api/topic'
-import { ElMessage } from 'element-plus'
+import { onMounted, ref, markRaw } from 'vue'
+import { findCommentByTopic, getTopicInfo, appendComment, deleteComment } from '@/api/topic'
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter()
@@ -91,7 +99,7 @@ const getComment = async () => {
   await findCommentByTopic(route.params.id, page.value)
     .then((res) => {
       let msg = res.data.msg
-      if (msg == 'SUCCESS'){
+      if (msg == 'SUCCESS') {
         comments.value = res.data.object
         commentsCount.value = res.data.num
       } else {
@@ -104,6 +112,67 @@ const getComment = async () => {
   bookOut.value.setHeight()
 }
 onMounted(init)
+const editComment = ref()
+const commentContent = ref()
+const onComment = async () => {
+  if (editComment.value.code.length == 0) {
+    ElMessage.error('请输入验证码')
+  } else if (editComment.value.content.length < 10) {
+    ElMessage.error('评论内容不能少于10个字符')
+  } else {
+    await appendComment(
+      route.params.id,
+      userStore.user,
+      editComment.value.content,
+      editComment.value.code
+    )
+      .then((res) => {
+        let msg = res.data.msg
+        if (msg == 'CODE_ERROR') {
+          ElMessage.error('验证码错误')
+        } else {
+          ElNotification({
+            title: '评论成功!',
+            message: editComment.value.content.substr(0, 10) + '...',
+            type: 'success'
+          })
+          editComment.value.content = ''
+          editComment.value.code = ''
+          page.value = ((res.data.num + 9) / 10).toString().split('.')[0]
+          getComment()
+        }
+      })
+      .catch((err) => {
+        ElMessage.error('服务异常')
+      })
+    editComment.value.codeImg.changeCode()
+  }
+}
+
+const delComment = (i,date) => {
+  ElMessageBox.confirm('确定删除此评论吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    await deleteComment(route.params.id, userStore.user, date).then((res) => {
+      let msg = res.data.msg
+      if (msg == 'SUCCESS') {
+        ElNotification({
+          title: '删除成功!',
+          message: '评论已删除',
+          type: 'success'
+        })
+        router.go(0)
+      }
+    }).catch(() => {
+      ElMessage.error('服务异常')
+    })
+  })
+  .catch(() => {
+    ElMessage.info('已取消删除')
+  })
+}
 </script>
 <style scoped>
 .ul {
@@ -135,7 +204,7 @@ onMounted(init)
   width: 100%;
   border-collapse: collapse;
 }
-.inCommentLeft{
+.inCommentLeft {
   width: 180px;
   background-color: #e3c99e;
 }
@@ -147,7 +216,7 @@ onMounted(init)
   display: flex;
   flex-direction: column;
 }
-.inComment div:nth-child(2){
+.inComment div:nth-child(2) {
   font-size: 14px;
   cursor: pointer;
 }
@@ -160,12 +229,12 @@ onMounted(init)
   display: flex;
   height: 80px;
 }
-.operateLeft{
-  width:180px;
+.operateLeft {
+  width: 180px;
   background-color: #e3c99e;
   border-right: 1px solid #cfb78e;
 }
-.operateRight{
+.operateRight {
   width: calc(100% - 180px);
   display: flex;
   justify-content: right;
