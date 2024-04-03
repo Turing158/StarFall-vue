@@ -189,7 +189,7 @@ const isLike = ref(0)
 const likeNum = ref(0)
 const initLike = async () => {
   if (userStore.isLogin) {
-    await getLike(props.id, userStore.user)
+    await getLike(props.id)
       .then((res) => {
         let msg = res.data.msg
         if (msg == 'IS_LIKE') {
@@ -211,7 +211,7 @@ const initLike = async () => {
 initLike()
 const onLike = async (op) => {
   if (userStore.isLogin) {
-    await LikeOrDislike(props.id, userStore.user, op)
+    await LikeOrDislike(props.id, op)
       .then((res) => {
         let msg = res.data.msg
         let num = res.data.num

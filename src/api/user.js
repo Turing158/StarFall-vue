@@ -1,5 +1,6 @@
 import request from '@/util/request'
-
+import { useUserStore } from '@/stores/user'
+const userStore = useUserStore()
 export const login = (account,password,code)=>{
     let param = new URLSearchParams()
     param.append('account',account)
@@ -8,6 +9,7 @@ export const login = (account,password,code)=>{
     return request.post('/login',param)
 }
 
+export const getUserInfo = ()=>request.post('/getUserInfo')
 
 export const getEmailCode = (email)=>{
     let param = new URLSearchParams()
@@ -33,9 +35,8 @@ export const findUserinfo = (user)=>{
 }
 
 
-export const saveInfo = (user,name,gender,birthday,code)=>{
+export const saveInfo = (name,gender,birthday,code)=>{
     let param = new URLSearchParams()
-    param.append('user',user)
     param.append('name',name)
     param.append('gender',gender)
     param.append('birthday',birthday)
@@ -44,9 +45,8 @@ export const saveInfo = (user,name,gender,birthday,code)=>{
 }
 
 
-export const settingPassword = (user,oldPassword,newPassword,code)=>{
+export const settingPassword = (oldPassword,newPassword,code)=>{
     let param = new URLSearchParams()
-    param.append('user',user)
     param.append('oldPassword',oldPassword)
     param.append('newPassword',newPassword)
     param.append('code',code)

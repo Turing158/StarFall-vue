@@ -19,7 +19,7 @@
     </td>
     <td style="width: 40px">
       <div class="avatar">
-        <img class="img" :src="'/src/assets/avatar/'+props.item.avatar" alt="" />
+        <img class="img" :src="'/src/assets/avatar/' + props.item.avatar" alt="" />
       </div>
     </td>
     <td v-show="isEdit" class="operate" style="width: 130px">
@@ -45,12 +45,14 @@ const props = defineProps({
 
 const router = useRouter()
 const onClickTitle = (id) => {
-  router.push('/topic/detail/'+id)
+  router.push('/topic/detail/' + id)
 }
 const onClickUser = () => {
-  router.push('/personal/other/'+props.item.user)
+  router.push('/personal/other/' + props.item.user)
 }
-const onEdit = () => {}
+const onEdit = (id) => {
+  router.push('/topic/editTopic/' + id)
+}
 const onDel = () => {}
 </script>
 <style scoped>

@@ -14,7 +14,7 @@
               :data="item"
               :page="page"
               :isMe="item.user == userStore.user"
-              ><span @click="delComment(index,item.date)">删除</span></TopicCommentContent
+              ><span @click="delComment(index, item.date)">删除</span></TopicCommentContent
             >
             <tr v-show="comments.length == 0">
               <td class="inCommentLeft"></td>
@@ -37,6 +37,7 @@
                 :total="commentsCount"
                 :page-size="10"
                 style="margin-top: 20px"
+                :current-page="page"
                 @current-change="changePage"
               ></el-pagination>
             </div>
@@ -94,6 +95,7 @@ const page = ref(1)
 const changePage = (e) => {
   page.value = e
   getComment()
+
 }
 const getComment = async () => {
   await findCommentByTopic(route.params.id, page.value)
@@ -120,12 +122,7 @@ const onComment = async () => {
   } else if (editComment.value.content.length < 10) {
     ElMessage.error('评论内容不能少于10个字符')
   } else {
-    await appendComment(
-      route.params.id,
-      userStore.user,
-      editComment.value.content,
-      editComment.value.code
-    )
+    await appendComment(route.params.id, editComment.value.content, editComment.value.code)
       .then((res) => {
         let msg = res.data.msg
         if (msg == 'CODE_ERROR') {
@@ -138,8 +135,8 @@ const onComment = async () => {
           })
           editComment.value.content = ''
           editComment.value.code = ''
-          page.value = ((res.data.num + 9) / 10).toString().split('.')[0]
-          getComment()
+          changePage(((res.data.num + 9) / 10).toString().split('.')[0]) 
+
         }
       })
       .catch((err) => {
@@ -149,29 +146,32 @@ const onComment = async () => {
   }
 }
 
-const delComment = (i,date) => {
+const delComment = (i, date) => {
   ElMessageBox.confirm('确定删除此评论吗？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(async () => {
-    await deleteComment(route.params.id, userStore.user, date).then((res) => {
-      let msg = res.data.msg
-      if (msg == 'SUCCESS') {
-        ElNotification({
-          title: '删除成功!',
-          message: '评论已删除',
-          type: 'success'
+  })
+    .then(async () => {
+      await deleteComment(route.params.id, date)
+        .then((res) => {
+          let msg = res.data.msg
+          if (msg == 'SUCCESS') {
+            ElNotification({
+              title: '删除成功!',
+              message: '评论已删除',
+              type: 'success'
+            })
+            router.go(0)
+          }
         })
-        router.go(0)
-      }
-    }).catch(() => {
-      ElMessage.error('服务异常')
+        .catch(() => {
+          ElMessage.error('服务异常')
+        })
     })
-  })
-  .catch(() => {
-    ElMessage.info('已取消删除')
-  })
+    .catch(() => {
+      ElMessage.info('已取消删除')
+    })
 }
 </script>
 <style scoped>

@@ -116,14 +116,19 @@ const onSaveInfo = async () => {
   } else {
     if(name.value.length <= 10){
       if(code.value.length != 0){
-        codeImg.value.changeCode()
-        await saveInfo(userStore.user, name.value, checkGenderToValue(gender.value),birthday.value,code.value)
+        await saveInfo(name.value, checkGenderToValue(gender.value),birthday.value,code.value)
           .then((res) => {
             let msg = res.data.msg
-            let data = res.data.object
+            
             if (msg == 'CODE_ERROR') {
               ElMessage.error('验证码错误')
-            } else {
+            } 
+            else if(msg == 'DATASOURCE_ERROR'){
+              ElMessage.error('服务器数据库异常')
+            }
+            else {
+              let data = res.data.object
+              console.log(res);
               userStore.setUserObject(data.user,data.name,data.level,data.exp,data.maxExp,data.gender,data.birthday,data.avatar,data.email)
               name.value = data.name,
               gender.value = checkGenderToLabel(data.gender)
@@ -139,6 +144,7 @@ const onSaveInfo = async () => {
             ElMessage.error('服务异常')
           })
           code.value = ''
+          codeImg.value.changeCode()
       }
       else{
       ElMessage.error('验证码不能为空')

@@ -4,17 +4,17 @@
       class="input"
       type="text"
       ref="onInput"
-      v-model="text"
+      v-model="props.modelValue"
       :placeholder="placeholder"
       @input="onChange()"
       :style="{ width: inputWidth + 'px', fontSize: fontSize + 'px'}"
     />
-    <div class="text" ref="onText">{{ text }}</div>
+    <div class="text" ref="onText">{{ props.modelValue }}</div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 const props = defineProps({
     modelValue: {
         type: String,
@@ -34,24 +34,26 @@ const props = defineProps({
     }
 })
 const emit = defineEmits(['update:modelValue'])
-const text = ref(props.modelValue)
 const onInput = ref()
 const onText = ref()
 const inputWidth = ref(props.width)
-const onFocus = () => {
-  onInput.value.focus()
-}
+
 const onChange = () => {
-  if (text.value == ' ') {
-    text.value = ''
+  if (props.modelValue == ' ') {
+    props.modelValue = ''
   }
-  if (text.value.length == 0) {
+  if (props.modelValue.length == 0) {
     inputWidth.value = props.width
   } else {
     inputWidth.value = onText.value.clientWidth + 5
   }
-  emit('update:modelValue', text.value)
+  emit('update:modelValue', props.modelValue)
 }
+const onFocus = () => {
+  onChange()
+  onInput.value.focus()
+}
+onMounted(onChange)
 </script>
 <style scoped>
 .input {

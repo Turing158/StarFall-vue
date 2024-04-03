@@ -130,7 +130,7 @@
               </tr>
               <tr>
                 <td style="border: 0; background-color: initial">
-                  <Empty height="50" />
+                  <Empty :height="50" />
                   <div class="contentInput">
                     <el-input
                       type="textarea"
@@ -142,15 +142,15 @@
                     />
                   </div>
                   <!-- <div class="contentMd" id="contentMd" v-highlight v-html="content"></div> -->
-                  <Empty height="10" />
+                  <Empty :height="10" />
                   <div class="operate">
                     <el-input
                       v-model="code"
                       placeholder="验证码"
-                      style="width: 80px;"
+                      style="width: 80px"
                       maxlength="4"
-                      />
-                    <Code ref="codeImg" width="75px" height="30px" margin="0 5px"/>
+                    />
+                    <Code ref="codeImg" width="75px" height="30px" margin="0 5px" />
                     <div @click="onConfirm()">
                       <McBtn text="发布" />
                     </div>
@@ -165,7 +165,7 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import ExpBar from '@/components/ExpBar.vue'
 import Ul from '@/components/UlBar.vue'
 import Book from '@/components/Book.vue'
@@ -176,18 +176,22 @@ import Empty from '@/components/FitEmpty.vue'
 import { ElMessage, ElNotification } from 'element-plus'
 import { marked } from 'marked'
 import useUserStore from '@/stores/user'
-import {} from '@/api/topic'
+import { hasPromiseToEdit, isPromiseToEdit } from '@/api/topic'
 import { appendTopic } from '@/api/topic'
+import { useRoute, useRouter } from 'vue-router'
 const labels = ['服务端', '客户端', '模组', '插件', '材质包', '视频']
 const label = ref()
-
+const route = useRoute()
+const router = useRouter()
 const toMd = () => {
+  
   //   if (data.value.content == null) return
   //   content.value = marked(data.value.content)
 }
 toMd()
+const bookOut = ref()
 const codeImg = ref()
-const code = ref()
+const code = ref('')
 const title = ref('')
 const subtitle = ref('')
 const subtitleEn = ref('')
@@ -200,7 +204,84 @@ const download = ref('')
 const content = ref('')
 const userStore = useUserStore()
 const onChange = () => {}
-const onConfirm = async()=>{
+const init = async () => {
+  if (route.params.id) {
+    await isPromiseToEdit(route.params.id)
+      .then(async(res) => {
+        let msg = res.data.msg
+        if (msg == 'SUCCESS') {
+          await hasPromiseToEdit(route.params.id).then(res=>{
+            let msg = res.data.msg
+            if(msg == 'SUCCESS'){
+              let data = res.data.object
+              title.value = data.title
+              label.value = data.label
+              subtitle.value = data.topicTitle
+              subtitleEn.value = data.enTitle
+              source.value = data.source
+              version.value = data.version
+              author.value = data.author
+              language.value = data.language
+              address.value = data.address
+              download.value = data.download
+              content.value = data.content
+              
+            }
+            else{
+              errorPromise()
+            }
+            
+          }).catch(err=>{
+            ElMessage.error("服务异常")
+          })
+        } else {
+          errorPromise()
+        }
+      })
+      .catch((err) => {
+        ElMessage.error('服务异常')
+      })
+  }
+  bookOut.value.setHeight()
+}
+const errorPromise = ()=>{
+  ElNotification({
+    title: '访问拒绝',
+    message: '不允许编辑该主题帖',
+    type: 'error'
+  })
+  router.push('/topic')
+}
+const append = async (data) => {
+  await appendTopic(data)
+    .then((res) => {
+      let msg = res.data.msg
+      if (msg == 'LEVEL_ERROR') {
+        ElNotification({
+          title: '等级不足',
+          message: '虽然不知道你为什么可以这样操作，但是你的等级不足',
+          type: 'error'
+        })
+      } else if (msg == 'CODE_ERROR') {
+        ElMessage.error('验证码错误')
+      } else {
+        let num = res.data.num
+        ElNotification({
+          title: '发布成功',
+          message: '成功发布'+title.value,
+          type: 'success'
+        })
+        router.push('/topic/detail/' + num)
+      }
+    })
+    .catch((err) => {
+      ElMessage.error('服务异常，发布失败')
+    })
+}
+const edit = async (data) => {
+  
+}
+const onConfirm = async () => {
   if (title.value.length < 6) {
     ElNotification({
       title: '标题过短',
@@ -208,72 +289,63 @@ const onConfirm = async()=>{
       type: 'warning',
       duration: 2000
     })
-  }
-  else if (subtitle.value.length < 4) {
+  } else if (subtitle.value.length < 4) {
     ElNotification({
       title: '作品名过短',
       message: '作品名长度不得少于4个字符',
       type: 'warning',
       duration: 2000
     })
-  }
-  else if (subtitleEn.value.length < 4) {
+  } else if (subtitleEn.value.length < 4) {
     ElNotification({
       title: '英文名过短',
       message: '英文名长度不得少于4个字符',
       type: 'warning',
       duration: 2000
     })
-  }
-  else if (source.value.length == 0) {
+  } else if (source.value.length == 0) {
     ElNotification({
       title: '来源为空',
       message: '来源必须选择 原创 或 转载',
       type: 'warning',
       duration: 2000
     })
-  }
-  else if (version.value.length == 0) {
+  } else if (version.value.length == 0) {
     ElNotification({
       title: '版本为空',
       message: '版本不能为空，请输入适用版本',
       type: 'warning',
       duration: 2000
     })
-  }
-  else if (author.value.length == 0) {
+  } else if (author.value.length == 0) {
     ElNotification({
       title: '作者为空',
       message: '原创输入自己的用户名称，转载输入原作者名称',
       type: 'warning',
       duration: 2000
     })
-  }
-  else if (language.value.length == 0) {
+  } else if (language.value.length == 0) {
     ElNotification({
       title: '语言为空',
       message: '请选择该资源所适配的语言',
       type: 'warning',
       duration: 2000
     })
-  }
-  else if (content.value.length < 10) {
+  } else if (content.value.length < 10) {
     ElNotification({
       title: '内容过短',
       message: '内容长度不得少于10个字符',
       type: 'warning',
       duration: 2000
     })
-  }
-  else if (code.value.length == 0) {
+  } else if (code.value.length == 0) {
     ElNotification({
       title: '验证码为空',
       message: '请输入验证码输入框左边图片的字母或数字',
       type: 'warning',
       duration: 2000
     })
-  }
-  else {
+  } else {
     let data = {
       title: title.value,
       label: label.value,
@@ -286,16 +358,16 @@ const onConfirm = async()=>{
       address: address.value,
       download: download.value,
       content: content.value,
-      user: userStore.user,
       code: code.value
     }
-    await appendTopic(data).then(res=>{
-      console.log(res);
-    }).catch(err=>{
-      ElMessage.error('服务异常，发布失败')
-    })
+    if (route.params.id) {
+      edit(data)
+    } else {
+      append(data)
+    }
   }
 }
+onMounted(init)
 </script>
 <style scoped>
 .ul {

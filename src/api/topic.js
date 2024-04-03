@@ -30,37 +30,47 @@ export const findCommentByTopic = (id, page) => {
   return request.post('/findCommentByTopic', param)
 }
 
-export const getLike = (id, user) => {
+export const getLike = (id) => {
   let param = new URLSearchParams()
   param.append('id', id)
-  param.append('user', user)
   return request.post('/getLike', param)
 }
-export const LikeOrDislike = (id, user, like) => {
+export const LikeOrDislike = (id, like) => {
   let param = new URLSearchParams()
   param.append('id', id)
-  param.append('user', user)
   param.append('like', like)
   return request.post('/like', param)
 }
 
-export const appendComment = (id, user, content, code) => {
+export const appendComment = (id, content, code) => {
   let param = new URLSearchParams()
   param.append('id', id)
-  param.append('user', user)
   param.append('content', content)
   param.append('code', code)
   return request.post('/appendComment', param)
 }
 
 
-export const deleteComment = (id,user,date) => {
+export const deleteComment = (id,date) => {
   let param = new URLSearchParams()
   param.append('id', id)
-  param.append('user', user)
   param.append('date', date)
   return request.post('/deleteComment', param)
 }
 
 
 export const appendTopic = (data)=>request.post('/appendTopic',data)
+
+
+export const isPromiseToEdit = (id)=>{
+  let param = new URLSearchParams()
+  param.append('id',id)
+  return request.post('/isPromiseToEdit',param)
+}
+
+
+export const hasPromiseToEdit = (id)=>{
+  let param = new URLSearchParams()
+  param.append('id',id)
+  return request.post('/hasToPromiseToEdit',param)
+}

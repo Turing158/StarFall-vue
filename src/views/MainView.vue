@@ -38,6 +38,20 @@ router.beforeResolve((to,from,next)=>{
   else{
     next()
   }
+  if(to.path == '/topic/editTopic'){
+    if(userStroe.level < 5){
+      router.push('/topic')
+      ElNotification({
+        title:'等级不足',
+        message:'等级不足，无法访问此页面',
+        type:'warning'
+      })
+      
+    }
+    else{
+      next()
+    }
+  }
   if(to.path == '/login' || to.path == '/reg'){
     if(userStroe.isLogin){
       ElNotification({

@@ -40,7 +40,7 @@ const router = createRouter({
       component: TopicDetailView
     },
     {
-      path: '/topic/editTopic',
+      path: '/topic/editTopic/:id?',
       name: 'EditTopicView',
       component: EditTopicView
     },

@@ -41,7 +41,7 @@
 import McBtn from '@/components/McBtn.vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { login } from '@/api/user'
+import { getUserInfo, login } from '@/api/user'
 import { ElMessage,ElNotification } from 'element-plus'
 import Code from '@/components/Code.vue'
 import useUserStore from '@/stores/user'
@@ -60,7 +60,7 @@ const confirm = async () => {
     ElMessage.error('验证码不能为空')
   } else {
     await login(account.value, password.value, code.value)
-      .then((res) => {
+      .then(async(res) => {
         let msg = res.data.msg
         if (msg == 'USER_PASSWORD') {
           ElMessage.error('用户名错误或不存在')
@@ -71,25 +71,30 @@ const confirm = async () => {
         } else if (msg == 'CODE_ERROR') {
           ElMessage.error('验证码错误')
         } else {
-          ElNotification({
-              title: '登录成功',
-              message:'已前往主页，愉快的进行探索吧！',
-              type:'success'
+            console.log(res.data.object);
+            userStore.setToken(res.data.object)
+            await getUserInfo().then(res=>{
+              console.log(res.data.object);
+              let data = res.data.object
+              userStore.setUserObject(
+                data.user,
+                data.name,
+                data.level,
+                data.exp,
+                data.maxExp,
+                data.gender,
+                data.birthday,
+                data.avatar,
+                data.email
+              )
+              userStore.setLogin(true)
+              router.push('/')
+              ElNotification({
+                title: '登录成功',
+                message:'已前往主页，愉快的进行探索吧！',
+                type:'success'
+              })
             })
-          let data = res.data.object
-          userStore.setUserObject(
-            data.user,
-            data.name,
-            data.level,
-            data.exp,
-            data.maxExp,
-            data.gender,
-            data.birthday,
-            data.avatar,
-            data.email
-          )
-          userStore.setLogin(true)
-          router.push('/')
         }
         codeImg.value.changeCode()
       })

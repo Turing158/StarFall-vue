@@ -78,7 +78,7 @@ const confirm = async () => {
   } else if (newPassword.value != againPassword.value) {
     ElMessage.error('新密码与再次输入的密码不同')
   } else {
-    await settingPassword(userStroe.user, oldPassword.value, newPassword.value, code.value)
+    await settingPassword(oldPassword.value, newPassword.value, code.value)
       .then((res) => {
         let msg = res.data.msg
         if (msg == 'CODE_ERROR') {

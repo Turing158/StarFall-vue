@@ -16,7 +16,7 @@
     </template>
     <template v-slot:content>
       <div class="content">
-        <div v-html="content"></div>
+        <div v-html="toMd()"></div>
       </div>
     </template>
     <template v-slot:bottom>
@@ -30,7 +30,6 @@
 </template>
 <script setup>
 import UserContentModel from '@/components/UserContentModel.vue'
-import { ref } from 'vue'
 const props = defineProps({
   index: Number,
   data: Object,
@@ -38,11 +37,9 @@ const props = defineProps({
   isMe: Boolean
 })
 import { marked } from 'marked'
-const content = ref('')
 const toMd = () => {
-  console.log(props.data);
   if (props.data.content == null) return
-  content.value = marked(props.data.content)
+  return marked(props.data.content)
 }
 toMd()
 defineExpose({
