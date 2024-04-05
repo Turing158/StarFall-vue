@@ -130,7 +130,7 @@
 import { onMounted, ref } from 'vue'
 import ExpBar from '@/components/ExpBar.vue'
 const props = defineProps({
-  id: Number,
+  id: String,
   data: {
     type: Object,
     require: false,

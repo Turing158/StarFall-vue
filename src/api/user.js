@@ -53,4 +53,4 @@ export const settingPassword = (oldPassword,newPassword,code)=>{
     return request.post('/updatePassword',param)
 }
 
-
+export const exit = ()=>request.post('/exit')

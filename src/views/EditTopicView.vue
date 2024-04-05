@@ -19,7 +19,7 @@
                   :value="item"
                 ></el-option> </el-select
               >]
-              <TextInput v-model="title" placeholder="请输入主题标题" :fontSize="20" :width="200" />
+              <TextInput v-model="title" placeholder="请输入主题标题" :fontSize="20" :width="200" :key="new Date().getTime()"/>
             </h1>
           </th>
         </table>
@@ -73,7 +73,7 @@
                     <tr>
                       <th>作品名称：</th>
                       <td>
-                        <TextInput v-model="subtitle" placeholder="请输入作品名称" />
+                        <TextInput v-model="subtitle" placeholder="请输入作品名称" :key="new Date().getTime()"/>
                       </td>
                     </tr>
                     <tr>
@@ -83,13 +83,14 @@
                           v-model="subtitleEn"
                           placeholder="请输入作品英文名称"
                           :width="120"
+                          :key="new Date().getTime()"
                         />
                       </td>
                     </tr>
                     <tr>
                       <th>来源 source：</th>
                       <td>
-                        <el-select style="width: 80px" size="small" v-model="source">
+                        <el-select style="width: 80px" size="small" v-model="source" :key="new Date().getTime()">
                           <el-option label="原创" value="原创"></el-option>
                           <el-option label="转载" value="转载"></el-option>
                         </el-select>
@@ -98,31 +99,31 @@
                     <tr>
                       <th>适用版本 version：</th>
                       <td>
-                        <TextInput v-model="version" placeholder="请输入适用版本" />
+                        <TextInput v-model="version" placeholder="请输入适用版本" :key="new Date().getTime()"/>
                       </td>
                     </tr>
                     <tr>
                       <th>作者 author：</th>
                       <td>
-                        <TextInput v-model="author" placeholder="请输入作者名称" />
+                        <TextInput v-model="author" placeholder="请输入作者名称" :key="new Date().getTime()"/>
                       </td>
                     </tr>
                     <tr>
                       <th>语言 language：</th>
                       <td>
-                        <TextInput v-model="language" placeholder="请输入支持语言" />
+                        <TextInput v-model="language" placeholder="请输入支持语言" :key="new Date().getTime()"/>
                       </td>
                     </tr>
                     <tr>
                       <th>原帖 address：</th>
                       <td>
-                        <TextInput v-model="address" placeholder="请输入原帖地址" />
+                        <TextInput v-model="address" placeholder="请输入原帖地址" :key="new Date().getTime()"/>
                       </td>
                     </tr>
                     <tr>
                       <th>下载 download：</th>
                       <td>
-                        <TextInput v-model="download" placeholder="请输入下载地址" />
+                        <TextInput v-model="download" placeholder="请输入下载地址" :key="new Date().getTime()"/>
                       </td>
                     </tr>
                   </table>
@@ -176,7 +177,7 @@ import Empty from '@/components/FitEmpty.vue'
 import { ElMessage, ElNotification } from 'element-plus'
 import { marked } from 'marked'
 import useUserStore from '@/stores/user'
-import { hasPromiseToEdit, isPromiseToEdit } from '@/api/topic'
+import { editTopic, hasPromiseToEdit, isPromiseToEdit } from '@/api/topic'
 import { appendTopic } from '@/api/topic'
 import { useRoute, useRouter } from 'vue-router'
 const labels = ['服务端', '客户端', '模组', '插件', '材质包', '视频']
@@ -225,7 +226,6 @@ const init = async () => {
               address.value = data.address
               download.value = data.download
               content.value = data.content
-              
             }
             else{
               errorPromise()
@@ -264,6 +264,7 @@ const append = async (data) => {
         })
       } else if (msg == 'CODE_ERROR') {
         ElMessage.error('验证码错误')
+        code.value = ''
       } else {
         let num = res.data.num
         ElNotification({
@@ -279,8 +280,33 @@ const append = async (data) => {
     })
 }
 const edit = async (data) => {
-  
+  await editTopic(data).then(res=>{
+    let msg = res.data.msg
+    if(msg == 'SUCCESS'){
+      ElNotification({
+        title: '编辑成功',
+        message: '成功编辑'+title.value,
+        type: 'success'
+      })
+      router.push('/topic/detail/' + route.params.id)
+    }
+    else if(msg == 'CODE_ERROR'){
+      ElMessage.error('验证码错误')
+      code.value = ''
+    }
+    else if(msg == 'REJECT'){
+      errorPromise()
+    }
+    else{
+      ElMessage.error('服务异常')
+    }
+    console.log(msg);
+  }).catch(err=>{
+    ElMessage.error('服务异常')
+  })
+
 }
+
 const onConfirm = async () => {
   if (title.value.length < 6) {
     ElNotification({
@@ -347,6 +373,7 @@ const onConfirm = async () => {
     })
   } else {
     let data = {
+      id: route.params.id,
       title: title.value,
       label: label.value,
       topicTitle: subtitle.value,
@@ -365,6 +392,7 @@ const onConfirm = async () => {
     } else {
       append(data)
     }
+    codeImg.value.changeCode()
   }
 }
 onMounted(init)

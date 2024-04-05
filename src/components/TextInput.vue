@@ -4,56 +4,84 @@
       class="input"
       type="text"
       ref="onInput"
-      v-model="props.modelValue"
+      v-model="text"
       :placeholder="placeholder"
-      @input="onChange()"
-      :style="{ width: inputWidth + 'px', fontSize: fontSize + 'px'}"
+      @input="onChange"
+      :style="{ width: inputWidth + 'px', fontSize: fontSize + 'px' }"
+      :maxlength="maxlength"
     />
-    <div class="text" ref="onText">{{ props.modelValue }}</div>
+    <div class="text" ref="onText">{{ text }}</div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
 const props = defineProps({
-    modelValue: {
-        type: String,
-        default: ''
-    },
-    placeholder: {
-        type: String,
-        default: ''
-    },
-    width: {
-        type: Number,
-        default: 100
-    },
-    fontSize: {
-        type: Number,
-        default: 12
-    }
+  modelValue: {
+    type: String,
+    default: ''
+  },
+  placeholder: {
+    type: String,
+    default: ''
+  },
+  width: {
+    type: Number,
+    default: 100
+  },
+  maxWidth:{
+    type: Number,
+    default: -1
+  },
+  maxlength:{
+    type: Number,
+    default: -1
+  },
+  fontSize: {
+    type: Number,
+    default: 12
+  },
+  update: Number
 })
 const emit = defineEmits(['update:modelValue'])
+const text = ref(props.modelValue)
 const onInput = ref()
 const onText = ref()
-const inputWidth = ref(props.width)
+const inputWidth = ref()
 
 const onChange = () => {
-  if (props.modelValue == ' ') {
-    props.modelValue = ''
+  if (text.value == ' ') {
+    text.value = ''
   }
-  if (props.modelValue.length == 0) {
+  if (text.value.length == 0) {
     inputWidth.value = props.width
   } else {
-    inputWidth.value = onText.value.clientWidth + 5
+    if(props.maxWidth != -1){
+      if((onText.value.clientWidth+5)>props.maxWidth){
+        inputWidth.value = onText.value.clientWidth + 5
+      }
+      else{
+        inputWidth.value = props.maxWidth
+      }
+    }
+    else{
+      inputWidth.value = onText.value.clientWidth + 5
+    }
   }
-  emit('update:modelValue', props.modelValue)
+  emit('update:modelValue', text.value)
+  
 }
 const onFocus = () => {
   onChange()
   onInput.value.focus()
 }
-onMounted(onChange)
+const init = () => {
+  text.value = props.modelValue
+  onChange()
+}
+onMounted(() => {
+  init()
+})
 </script>
 <style scoped>
 .input {

@@ -74,3 +74,6 @@ export const hasPromiseToEdit = (id)=>{
   param.append('id',id)
   return request.post('/hasToPromiseToEdit',param)
 }
+
+
+export const editTopic = (data)=>request.post('/editTopic',data)

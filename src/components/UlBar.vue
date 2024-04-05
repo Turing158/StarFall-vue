@@ -17,7 +17,7 @@
       </a>
     </li>
     <div v-show="isLogin" class="user ul_border">
-      <img :src="'/src/assets/avatar/'+userStore.avatar" alt="" class="avatar_img" />
+      <img :src="'/src/assets/avatar/' + userStore.avatar" alt="" class="avatar_img" />
       <div class="menu">
         <p>{{ userStore.name }}</p>
         <div class="exp">
@@ -26,7 +26,7 @@
         <div class="operate">
           <router-link class="ul_border" to="/personal">设置</router-link>
           <router-link class="ul_border" to="/signIn" @click="PageIndex = -1">签到</router-link>
-          <a class="ul_border" @click="exit()">退出</a>
+          <a class="ul_border" @click="onExit()">退出</a>
         </div>
       </div>
     </div>
@@ -81,15 +81,31 @@ const PageIndex = ref(props.pageIndex)
 
 import useUserStore from '@/stores/user'
 import { ElMessage, ElNotification } from 'element-plus'
+import { exit } from '@/api/user'
 const userStore = useUserStore()
 const isLogin = ref(userStore.isLogin)
-const exit = ()=>{
+const onExit = async () => {
+  await exit()
+    .then((res) => {
+      let msg = res.data.msg
+      if (msg == 'NO_TOKEN') {
+        ElNotification({
+          title: '退出登录',
+          message: '嘿!你个老登,你还没登录呢',
+          type: 'error'
+        })
+      } else {
+        ElNotification({
+          title: '退出登录',
+          message: '成功退出登录，期待下次回来',
+          type: 'success'
+        })
+      }
+    })
+    .catch((err) => {
+      ElMessage.error('服务异常')
+    })
   userStore.exit()
-  ElNotification({
-    title:'退出登录',
-    message:'成功退出登录，期待下次回来',
-    type:'success'
-  })
   isLogin.value = false
 }
 </script>
@@ -243,6 +259,7 @@ ul .avatar_img {
   text-decoration: none;
   color: #131313;
   transition: all 250ms;
+  cursor: pointer;
 }
 .menu .operate a:nth-child(2) {
   margin: 0 5px;
