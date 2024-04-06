@@ -1,6 +1,4 @@
 import request from '@/util/request'
-import { useUserStore } from '@/stores/user'
-const userStore = useUserStore()
 export const login = (account,password,code)=>{
     let param = new URLSearchParams()
     param.append('account',account)
