@@ -10,7 +10,8 @@
 </template>
 <script setup>
 import useUserStore from '@/stores/user'
-import { ElNotification } from 'element-plus'
+import { ElMessage, ElNotification } from 'element-plus'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 const userStroe = useUserStore()
 const router = useRouter()
@@ -63,6 +64,39 @@ router.beforeResolve((to,from,next)=>{
     }
   }
 })
+const onOpen = (e) => {
+  console.log('WebSocket连接成功')
+}
+const onError = (e) => {
+  ElMessage.error('服务异常')
+  console.log('onError', e)
+}
+const onSend = (e) => {
+  console.log('onSend', e)
+}
+const onMessage = (e) => {
+  ElNotification({
+        title:'新消息',
+        message:e.data,
+        type:'success'
+      })
+}
+const onClose = (e) => {
+  console.log('WebSocket关闭')
+}
+const webSocket = ref()
+const init = ()=>{
+  let url = 'ws://localhost:8080/message/admin'
+  if(userStroe.isLogin){
+    webSocket.value = new WebSocket(url)
+    webSocket.value.onopen = onOpen
+    webSocket.value.onerror = onError
+    webSocket.value.onmessage = onMessage
+    webSocket.value.onclose = onClose
+    webSocket.value.send = onSend
+  }
+}
+onMounted(init)
 </script>
 <style scoped>
 .main {
