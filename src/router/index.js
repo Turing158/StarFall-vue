@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import TopicDetailView from '../views/TopicDetialView.vue'
 import PersonalView from '../views/PersonalView.vue'
 import EditTopicView from '../views/EditTopicView.vue'
+import NoticeView from '@/views/NoticeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +34,11 @@ const router = createRouter({
           component: () => import('../views/content/SignInContent.vue')
         }
       ]
+    },
+    {
+      path: '/notices',
+      name: 'notices',
+      component: NoticeView
     },
     {
       path: '/topic/detail/:id?',

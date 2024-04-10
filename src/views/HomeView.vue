@@ -35,6 +35,8 @@ if (route.path == '/') {
   pageIndex.value = 0
 } else if (route.path == '/topic') {
   pageIndex.value = 2
+} else if (route.path == '/signIn') {
+  pageIndex.value = 3
 } else {
   pageIndex.value = -1
 }

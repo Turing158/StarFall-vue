@@ -25,7 +25,7 @@
         </div>
         <div class="operate">
           <router-link class="ul_border" to="/personal">设置</router-link>
-          <router-link class="ul_border" to="/signIn" @click="PageIndex = -1">签到</router-link>
+          <router-link class="ul_border" to="/notices" @click="PageIndex = -1">消息</router-link>
           <a class="ul_border" @click="onExit()">退出</a>
         </div>
       </div>
@@ -68,6 +68,11 @@ const UlItem = ref([
     eName: 'topic',
     href: '/topic',
     admin: false
+  },{
+    name: '签到',
+    eName: 'signIn',
+    href: '/signIn',
+    admin: true
   },
   {
     name: '管理',
