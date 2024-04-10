@@ -180,6 +180,9 @@ const upper = (e) => {
   color: aliceblue;
   border-radius: 5px;
 }
+.back span{
+  transition: all 0.2s;
+}
 .back span:first-child {
   position: relative;
   top: -20px;

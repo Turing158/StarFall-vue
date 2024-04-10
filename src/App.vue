@@ -17,7 +17,7 @@ import MainView from './views/MainView.vue'
 .bottom {
   position: relative;
   width: 100vw;
-  height: 100px;
+  height: 50px;
   background-image: url(./assets/img/tail.png);
   background-size: 2%;
 }

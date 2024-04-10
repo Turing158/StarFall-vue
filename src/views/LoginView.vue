@@ -71,10 +71,8 @@ const confirm = async () => {
         } else if (msg == 'CODE_ERROR') {
           ElMessage.error('验证码错误')
         } else {
-            console.log(res.data.object);
             userStore.setToken(res.data.object)
             await getUserInfo().then(res=>{
-              console.log(res.data.object);
               let data = res.data.object
               userStore.setUserObject(
                 data.user,
@@ -137,6 +135,9 @@ const confirm = async () => {
   background-color: rgba(0, 0, 0, 0.2);
   color: aliceblue;
   border-radius: 5px;
+}
+.back span{
+  transition: all 0.2s;
 }
 .back span:first-child {
   position: relative;

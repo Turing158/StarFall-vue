@@ -6,16 +6,25 @@
                     <th class="listTitle"></th>
                     <th class="userTitle">
                         <div class="userTitleMain">
-                            title
+                            {{ noticeTitle }}
                         </div>
                     </th>
                 </tr>
                 <tr>
                     <td>
-                        <NoticeList/>
+                        <div class="noticeList">
+                            <div v-for="(item,index) in noticeUserList" :key="index" @click="listClick(item,index)">
+                                <NoticeList :item="item" :active="index == listIndex" />
+                            </div>
+                        </div>
                     </td>
                     <td>
-                        <NoticeUserView/>
+                        <div ref="noticeUser" class="noticeUser">
+                            <div v-for="(item,index) in notices" :key="index">
+                                <NoticeUserView :notices="item"/>
+                            </div>
+                        </div>
+                        
                         <div class="sendBlock">
                             <textarea type="text" class="sendBox"></textarea>
                             <div class="operate">
@@ -33,6 +42,95 @@ import Book from '@/components/Book.vue';
 import NoticeList from '@/components/NoticeList.vue';
 import NoticeUserView from '@/components/NoticeUserView.vue';
 import McBtn from '@/components/McBtn.vue';
+import { findAllMsgByToUser, findMsgByToUserAndFromUser } from '@/api/message';
+import { ElMessage,ElNotification } from 'element-plus';
+import { inject, nextTick, onMounted,ref } from 'vue';
+const notices = ref([]);
+const noticeUserList = ref([]);
+const noticeTitle = ref('')
+const listIndex = ref(0)
+const noticeUser = ref(null)
+const init = async()=>{
+    await findAllMsgByToUser().then(res=>{
+        let msg = res.data.msg;
+        if(msg == 'SUCCESS'){
+            let data = res.data.object
+            for (let i = 0; i < data.length; i++) {
+                let content = data[i].content.split('[&divide&]')
+                let lastContent = content[content.length-1]
+                let userList = {
+                    user: data[i].fromUser,
+                    name: data[i].fromName,
+                    avatar: data[i].fromAvatar,
+                    lastContent:lastContent,
+                }
+                if(noticeUserList.value.length == 0){
+                    noticeUserList.value.push(userList)
+                }else{
+                    let flag = true
+                    for (let j = 0; j < noticeUserList.value.length; j++) {
+                        if(noticeUserList.value[j].user == userList.user){
+                            noticeUserList.value.splice(j,1)
+                            noticeUserList.value.push(userList)
+                            flag = false
+                            break;
+                        }
+                    } 
+                    if(flag){
+                        noticeUserList.value.push(userList)
+                    } 
+                }
+            }
+        }
+        
+    }).catch(err=>{
+        ElMessage.error('服务异常');
+        console.log(err);
+    });
+    getUserMsg('StarFall')
+    noticeTitle.value = 'StarFall官方'
+}
+const setViewBottom = ()=>{
+    noticeUser.value.scrollTop = noticeUser.value.scrollHeight
+}
+const getUserMsg = async(fromUser)=>{
+    notices.value = []
+    await findMsgByToUserAndFromUser(fromUser).then(res=>{
+        let msg = res.data.msg;
+        if(msg == 'SUCCESS'){
+            let data = res.data.object
+            for (let i = 0; i < data.length; i++) {
+                let contents = data[i].content.split('[&divide&]')
+                notices.value.push({
+                    fromUser: data[i].fromUser,
+                    fromAvatar: data[i].fromAvatar,
+                    date: data[i].date,
+                    contents: contents
+                })
+            }
+        } 
+    }).catch(err=>{
+        ElMessage.error('服务异常');
+        console.log(err);
+    })
+    setViewBottom()
+}
+const listClick = (item,index)=>{
+    listIndex.value = index
+    noticeTitle.value = item.name
+    getUserMsg(item.user)
+}
+const webSocket = inject('webSocket')
+webSocket.value.onmessage = (e) => {
+    let data = JSON.parse(e.data)
+    ElNotification({
+        title:'新消息-来自'+data.fromUser+'的消息',
+        message:data.content,
+        type:'success'
+    })
+    init()
+}
+onMounted(init)
 </script>
 <style scoped>
 .noticeBlock{
@@ -43,7 +141,7 @@ import McBtn from '@/components/McBtn.vue';
     text-align: left;
     font-size: 20px;
     font-weight: bold;
-    background-color: #c4ba9e;
+    background-color: #f3ddab;
 }
 .noticeBlock .listTitle{
     width: 25%;
@@ -58,6 +156,36 @@ import McBtn from '@/components/McBtn.vue';
     height: 50px;
     padding-left: 30px;
     line-height: 60px;
+}
+.noticeList{
+    height: 550px;
+    width:100%;
+    background-color: #f8eecf;
+    border-bottom-left-radius: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: all 250ms;
+}
+.noticeList::-webkit-scrollbar {
+    width: 6px;
+}
+.noticeList::-webkit-scrollbar-thumb {
+    background-color: #756c53;
+    cursor:n-resize;
+}
+.noticeUser{
+    height: 350px;
+    background-color: #faf1d9;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.noticeUser::-webkit-scrollbar {
+    width: 6px;
+    
+}
+.noticeUser::-webkit-scrollbar-thumb {
+    background-color: #756c53;
+    cursor:n-resize;
 }
 .sendBlock{
     width: 100%;

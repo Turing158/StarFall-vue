@@ -1,6 +1,7 @@
 <template>
   <div class="main">
     <router-view/>
+    
     <el-backtop>
       <div class="backTop">
         <img style="width: 100%;" src="../assets/img/icon/arrow.png" alt="">
@@ -11,7 +12,7 @@
 <script setup>
 import useUserStore from '@/stores/user'
 import { ElMessage, ElNotification } from 'element-plus'
-import { onMounted, ref } from 'vue'
+import { onMounted, provide, ref } from 'vue'
 import { useRouter } from 'vue-router'
 const userStroe = useUserStore()
 const router = useRouter()
@@ -22,7 +23,9 @@ router.beforeResolve((to,from,next)=>{
     to.path == '/personal/password'||
     to.path == '/personal/email'||
     to.path == '/signIn'||
+    to.path == '/notices'||
     to.path == '/admin'
+
     ){
     if(userStroe.user != '' || userStroe.isLogin){
       next()
@@ -75,9 +78,11 @@ const onSend = (e) => {
   console.log('onSend', e)
 }
 const onMessage = (e) => {
+  let data = JSON.parse(e.data)
+  console.log(data);
   ElNotification({
-        title:'新消息',
-        message:e.data,
+        title:'新消息-来自'+data.fromUser+'的消息',
+        message:data.content,
         type:'success'
       })
 }
@@ -86,7 +91,7 @@ const onClose = (e) => {
 }
 const webSocket = ref()
 const init = ()=>{
-  let url = 'ws://localhost:8080/message/admin'
+  let url = 'ws://localhost:8080/message/'+userStroe.token
   if(userStroe.isLogin){
     webSocket.value = new WebSocket(url)
     webSocket.value.onopen = onOpen
@@ -94,8 +99,10 @@ const init = ()=>{
     webSocket.value.onmessage = onMessage
     webSocket.value.onclose = onClose
     webSocket.value.send = onSend
+    
   }
 }
+provide('webSocket',webSocket)
 onMounted(init)
 </script>
 <style scoped>
@@ -109,4 +116,5 @@ onMounted(init)
   box-shadow: var(--el-box-shadow-lighter);
   border-radius: 10px
 }
+
 </style>
