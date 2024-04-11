@@ -34,6 +34,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import McBtn from './McBtn.vue'
+import { deleteTopic } from '@/api/topic';
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 const props = defineProps({
   item: Object,
   isEdit: {
@@ -53,7 +55,41 @@ const onClickUser = () => {
 const onEdit = (id) => {
   router.push('/topic/editTopic/' + id)
 }
-const onDel = () => {}
+
+const onDel = async(id) => {
+  ElMessageBox.confirm('确定删除此评论吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(async () => {
+      await deleteTopic(id).then(res=>{
+        let msg = res.data.msg
+        if(msg == 'SUCCESS'){
+          router.go(0)
+          ElNotification({
+            title: '删除成功',
+            message: '成功删除主题:'+props.item.title,
+            type: 'success'
+          })
+        }
+        else{
+          ElNotification({
+            title: '删除失败',
+            message: '删除主题:'+props.item.title+'失败',
+            type: 'error'
+          })
+        }
+      }).catch(err=>{
+        ElMessage.error('删除主题失败')
+        console.log(err);
+      })
+    })
+    .catch(() => {
+      ElMessage.info('已取消删除')
+    })
+  
+}
 </script>
 <style scoped>
 .item {

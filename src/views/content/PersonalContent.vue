@@ -89,10 +89,6 @@ const getTopic = async () => {
     })
   bookOut.value.setHeight()
 }
-const clickTopic = (i) => {}
-const clickAuthor = (i) => {}
-const clickEdit = (i) => {}
-const clickDel = (i) => {}
 onMounted(getTopic)
 </script>
 <style scoped>

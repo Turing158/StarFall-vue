@@ -77,3 +77,10 @@ export const hasPromiseToEdit = (id)=>{
 
 
 export const editTopic = (data)=>request.post('/editTopic',data)
+
+
+export const deleteTopic = (id)=> {
+  let param = new URLSearchParams()
+  param.append('id',id)
+  return request.post('/deleteTopic',param)
+}

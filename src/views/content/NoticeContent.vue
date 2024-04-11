@@ -45,12 +45,19 @@ import McBtn from '@/components/McBtn.vue';
 import { findAllMsgByToUser, findMsgByToUserAndFromUser } from '@/api/message';
 import { ElMessage,ElNotification } from 'element-plus';
 import { inject, nextTick, onMounted,ref } from 'vue';
+import useUserStore from '@/stores/user';
 const notices = ref([]);
 const noticeUserList = ref([]);
 const noticeTitle = ref('')
 const listIndex = ref(0)
 const noticeUser = ref(null)
+const userStore = useUserStore()
 const init = async()=>{
+    await getUserList()
+    await getUserMsg(noticeUserList.value[listIndex.value].user)
+    noticeTitle.value = noticeUserList.value[listIndex.value].name
+}
+const getUserList = async()=>{
     await findAllMsgByToUser().then(res=>{
         let msg = res.data.msg;
         if(msg == 'SUCCESS'){
@@ -58,37 +65,69 @@ const init = async()=>{
             for (let i = 0; i < data.length; i++) {
                 let content = data[i].content.split('[&divide&]')
                 let lastContent = content[content.length-1]
-                let userList = {
-                    user: data[i].fromUser,
-                    name: data[i].fromName,
-                    avatar: data[i].fromAvatar,
-                    lastContent:lastContent,
-                }
                 if(noticeUserList.value.length == 0){
-                    noticeUserList.value.push(userList)
-                }else{
+                    if(data[i].fromUser == userStore.user){
+                        let userList = {
+                            user: data[i].toUser,
+                            name: data[i].toName,
+                            avatar: data[i].toAvatar,
+                            lastContent:lastContent,
+                        }   
+                        noticeUserList.value.push(userList)
+                    }
+                    else{
+                        let userList = {
+                            user: data[i].fromUser,
+                            name: data[i].fromName,
+                            avatar: data[i].fromAvatar,
+                            lastContent:lastContent,
+                        }   
+                        noticeUserList.value.push(userList)
+                    }
+                }
+                else{
                     let flag = true
                     for (let j = 0; j < noticeUserList.value.length; j++) {
-                        if(noticeUserList.value[j].user == userList.user){
-                            noticeUserList.value.splice(j,1)
-                            noticeUserList.value.push(userList)
-                            flag = false
-                            break;
+                        if(data[i].fromUser == userStore.user){
+                            if(noticeUserList.value[j].user == data[i].toUser){
+                                flag = false
+                                break;
+                            }
                         }
-                    } 
+                        else{
+                            if(noticeUserList.value[j].user == data[i].fromUser){
+                                flag = false
+                                break;                  
+                            }
+                        }
+                    }
                     if(flag){
-                        noticeUserList.value.push(userList)
-                    } 
+                        if(data[i].fromUser == userStore.user){
+                            let userList = {
+                                user: data[i].toUser,
+                                name: data[i].toName,
+                                avatar: data[i].toAvatar,
+                                lastContent:lastContent
+                            }
+                            noticeUserList.value.push(userList)
+                        }
+                        else{
+                            let userList = {
+                                user: data[i].fromUser,
+                                name: data[i].fromName,
+                                avatar: data[i].fromAvatar,
+                                lastContent:lastContent
+                            }
+                            noticeUserList.value.push(userList)
+                        }
+                    }
                 }
             }
         }
         
     }).catch(err=>{
         ElMessage.error('服务异常');
-        console.log(err);
     });
-    getUserMsg('StarFall')
-    noticeTitle.value = 'StarFall官方'
 }
 const setViewBottom = ()=>{
     noticeUser.value.scrollTop = noticeUser.value.scrollHeight
@@ -128,7 +167,61 @@ webSocket.value.onmessage = (e) => {
         message:data.content,
         type:'success'
     })
-    init()
+    // init()
+    if(data.fromUser == noticeUserList.value[listIndex.value].user || data.fromUser == userStore.user){
+        let obj = {
+            fromUser: data.fromUser,
+            fromAvatar: data.fromAvatar,
+            date: data.date,
+            contents: [data.content]
+        }
+        if(notices.value[notices.value.length-1].fromUser == obj.fromUser){
+            if(timeDiff(notices.value[notices.value.length-1].date,obj.date) < 1){
+                notices.value[notices.value.length-1].contents.push(data.content)
+            }
+            else{
+                notices.value.push(obj)
+            }
+        }else{
+            notices.value.push(obj)
+        }
+        setTimeout(() => {
+            setViewBottom()
+        }, 10);
+    }
+    else{
+        let flag = true
+        for (let i = 0; i < noticeUserList.value.length; i++) {
+            if(noticeUserList.value[i].user == data.fromUser){
+                flag = false
+                break
+            }
+        }
+        if(flag){
+            let userList = {
+                user: data.fromUser,
+                name: data.fromName,
+                avatar: data.fromAvatar,
+                lastContent:data.content
+            }
+            let newlist = []
+            newlist.push(userList)
+            for (let i = 0; i < noticeUserList.value.length; i++) {
+                newlist.push(noticeUserList.value[i])
+            }
+            noticeUserList.value = newlist
+            listIndex.value ++;
+        }
+
+    }
+    
+}
+const timeDiff = (newDate,oldDate)=>{
+    let new_date = new Date(newDate)
+    let old_date = new Date(oldDate)
+    console.log(new_date)
+    let diffInMilliseconds = new_date.getTime() - old_date.getTime()
+    return Math.abs(diffInMilliseconds / (1000 * 60))
 }
 onMounted(init)
 </script>
