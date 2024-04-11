@@ -26,9 +26,11 @@
                         </div>
                         
                         <div class="sendBlock">
-                            <textarea type="text" class="sendBox"></textarea>
+                            <textarea type="text" class="sendBox" v-model="contentValue"></textarea>
                             <div class="operate">
-                                <McBtn text="发送"/>
+                                <div @click="send()">
+                                    <McBtn text="发送"/>
+                                </div>
                             </div>
                         </div>
                     </td>
@@ -42,11 +44,12 @@ import Book from '@/components/Book.vue';
 import NoticeList from '@/components/NoticeList.vue';
 import NoticeUserView from '@/components/NoticeUserView.vue';
 import McBtn from '@/components/McBtn.vue';
-import { findAllMsgByToUser, findMsgByToUserAndFromUser } from '@/api/message';
+import { findAllMsgByToUser, findMsgByToUserAndFromUser, sendMessage } from '@/api/message';
 import { ElMessage,ElNotification } from 'element-plus';
 import { inject, nextTick, onMounted,ref } from 'vue';
 import useUserStore from '@/stores/user';
 const notices = ref([]);
+const contentValue = ref('')
 const noticeUserList = ref([]);
 const noticeTitle = ref('')
 const listIndex = ref(0)
@@ -167,7 +170,6 @@ webSocket.value.onmessage = (e) => {
         message:data.content,
         type:'success'
     })
-    // init()
     if(data.fromUser == noticeUserList.value[listIndex.value].user || data.fromUser == userStore.user){
         let obj = {
             fromUser: data.fromUser,
@@ -216,10 +218,51 @@ webSocket.value.onmessage = (e) => {
     }
     
 }
+const send = async()=>{
+    if(contentValue.value.length == 0){
+        ElMessage.error('消息内容不能为空');
+        return;
+    }
+    else if(contentValue.value.length < 10){
+        ElMessage.error('消息内容不能少于10个字符');
+        return;
+    }
+    let indexTmp = listIndex.value
+    await sendMessage(noticeUserList.value[indexTmp].user,contentValue.value).then(res=>{
+        let msg = res.data.msg
+        if(msg == 'SUCCESS'){
+            let data = res.data.object
+            noticeUserList.value[indexTmp].lastContent = data.content
+            let obj = {
+                fromUser: userStore.user,
+                fromAvatar: userStore.avatar,
+                date: data.date,
+                contents: [data.content]
+            }
+            if(notices.value[notices.value.length-1].fromUser == obj.fromUser){
+                if(timeDiff(notices.value[notices.value.length-1].date,obj.date) < 1){
+                    notices.value[notices.value.length-1].contents.push(data.content)
+                }
+                else{
+                    notices.value.push(obj)
+                }
+            }else{
+                notices.value.push(obj)
+            }
+            setTimeout(() => {
+                setViewBottom()
+            }, 10);
+        }
+        else{
+            ElMessage.error('发送失败');
+        }
+    }).catch(err=>{
+        ElMessage.error('服务异常');
+    })
+}
 const timeDiff = (newDate,oldDate)=>{
     let new_date = new Date(newDate)
     let old_date = new Date(oldDate)
-    console.log(new_date)
     let diffInMilliseconds = new_date.getTime() - old_date.getTime()
     return Math.abs(diffInMilliseconds / (1000 * 60))
 }
