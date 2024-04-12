@@ -1,4 +1,7 @@
 import request from '@/util/request'
+
+
+
 export const login = (account,password,code)=>{
     let param = new URLSearchParams()
     param.append('account',account)
@@ -52,3 +55,21 @@ export const settingPassword = (oldPassword,newPassword,code)=>{
 }
 
 export const exit = ()=>request.post('/exit')
+
+
+export const findAllSignIn = (page)=>{
+    let param = new URLSearchParams()
+    param.append('page',page)
+    return request.post('/findAllSignIn',param)
+}
+
+
+export const countSignIn = ()=>request.post('/countAllSignIn')
+
+
+export const signIn = (msg,emotion)=>{
+    let param = new URLSearchParams()
+    param.append('msg',msg)
+    param.append('emotion',emotion)
+    return request.post('/signIn',param)
+}
