@@ -13,7 +13,7 @@
                     <el-option label="主题" value="主题"></el-option>
                     <el-option label="内容" value="内容"></el-option>
                     </el-select>
-                    <input type="text" v-model="text"/>
+                    <input type="text" v-model="text" v-on:keydown.enter="onSearch"/>
                     <div class="btn" @click="onSearch()">
                         <div class="icon"></div>
                         <span>搜索</span>

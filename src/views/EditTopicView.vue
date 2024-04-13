@@ -180,6 +180,7 @@ import useUserStore from '@/stores/user'
 import { editTopic, hasPromiseToEdit, isPromiseToEdit } from '@/api/topic'
 import { appendTopic } from '@/api/topic'
 import { useRoute, useRouter } from 'vue-router'
+import { getUserInfo } from '@/api/user'
 const labels = ['服务端', '客户端', '模组', '插件', '材质包', '视频']
 const label = ref()
 const route = useRoute()
@@ -254,7 +255,7 @@ const errorPromise = ()=>{
 }
 const append = async (data) => {
   await appendTopic(data)
-    .then((res) => {
+    .then(async(res) => {
       let msg = res.data.msg
       if (msg == 'LEVEL_ERROR') {
         ElNotification({
@@ -266,17 +267,37 @@ const append = async (data) => {
         ElMessage.error('验证码错误')
         code.value = ''
       } else {
+        let data = res.data.object
         let num = res.data.num
+        router.push('/topic/detail/' + data)
         ElNotification({
           title: '发布成功',
           message: '成功发布'+title.value,
           type: 'success'
         })
-        router.push('/topic/detail/' + num)
+        ElNotification({
+          title: '获得经验',
+          message: "经验添加"+num+"点",
+          type: 'success'
+        })
+        await getUserInfo().then(res=>{
+          let data = res.data.object
+            userStore.setUserObject(
+              data.user,
+              data.name,
+              data.level,
+              data.exp,
+              data.maxExp,
+              data.gender,
+              data.birthday,
+              data.avatar,
+              data.email
+            )
+        })
       }
     })
     .catch((err) => {
-      ElMessage.error('服务异常，发布失败')
+      ElMessage.error('服务异常')
     })
 }
 const edit = async (data) => {

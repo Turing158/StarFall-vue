@@ -84,7 +84,7 @@ import McBtn from '@/components/McBtn.vue'
 import Empty from '@/components/FitEmpty.vue'
 import { onMounted, ref } from 'vue'
 import useUserStore from '@/stores/user'
-import { countSignIn, findAllSignIn, signIn } from '@/api/user'
+import { countSignIn, findAllSignIn, getUserInfo, signIn } from '@/api/user'
 import { ElMessage, ElNotification } from 'element-plus'
 const isSignIn = ref(false)
 const continueSignIn = ref(0)
@@ -149,17 +149,37 @@ const confirmSignIn = async()=>{
     ElMessage.error('请选择心情')
   }
   else{
-    await signIn(message.value,emotion.value).then(res=>{
+    await signIn(message.value,emotion.value).then(async(res)=>{
       let msg = res.data.msg
       if(msg == 'SUCCESS'){
-        ElNotification.success({
+        let num = res.data.num
+        ElNotification({
           title: '签到成功',
-          message: "今天的签到已经完成",
+          message: "经验添加"+num+"点",
           type: 'success'
         })
         isSignIn.value = true
         getSignList()
         signPage.value = false
+        await getUserInfo().then(res=>{
+          let msg = res.data.msg
+          if(msg == 'SUCCESS'){
+            let data = res.data.object
+            userStore.setUserObject(
+              data.user,
+              data.name,
+              data.level,
+              data.exp,
+              data.maxExp,
+              data.gender,
+              data.birthday,
+              data.avatar,
+              data.email
+            )
+          }
+        }).catch(err=>{
+          ElMessage.error('服务异常')
+        })
       }
       else{
         ElNotification.error({
