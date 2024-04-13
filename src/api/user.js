@@ -29,6 +29,21 @@ export const register = (user,password,email,emailCode,code)=>{
     return request.post('/register',param)
 }
 
+
+export const checkForget = (email,emailCode,code)=>{
+    let param = new URLSearchParams()
+    param.append('email',email)
+    param.append('emailCode',emailCode)
+    param.append('code',code)
+    return request.post('/checkForgetPassword',param)
+}
+
+export const forgetPassword = (password)=>{
+    let param = new URLSearchParams()
+    param.append('password',password)
+    return request.post('/forgetPassword',param)
+}
+
 export const findUserinfo = (user)=>{
     let param = new URLSearchParams()
     param.append('user',user)

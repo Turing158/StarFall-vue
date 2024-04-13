@@ -99,6 +99,11 @@ const router = createRouter({
       component: () => import('../views/RegView.vue')
     },
     {
+      path: '/forget',
+      name: 'forget',
+      component: () => import('../views/ForgetView.vue')
+    },
+    {
       path: '/admin',
       name: 'admin',
       component: () => import('../views/AdminView.vue')

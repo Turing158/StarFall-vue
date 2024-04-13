@@ -56,7 +56,7 @@ router.beforeResolve((to,from,next)=>{
       next()
     }
   }
-  if(to.path == '/login' || to.path == '/reg'){
+  if(to.path == '/login' || to.path == '/reg' || to.path == '/forget'){
     if(userStroe.isLogin){
       ElNotification({
         title:'已登录',

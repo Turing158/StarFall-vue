@@ -23,7 +23,7 @@
         <input type="text" class="code_input" name="login_code" required v-model="code" />
         <span class="code_span">验证码：</span>
         <div class="code_underline"></div>
-        <Code class="" ref="codeImg" width="100px" height="40px" margin="0 5px" />
+        <Code ref="codeImg" width="100px" height="40px" margin="0 5px" />
         <div class="operate">
           <router-link to="/reg">
             <McBtn text="注册" :margin="0" />
@@ -109,7 +109,7 @@ const confirm = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 50px);
   background-image: url(../assets/img/loginBg.png);
   background-repeat: no-repeat;
   background-size: cover;
