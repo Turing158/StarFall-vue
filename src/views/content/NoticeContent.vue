@@ -44,9 +44,9 @@ import Book from '@/components/Book.vue';
 import NoticeList from '@/components/NoticeList.vue';
 import NoticeUserView from '@/components/NoticeUserView.vue';
 import McBtn from '@/components/McBtn.vue';
-import { findAllMsgByToUser, findMsgByToUserAndFromUser, sendMessage } from '@/api/message';
+import { findMessageList, findMsgByToUserAndFromUser, sendMessage } from '@/api/message';
 import { ElMessage,ElNotification } from 'element-plus';
-import { inject, nextTick, onMounted,ref } from 'vue';
+import { inject, onMounted,ref } from 'vue';
 import useUserStore from '@/stores/user';
 const notices = ref([]);
 const contentValue = ref('')
@@ -61,71 +61,11 @@ const init = async()=>{
     noticeTitle.value = noticeUserList.value[listIndex.value].name
 }
 const getUserList = async()=>{
-    await findAllMsgByToUser().then(res=>{
+    await findMessageList().then(res=>{
         let msg = res.data.msg;
         if(msg == 'SUCCESS'){
             let data = res.data.object
-            for (let i = 0; i < data.length; i++) {
-                let content = data[i].content.split('[&divide&]')
-                let lastContent = content[content.length-1]
-                if(noticeUserList.value.length == 0){
-                    if(data[i].fromUser == userStore.user){
-                        let userList = {
-                            user: data[i].toUser,
-                            name: data[i].toName,
-                            avatar: data[i].toAvatar,
-                            lastContent:lastContent,
-                        }   
-                        noticeUserList.value.push(userList)
-                    }
-                    else{
-                        let userList = {
-                            user: data[i].fromUser,
-                            name: data[i].fromName,
-                            avatar: data[i].fromAvatar,
-                            lastContent:lastContent,
-                        }   
-                        noticeUserList.value.push(userList)
-                    }
-                }
-                else{
-                    let flag = true
-                    for (let j = 0; j < noticeUserList.value.length; j++) {
-                        if(data[i].fromUser == userStore.user){
-                            if(noticeUserList.value[j].user == data[i].toUser){
-                                flag = false
-                                break;
-                            }
-                        }
-                        else{
-                            if(noticeUserList.value[j].user == data[i].fromUser){
-                                flag = false
-                                break;                  
-                            }
-                        }
-                    }
-                    if(flag){
-                        if(data[i].fromUser == userStore.user){
-                            let userList = {
-                                user: data[i].toUser,
-                                name: data[i].toName,
-                                avatar: data[i].toAvatar,
-                                lastContent:lastContent
-                            }
-                            noticeUserList.value.push(userList)
-                        }
-                        else{
-                            let userList = {
-                                user: data[i].fromUser,
-                                name: data[i].fromName,
-                                avatar: data[i].fromAvatar,
-                                lastContent:lastContent
-                            }
-                            noticeUserList.value.push(userList)
-                        }
-                    }
-                }
-            }
+            noticeUserList.value = data
         }
         
     }).catch(err=>{
