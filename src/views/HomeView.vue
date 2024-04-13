@@ -69,23 +69,4 @@ window.addEventListener('resize', checkWindowWidth)
   width: 100vw;
   z-index: 999;
 }
-.test {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.test1 {
-  background-color: #fff;
-}
-.test2 {
-  background-color: #aaa;
-}
-.test3 {
-  background-color: #888;
-}
-.test4 {
-  background-color: #444;
-}
 </style>

@@ -1,12 +1,23 @@
 <template>
     <div class="minSearch">
-        <form action="/topic/search" method="get">
+        <form>
             <div>
-                <input type="text" name="search"><button type="submit"></button>
+                <input type="text" name="search" v-model="text"><button type="button" @click="search()"></button>
             </div>
         </form>
     </div>
 </template>
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+const text = ref('')
+const router = useRouter()
+const search = ()=>{
+    localStorage.setItem('search',text.value)
+    router.push('/topic/search')
+}
+
+</script>
 <style scoped>
 .minSearch{
     position: absolute;

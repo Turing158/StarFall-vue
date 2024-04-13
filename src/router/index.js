@@ -4,6 +4,7 @@ import TopicDetailView from '../views/TopicDetialView.vue'
 import PersonalView from '../views/PersonalView.vue'
 import EditTopicView from '../views/EditTopicView.vue'
 import NoticeView from '@/views/NoticeView.vue'
+import SearchView from '@/views/SearchView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -49,6 +50,11 @@ const router = createRouter({
       path: '/topic/editTopic/:id?',
       name: 'EditTopicView',
       component: EditTopicView
+    },
+    {
+      path: '/topic/search',
+      name: 'SearchView',
+      component: SearchView
     },
     {
       path: '/personal',

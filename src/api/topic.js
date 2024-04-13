@@ -84,3 +84,12 @@ export const deleteTopic = (id)=> {
   param.append('id',id)
   return request.post('/deleteTopic',param)
 }
+
+
+export const searchTopic = (key,classification,page)=>{
+  let param = new URLSearchParams()
+  param.append('key',key)
+  param.append('classification',classification)
+  param.append('page',page)
+  return request.post('/search',param)
+}
