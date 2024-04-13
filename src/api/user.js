@@ -73,3 +73,20 @@ export const signIn = (msg,emotion)=>{
     param.append('emotion',emotion)
     return request.post('/signIn',param)
 }
+
+export const getOldEmailCode = ()=>request.post('/getOldEmailCode')
+
+export const getNewEmailCode = (newEmail)=>{
+    let param = new URLSearchParams()
+    param.append('newEmail',newEmail)
+    return request.post('/getNewEmailCode',param)
+}
+
+export const updateEmail = (oldEmailCode,newEmail,newEmailCode)=>{
+    let param = new URLSearchParams()
+    param.append('newEmail',newEmail)
+    param.append('oldEmailCode',oldEmailCode)
+    param.append('newEmailCode',newEmailCode)
+    return request.post('/updateEmail',param)
+}
+

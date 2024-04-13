@@ -26,6 +26,9 @@ export const useUserStore = defineStore('user-Sf', () => {
     avatar.value = Avatar
     email.value = Email
   }
+  const setEmail = (Email)=>{
+    email.value = Email
+  }
   const setLogin = (bool)=>{
     isLogin.value = bool
   }
@@ -49,7 +52,7 @@ export const useUserStore = defineStore('user-Sf', () => {
   }
 
 
-  return { user, name, level, exp, maxExp, gender, birthday,avatar,email,isLogin,token,setUserObject,setLogin,setToken,exit }
+  return { user, name, level, exp, maxExp, gender, birthday,avatar,email,isLogin,token,setUserObject,setLogin,setToken,exit,setEmail }
 },
 {
   persist: true,
