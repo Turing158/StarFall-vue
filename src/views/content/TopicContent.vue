@@ -83,7 +83,6 @@ const appendTopic = () => {
 const page = ref(1)
 const changePage = (e) => {
   page.value = e
-  console.log(page.value)
   getTopic()
 }
 const getTopic = async () => {
