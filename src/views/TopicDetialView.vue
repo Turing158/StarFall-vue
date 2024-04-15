@@ -62,9 +62,9 @@ import EditComment from '../components/EditComment.vue'
 import useUserStore from '@/stores/user'
 import McBtn from '@/components/McBtn.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { onMounted, ref, markRaw } from 'vue'
+import { onMounted, ref } from 'vue'
 import { findCommentByTopic, getTopicInfo, appendComment, deleteComment } from '@/api/topic'
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
+import { ElLoading, ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter()
@@ -73,6 +73,12 @@ const topicInfo = ref()
 const error = ref(true)
 const comments = ref([])
 const commentsCount = ref(0)
+const loading = ElLoading.service({
+  lock: true,
+  text: '加载中...',
+  background: 'rgba(0, 0, 0, 0.7)'
+})
+
 const init = async () => {
   await getTopicInfo(route.params.id)
     .then((res) => {
@@ -90,6 +96,7 @@ const init = async () => {
       ElMessage.error('服务异常')
     })
   bookOut.value.setHeight()
+  loading.close()
 }
 const page = ref(1)
 const changePage = (e) => {
