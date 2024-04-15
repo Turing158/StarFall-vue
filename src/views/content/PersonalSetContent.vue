@@ -181,7 +181,6 @@ const onSaveInfo = async () => {
             }
             else {
               let data = res.data.object
-              console.log(res);
               userStore.setUserObject(data.user,data.name,data.level,data.exp,data.maxExp,data.gender,data.birthday,data.avatar,data.email)
               name.value = data.name,
               gender.value = checkGenderToLabel(data.gender)
@@ -304,7 +303,6 @@ const onclip = ()=>{
   cropper.value.getCropData(data=>{
     avatar.value = data
     setAvatarPage.value = false
-    console.log(data);
   })
 }
 onMounted(init)
