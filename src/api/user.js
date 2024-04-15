@@ -69,6 +69,12 @@ export const settingPassword = (oldPassword,newPassword,code)=>{
     return request.post('/updatePassword',param)
 }
 
+export const settingAvatar = (avatarBase64)=>{
+    let param = new URLSearchParams()
+    param.append('avatarBase64',avatarBase64)
+    return request.post('/updateAvatar',param)
+}
+
 export const exit = ()=>request.post('/exit')
 
 

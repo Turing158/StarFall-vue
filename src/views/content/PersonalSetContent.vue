@@ -2,8 +2,58 @@
   <Book>
     <Empty :height="30" />
     <div class="setHead">
-      <img class="avatar" :src="'/src/assets/avatar/' + userStore.avatar" alt="" />
-      <McBtn text="保存头像" />
+      <div class="avatarOut">
+        <img class="avatar" :src="avatar" alt="" @click="setAvatarPage = true"/>
+      </div>
+      <input class="setAvatarInput" ref="fileInput" type="file" accept="image/jpeg, image/png, image/jpg"/>
+      {{ tip }}
+      <el-dialog
+        title="裁剪头像"
+        v-model="setAvatarPage"
+        width="600"
+      >
+      <div class="cropperDiv">
+        <VueCropper 
+          class="cropper"
+          ref="cropper" 
+          :img="avatar" 
+          :outputSize="option.outputSize"
+          :outputType="option.outputType" 
+          :info="option.info" 
+          :canScale="option.canScale" 
+          :autoCrop="option.autoCrop"
+          :autoCropWidth="option.autoCropWidth" 
+          :autoCropHeight="option.autoCropHeight" 
+          :fixedBox="option.fixedBox"
+          :fixed="option.fixed" 
+          :fixedNumber="option.fixedNumber" 
+          :canMove="option.canMove" 
+          :canMoveBox="option.canMoveBox"
+          :original="option.original" 
+          :centerBox="option.centerBox" 
+          :infoTrue="option.infoTrue" 
+          :full="option.full"
+          :enlarge="option.enlarge" 
+          :mode="option.mode"
+          @realTime="realTime"
+          >
+        </VueCropper>
+        <div class="operateClip">
+          <div class="preview">
+            <div class="previewChild" :style="{scale:100/preview.h}" >
+              <div v-html="preview.html"></div>
+            </div>
+          </div>
+          <Empty :height="20" />
+          <McBtn :width="100" text="顺时针旋转90°" @click="cropper.rotateRight()"/>
+          <Empty :height="10" />
+          <McBtn :width="100" text="逆时针旋转90°"  @click="cropper.rotateLeft()"/>
+          <Empty :height="10" />
+          <McBtn :width="100" text="裁剪"  @click="onclip()"/>
+        </div>
+      </div>
+      </el-dialog>
+      <div @click="confirmAvatar()"><McBtn text="保存头像" /></div>
     </div>
     <div class="setInfo">
       <table>
@@ -45,14 +95,17 @@
   </Book>
 </template>
 <script setup>
-import { ref } from 'vue'
+import 'vue-cropper/dist/index.css'
+import { VueCropper }  from "vue-cropper";
+import { onMounted, ref ,reactive } from 'vue'
 import Book from '@/components/Book.vue'
 import Empty from '@/components/FitEmpty.vue'
 import McBtn from '@/components/McBtn.vue'
 import useUserStore from '@/stores/user'
 import { ElMessage, ElNotification } from 'element-plus'
-import { saveInfo } from '@/api/user'
+import { saveInfo, settingAvatar } from '@/api/user'
 import Code from '@/components/Code.vue'
+import { useRouter } from 'vue-router';
 const codeImg = ref()
 const options = [
   {
@@ -161,20 +214,127 @@ const reset = () => {
   gender.value = checkGenderToLabel(userStore.gender)
   birthday.value = userStore.birthday
 }
+const cropper = ref()
+const fileInput = ref()
+const tip = ref('')
+const avatar = ref('/src/assets/avatar/' + userStore.avatar)
+const init = ()=>{
+  fileInput.value.addEventListener('change', function() {
+    let fileInputValue = fileInput.value
+        // 清除背景图片:
+        if (!fileInputValue.value) {
+            fileInputValue.value = "";
+            return;
+        }
+        let file = fileInputValue.files[0];
+        let size = file.size;
+        if (size >= 5 * 1024 * 1024) {
+          fileInputValue.value = "";
+          ElMessage.error('文件大小超出限制(5MB)');
+          return false;
+        }
+        if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+          fileInputValue.value = "";
+          ElMessage.error('不是有效的图片文件!');
+          return;
+        }
+        // 读取文件:
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let data = e.target.result;
+            avatar.value = data
+            setAvatarPage.value = true
+        };
+        // 以DataURL的形式读取文件:
+        reader.readAsDataURL(file);
+    });
+}
 
+const setAvatarPage = ref(false)
+const router = useRouter()
+const confirmAvatar = async()=>{
+  if(avatar.value == '/src/assets/avatar/' + userStore.avatar){
+    ElMessage.error('请先选择图片')
+  }
+  else{
+    await settingAvatar(avatar.value).then(res=>{
+      let msg = res.data.msg
+      if(msg == 'SUCCESS'){
+        ElNotification({
+          title: '保存成功',
+          message: '已将头像保存',
+          type: 'success'
+        })
+        let fileName = res.data.object
+        userStore.setAvatar(fileName)
+        router.go(0)
+      }
+      else{
+        ElMessage.error('服务器异常')
+
+      }
+    })
+  }
+}
+const option = reactive({
+  outputSize: 1, // 裁剪生成图片的质量
+  outputType: 'png', // 裁剪生成图片的格式 jpeg, png, webp
+  info: true, // 裁剪框的大小信息
+  canScale: false, // 图片是否允许滚轮缩放
+  autoCrop: true, // 是否默认生成截图框
+  autoCropWidth: 100, // 默认生成截图框宽度
+  autoCropHeight: 100, // 默认生成截图框高度
+  fixedBox: false, // 固定截图框大小 不允许改变
+  fixed: true, // 是否开启截图框宽高固定比例，这个如果设置为true，截图框会是固定比例缩放的，如果设置为false，则截图框的狂宽高比例就不固定了
+  fixedNumber: [1, 1], // 截图框的宽高比例 [ 宽度 , 高度 ]
+  canMove: true, // 上传图片是否可以移动
+  canMoveBox: true, // 截图框能否拖动
+  original: false, // 上传图片按照原始比例渲染
+  centerBox: true, // 截图框是否被限制在图片里面
+  infoTrue: false, // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
+  full: true, // 是否输出原图比例的截图
+  enlarge: '1', // 图片根据截图框输出比例倍数
+  mode: 'contain' // 图片默认渲染方式 contain , cover, 100px, 100% auto
+})
+const preview = ref('')
+const realTime = (data) => {
+  preview.value = data
+}
+const onclip = ()=>{
+  cropper.value.getCropData(data=>{
+    avatar.value = data
+    setAvatarPage.value = false
+    console.log(data);
+  })
+}
+onMounted(init)
 </script>
 <style scoped>
 .setHead {
-  height: 180px;
+  height: fit-content;
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-size: 14px;
 }
-.avatar {
+.avatarOut{
   width: 100px;
   height: 100px;
-  margin: 10px;
   background-color: aliceblue;
+}
+.avatar {
+  width: 90px;
+  height: 90px;
+  margin: 5px;
+  background-size: cover;
+}
+.setAvatarInput{
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  margin-top: 10px;
+  opacity: 0;
+  cursor: pointer;
 }
 .setInfo {
   display: flex;
@@ -188,5 +348,28 @@ const reset = () => {
   position: relative;
   margin-top: -30px;
   margin-left: 70px;
+}
+.cropperDiv{
+  height: 300px;
+  display: flex;
+}
+.cropper{
+  width: 300px;
+  height: 300px;
+}
+.operateClip{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  margin-left: 80px;
+}
+.preview{
+  width: 100px;
+  height: 100px;
+  
+}
+.previewChild{
+  width: 100px;
+  transform-origin: 0 0;
 }
 </style>

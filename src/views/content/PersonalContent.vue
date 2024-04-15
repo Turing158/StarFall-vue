@@ -5,6 +5,7 @@
       <div class="avatarOut">
         <img class="avatar" :src="'/src/assets/avatar/'+userStore.avatar" alt="" width="100%" height="100%"/>
       </div>
+    
       <div class="info">
         <div class="exp">
           <ExpBar :lv="userStore.level" :exp="userStore.exp" :maxExp="userStore.maxExp" />
@@ -90,6 +91,7 @@ const getTopic = async () => {
   bookOut.value.setHeight()
 }
 onMounted(getTopic)
+
 </script>
 <style scoped>
 .basicInfo {
