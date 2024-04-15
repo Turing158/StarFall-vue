@@ -1,7 +1,7 @@
 <template>
   <div class="main">
     <router-view/>
-    
+    <div class="bottom"></div>
     <el-backtop>
       <div class="backTop">
         <img style="width: 100%;" src="../assets/img/icon/arrow.png" alt="">
@@ -23,8 +23,7 @@ router.beforeResolve((to,from,next)=>{
     to.path == '/personal/password'||
     to.path == '/personal/email'||
     to.path == '/signIn'||
-    to.path == '/notices'||
-    to.path == '/admin'
+    to.path == '/notices'
 
     ){
     if(userStroe.user != '' || userStroe.isLogin){
@@ -116,5 +115,12 @@ onMounted(init)
   box-shadow: var(--el-box-shadow-lighter);
   border-radius: 10px
 }
-
+.bottom {
+  position: relative;
+  width: 100vw;
+  height: 50px;
+  background-image: url(../assets/img/tail.png);
+  background-size: 2%;
+  z-index: 1;
+}
 </style>

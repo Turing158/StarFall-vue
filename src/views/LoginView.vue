@@ -109,7 +109,7 @@ const confirm = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(100vh - 50px);
+  height: 100vh;
   background-image: url(../assets/img/loginBg.png);
   background-repeat: no-repeat;
   background-size: cover;
