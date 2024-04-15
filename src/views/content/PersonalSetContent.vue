@@ -267,10 +267,10 @@ const confirmAvatar = async()=>{
         })
         let fileName = res.data.object
         userStore.setAvatar(fileName)
-        router.go(0)
+        avatar.value = '/src/assets/avatar/' + fileName
       }
       else{
-        ElMessage.error('服务器异常')
+        ElMessage.error('更改头像失败')
 
       }
     })
