@@ -55,7 +55,7 @@
           layout="prev, pager, next"
           :total="topicTotal"
           :page-size="10"
-          :background="true"
+          background
           @current-change="changePage"
         />
       </div>

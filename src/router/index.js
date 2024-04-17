@@ -14,7 +14,7 @@ const router = createRouter({
       path: '/',
       name: 'main',
       component: MainView,
-      children:[
+      children: [
         {
           path: '/',
           name: '_main',
@@ -93,7 +93,7 @@ const router = createRouter({
               component: () => import('../views/content/PersonalOtherContent.vue')
             }
           ]
-        },
+        }
       ]
     },
     {
@@ -114,7 +114,49 @@ const router = createRouter({
     {
       path: '/admin',
       name: 'admin',
-      component: () => import('../views/admin/MainView.vue')
+      component: () => import('../views/admin/MainView.vue'),
+      children: [
+        {
+          path: '/admin',
+          name: 'adminHome',
+          component: () => import('../views/admin/HomeView.vue')
+        },
+        {
+          path: '/admin/notice',
+          name: 'adminNotice',
+          component: () => import('../views/admin/NoticeView.vue')
+        },
+        {
+          path: '/admin/topic',
+          name: 'adminTopic',
+          component: () => import('../views/admin/TopicView.vue')
+        },
+        {
+          path: '/admin/topic/comment',
+          name: 'adminComment',
+          component: () => import('../views/admin/CommentView.vue')
+        },
+        {
+          path: '/admin/topic/like',
+          name: 'adminLike',
+          component: () => import('../views/admin/LikeView.vue')
+        },
+        {
+          path: '/admin/user',
+          name: 'adminUser',
+          component: () => import('../views/admin/UserView.vue')
+        },
+        {
+          path: '/admin/signIn',
+          name: 'adminSignIn',
+          component: () => import('../views/admin/SignInView.vue')
+        },
+        {
+          path: '/admin/chat',
+          name: 'adminChat',
+          component: () => import('../views/admin/ChatView.vue')
+        }
+      ]
     }
   ]
 })
