@@ -1,5 +1,5 @@
 <template>
-    <div class="main" :style="{backgroundColor:isDark ? '#222' : '#fefefe'}">
+    <div class="main" :style="{backgroundColor:isDark ? '#222' : '#f1f1f1'}">
         <el-menu
         :default-active="page"
         router
@@ -40,7 +40,7 @@
           <span>返回主页</span>
         </el-menu-item>
         <div class="changeTheme">
-          <div class="title">{{ isDark ? 'Dark' : 'Light' }}</div>
+          <div class="title" :style="{color:isDark ? '#f1f1f1' : '#333'}">{{ isDark ? 'Dark' : 'Light' }}</div>
           <el-switch v-model="isDark" @change="changeTheme">
             <template #active-action>
               <span class="custom-active-action">T</span>
