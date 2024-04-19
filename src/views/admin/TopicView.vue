@@ -137,84 +137,21 @@ const topic = ref({
     oldId: ''
 })
 const rules = reactive({
-    id:{
-        required: true,
-        message: 'id不能为空',
-        trigger: 'blur'
-    },
-    title: {
-        required: true,
-        message: '标题不能为空',
-        trigger: 'blur'
-    },
-    label: {
-        required: true,
-        message: '分类不能为空',
-        trigger: 'change'
-    },
-    user: {
-        required: true,
-        message: '用户不能为空',
-        trigger: 'change'
-    },
-    date: {
-        type: 'date',
-        required: true,
-        message: '日期不能为空',
-        trigger: 'blur'
-    },
-    view: {
-        required: true,
-        message: '浏览量不能为空',
-        trigger: 'blur'
-    },
-    version: {
-        required: true,
-        message: '版本不能为空',
-        trigger: 'blur'
-    },
-    topicTitle: {
-        required: true,
-        message: '标题不能为空',
-        trigger: 'blur'
-    },
-    enTitle: {
-        required: true,
-        message: '英文标题不能为空',
-        trigger: 'blur'
-    },
-    author:{
-        required: true,
-        message: '作者不能为空',
-        trigger: 'blur'
-    },
-    source: {
-        required: true,
-        message: '来源不能为空',
-        trigger: 'change'
-    },
-    address: {
-        required: true,
-        message: '原帖地址不能为空',
-        trigger: 'blur'
-    },
-    download: {
-        required: true,
-        message: '下载地址不能为空',
-        trigger: 'blur'
-    },
-    content: {
-        required: true,
-        message: '内容不能为空',
-        trigger: 'blur'
-    },
-    language: {
-        required: true,
-        message: '语言不能为空',
-        trigger: 'blur'
-    }
-
-
+    id:{required: true,message: 'id不能为空',trigger: 'blur'},
+    title: {required: true,message: '标题不能为空',trigger: 'blur'},
+    label: {required: true,message: '分类不能为空',trigger: 'change'},
+    user: {required: true,message: '用户不能为空',trigger: 'change'},
+    date: {type: 'date',required: true,message: '日期不能为空',trigger: 'blur'},
+    view: {required: true,message: '浏览量不能为空',trigger: 'blur'},
+    version: {required: true,message: '版本不能为空',trigger: 'blur'},
+    topicTitle: {required: true,message: '标题不能为空',trigger: 'blur'},
+    enTitle: {required: true,message: '英文标题不能为空',trigger: 'blur'},
+    author:{required: true,message: '作者不能为空',trigger: 'blur'},
+    source: {required: true,message: '来源不能为空',trigger: 'change'},
+    address: {required: true,message: '原帖地址不能为空',trigger: 'blur'},
+    download: {required: true,message: '下载地址不能为空',trigger: 'blur'},
+    content: {required: true,message: '内容不能为空',trigger: 'blur'},
+    language: {required: true,message: '语言不能为空',trigger: 'blur'}
 })
 
 const look = (i)=>{
