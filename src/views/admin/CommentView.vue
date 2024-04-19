@@ -1,9 +1,8 @@
 <template>
   <div class="comment" :class="isDark ? 'dark' : ''">
     <h2>评论管理</h2>
-    <div style="height: 10px"></div>
-    <el-button type="primary" @click="openDialog(0)" plain>添加</el-button>
-    <div style="height: 10px"></div>
+    <div style="margin: 10px 0;">
+      <el-button type="primary" @click="openDialog(0)" plain>添加</el-button></div>
     <el-collapse
       v-model="collapse"
       accordion

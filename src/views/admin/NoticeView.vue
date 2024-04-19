@@ -1,8 +1,9 @@
 <template>
     <div class="notice"  :class="isDark ? 'dark' : ''">
         <h2>公告列表</h2>
-        <div style="height: 10px"></div>
-        <el-button type="primary" @click="onAdd()" plain>添加</el-button>
+        <div style="margin: 10px 0;">
+            <el-button type="primary" @click="onAdd()" plain>添加</el-button>
+        </div>
         <el-table :data="notices" :class="isDark ? 'dark' : ''">
             <el-table-column label="id" prop="id" width="80"/>
             <el-table-column label="公告内容" prop="content"/>

@@ -1,8 +1,9 @@
 <template>
     <div class="topic" :class="isDark ? 'dark' : ''">
         <h2>主题列表</h2>
-        <div style="height: 10px"></div>
-        <el-button type="primary" @click="openDialog(0)" plain >添加</el-button>
+        <div style="margin: 10px 0;">
+            <el-button type="primary" @click="openDialog(0)" plain >添加</el-button>
+        </div>
         <el-table :data="topics" :class="isDark ? 'dark' : ''" style="">
             <el-table-column label="id" prop="id" width="80"/>
             <el-table-column label="标题" prop="title" width="600"/>

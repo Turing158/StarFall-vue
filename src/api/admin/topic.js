@@ -34,3 +34,20 @@ export const addTopicComment = (comment)=>request.post(urlHead+"/adminAddTopicCo
 export const updateTopicComment = (comment)=>request.post(urlHead+"/adminUpdateTopicComment",comment)
 
 export const deleteTopicComment = (comment)=>request.post(urlHead+"/adminDeleteTopicComment",comment)
+
+export const findAllTopicLikeItem = (page)=>{
+    let params = new URLSearchParams();
+    params.append("page",page);
+    return request.post(urlHead+"/adminFindAllTopicItem",params)
+}
+
+export const findAllLikeItem = (id,page)=>{
+    let params = new URLSearchParams();
+    params.append("id",id);
+    params.append("page",page);
+    return request.post(urlHead+"/adminFindLikeItem",params)
+}
+
+export const addTopicLikeItem = (likeLog) =>request.post(urlHead+"/adminAddLikeItem",likeLog)
+
+export const updateTopicLikeItem = (likeLog) =>request.post(urlHead+"/adminUpdateLikeItem",likeLog)
