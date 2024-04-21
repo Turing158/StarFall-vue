@@ -73,6 +73,9 @@ if(localStorage.getItem('isDark') == 'true'){
 provide('isDark', isDark)
 </script>
 <style scoped>
+*{
+  transition: all 0.25s;
+}
 .main{
     width: 100vw;
     height: 100vh;
