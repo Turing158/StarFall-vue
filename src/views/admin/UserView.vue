@@ -601,5 +601,6 @@ onMounted(init)
   --el-color-success-light-9: #444;
   --el-color-danger-light-9: #444;
   --el-text-color-primary: #444;
+  --el-fill-color: ##2b2b2b;
 }
 </style>
