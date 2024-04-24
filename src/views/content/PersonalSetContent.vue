@@ -250,7 +250,6 @@ const init = ()=>{
 }
 
 const setAvatarPage = ref(false)
-const router = useRouter()
 const confirmAvatar = async()=>{
   if(avatar.value == '/src/assets/avatar/' + userStore.avatar){
     ElMessage.error('请先选择图片')
