@@ -132,6 +132,8 @@ const isDark = inject('isDark')
 const topics = ref([])
 
 const likeList = ref([])
+
+const search = ref('')
 const page = ref(1)
 const total = ref(0)
 const handleCurrentChange = (e)=>{

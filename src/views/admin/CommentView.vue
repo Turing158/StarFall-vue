@@ -158,6 +158,7 @@ const showComments = ref([
     date: '2021-10-10'
   }
 ])
+const search = ref('')
 const pageTopic = ref(1)
 const totalTopic = ref(0)
 const handleTopicCurrentChange = (e) => {

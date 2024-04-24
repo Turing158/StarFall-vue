@@ -154,6 +154,8 @@ const rules = reactive({
     language: {required: true,message: '语言不能为空',trigger: 'blur'}
 })
 
+const search = ref('')
+
 const look = (i)=>{
     console.log(i)
 }

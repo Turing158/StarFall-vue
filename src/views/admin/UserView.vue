@@ -213,6 +213,7 @@ const handleCurrentChange = (e) => {
   page.value = e
   getUserList()
 }
+const search = ref('')
 
 const user = ref({
   user: '',

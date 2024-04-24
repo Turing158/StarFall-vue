@@ -55,6 +55,7 @@ import { addNotice, deleteNotice, findAllNotice, updateNotice } from '@/api/admi
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {inject, onMounted, ref} from 'vue'
 const isDark = inject('isDark')
+const search = ref('')
 const notices = ref([])
 const total = ref(0)
 const page = ref(1)
