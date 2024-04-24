@@ -106,7 +106,7 @@
               >
                 <span style="float: left">{{ item.user }}</span>
                 <span
-                  style="float: right; color: var(--el-text-color-secondary); font-size: 12px"
+                  style="position: relative;right: -25px;float: right; color: var(--el-text-color-secondary); font-size: 12px"
                   >{{ item.name }}</span
                 >
               </el-option>

@@ -69,7 +69,9 @@
                                 <span style="float: left">{{ item.user }}</span>
                                 <span
                                     style="
+                                    position: relative;
                                     float: right;
+                                    right: -25px;
                                     color: var(--el-text-color-secondary);
                                     font-size: 12px;
                                     "
