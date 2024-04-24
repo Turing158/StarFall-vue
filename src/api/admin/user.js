@@ -28,3 +28,16 @@ export const updateAvatar = (user,avatar) =>{
     param.append("avatar",avatar)
     return request.post(urlHead+"/adminUpdateAvatar",param)
 }
+
+
+export const findAllSignIn = (page)=>{
+    let param = new URLSearchParams();
+    param.append("page",page)
+    return request.post(urlHead+"/adminFindAllSignIn",param)
+}
+
+export const appendSignIn = (signIn)=>request.post(urlHead+"/adminAppendSignIn",signIn)
+
+export const updateSignIn = (signIn)=>request.post(urlHead+"/adminUpdateSignIn",signIn)
+
+export const deleteSignIn = (signIn)=>request.post(urlHead+"/adminDeleteSignIn",signIn)
