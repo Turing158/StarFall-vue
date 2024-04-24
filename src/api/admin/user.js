@@ -20,3 +20,11 @@ export const deleteUser = (user)=>{
     param.append("user",user)
     return request.post(urlHead+"/adminDeleteUser",param)
 }
+
+
+export const updateAvatar = (user,avatar) =>{
+    let param = new URLSearchParams();
+    param.append("user",user)
+    param.append("avatar",avatar)
+    return request.post(urlHead+"/adminUpdateAvatar",param)
+}

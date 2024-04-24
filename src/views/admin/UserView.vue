@@ -7,8 +7,9 @@
         >tips: 点击头像可更换头像</span
       >
     </div>
+    <input style="display: none;" ref="fileInput" type="file" accept="image/jpeg, image/png, image/jpg"/>
     <el-table :data="users" :class="isDark ? 'dark' : ''">
-      <el-table-column label="用户名" prop="user" fixed width="180"/>
+      <el-table-column label="用户名" prop="user" fixed width="180" />
       <el-table-column label="昵称" prop="name" width="200" />
       <el-table-column label="密码" prop="password" />
       <el-table-column label="邮箱" prop="email" width="200" />
@@ -32,24 +33,24 @@
         <template #default="{ row }">
           <div>
             <img
-                :src="'../src/assets/avatar/' + row.avatar"
-                style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #999"
+              :src="'../src/assets/avatar/' + row.avatar"
+              style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #999"
             />
             <div class="avatarMenu">
-                <el-dropdown class="dropmenu" trigger="click">
-                    <span class="el-dropdown-link">
-                    Dropdown
-                        <br>
-                        <br>
-                        <br>
-                    </span>
-                    <template #dropdown>
-                        <el-dropdown-menu>
-                            <el-dropdown-item>设为默认</el-dropdown-item>
-                            <el-dropdown-item>修改头像</el-dropdown-item>
-                        </el-dropdown-menu>
-                    </template>
-                </el-dropdown>
+              <el-dropdown class="dropmenu" trigger="click">
+                <span class="el-dropdown-link">
+                  Dropdown
+                  <br />
+                  <br />
+                  <br />
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item @click="avatarSelect(row.user,0)">设为默认</el-dropdown-item>
+                    <el-dropdown-item @click="avatarSelect(row.user,1)">修改头像</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
           </div>
         </template>
@@ -152,10 +153,55 @@
         <el-button type="primary" @click="confirm()" plain>确 定</el-button>
       </template>
     </el-dialog>
+    <el-dialog title="裁剪头像" v-model="setAvatarPage" width="600" :close-on-click-modal="false" @close="cancle()">
+      <div class="cropperDiv">
+        <VueCropper
+          class="cropper"
+          ref="cropper"
+          :img="avatar"
+          :outputSize="option.outputSize"
+          :outputType="option.outputType"
+          :info="option.info"
+          :canScale="option.canScale"
+          :autoCrop="option.autoCrop"
+          :autoCropWidth="option.autoCropWidth"
+          :autoCropHeight="option.autoCropHeight"
+          :fixedBox="option.fixedBox"
+          :fixed="option.fixed"
+          :fixedNumber="option.fixedNumber"
+          :canMove="option.canMove"
+          :canMoveBox="option.canMoveBox"
+          :original="option.original"
+          :centerBox="option.centerBox"
+          :infoTrue="option.infoTrue"
+          :full="option.full"
+          :enlarge="option.enlarge"
+          :mode="option.mode"
+          @realTime="realTime"
+        >
+        </VueCropper>
+        <div class="operateClip">
+          <div class="preview">
+            <div class="previewChild" :style="{ scale: 100 / preview.h }">
+              <div v-html="preview.html"></div>
+            </div>
+          </div>
+          <Empty :height="20" />
+          <el-button type="primary" :width="100" @click="cropper.rotateRight()" plain>顺时针旋转90°</el-button>
+          <Empty :height="10" />
+          <el-button type="primary" :width="100" @click="cropper.rotateLeft()" plain>逆时针旋转90°</el-button>
+          <Empty :height="10" />
+          <el-button type="success" :width="100" @click="onclip()" plain>确定</el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script setup>
-import { deleteUser, findAllUser, insertUser, updateUser } from '@/api/admin/user'
+import 'vue-cropper/dist/index.css'
+import { VueCropper }  from "vue-cropper";
+import Empty from '@/components/FitEmpty.vue'
+import { deleteUser, findAllUser, insertUser, updateAvatar, updateUser } from '@/api/admin/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { inject, onMounted, reactive, ref } from 'vue'
 const isDark = inject('isDark')
@@ -216,15 +262,15 @@ const onPage = (e) => {
     dialogTitle.value = '添加用户'
   } else {
     user.value = {
-        user: e.user,
-        password: '',
-        email: e.email,
-        name: e.name,
-        gender: e.gender,
-        birthday: e.birthday,
-        exp: e.exp,
-        level: e.level,
-        role: e.role
+      user: e.user,
+      password: '',
+      email: e.email,
+      name: e.name,
+      gender: e.gender,
+      birthday: e.birthday,
+      exp: e.exp,
+      level: e.level,
+      role: e.role
     }
     oldUser.value = e.user
     oldEmail.value = e.email
@@ -239,20 +285,22 @@ const onDel = (i) => {
     cancelButtonText: '取消',
     type: 'warning'
   })
-    .then(async() => {
-      await deleteUser(i.user).then(res=>{
-            let msg = res.data.msg
-            if(msg == 'SUCCESS'){
-                ElMessage.success('删除成功')
-                getUserList()
-            }else if(msg == 'USER_NOT_EXIST'){
-                ElMessage.error('该用户不存在，你在搞事情吗？')
-            }else{
-                ElMessage.error('删除失败')
-            }
-        }).catch(err=>{
+    .then(async () => {
+      await deleteUser(i.user)
+        .then((res) => {
+          let msg = res.data.msg
+          if (msg == 'SUCCESS') {
+            ElMessage.success('删除成功')
+            getUserList()
+          } else if (msg == 'USER_NOT_EXIST') {
+            ElMessage.error('该用户不存在，你在搞事情吗？')
+          } else {
             ElMessage.error('删除失败')
-      })
+          }
+        })
+        .catch((err) => {
+          ElMessage.error('删除失败')
+        })
     })
     .catch(() => {
       ElMessage.info('已取消删除')
@@ -305,44 +353,132 @@ const addUser = async () => {
       ElMessage.error('添加失败')
     })
 }
-const editUser = async() => {
-    let obj = {
-        user:{
-            user: user.value.user,
-            password: user.value.password,
-            email: user.value.email,
-            name: user.value.name,
-            gender: user.value.gender,
-            birthday: user.value.birthday,
-            exp: user.value.exp,
-            level: user.value.level,
-            role: user.value.role
-        },
-        oldUser: oldUser.value,
-        oldEmail: oldEmail.value
-
-    }
-    await updateUser(obj).then(res=>{
-        let msg = res.data.msg
-        if(msg == 'SUCCESS'){
-            ElMessage.success('修改成功')
-            getUserList()
-            clear()
-        }else if(msg == 'USER_NOT_EXIST'){
-            ElMessage.error('该用户不存在，你在搞事情吗？')
-        }else if(msg == 'USER_EXIST'){
-            ElMessage.error('该用户名已存在')
-        }else if(msg == 'EMAIL_EXIST'){
-            ElMessage.error('该邮箱已存在')
-        }else{
-            ElMessage.error('修改失败')
-        }
-    }).catch(err=>{
+const editUser = async () => {
+  let obj = {
+    user: {
+      user: user.value.user,
+      password: user.value.password,
+      email: user.value.email,
+      name: user.value.name,
+      gender: user.value.gender,
+      birthday: user.value.birthday,
+      exp: user.value.exp,
+      level: user.value.level,
+      role: user.value.role
+    },
+    oldUser: oldUser.value,
+    oldEmail: oldEmail.value
+  }
+  await updateUser(obj)
+    .then((res) => {
+      let msg = res.data.msg
+      if (msg == 'SUCCESS') {
+        ElMessage.success('修改成功')
+        getUserList()
+        clear()
+      } else if (msg == 'USER_NOT_EXIST') {
+        ElMessage.error('该用户不存在，你在搞事情吗？')
+      } else if (msg == 'USER_EXIST') {
+        ElMessage.error('该用户名已存在')
+      } else if (msg == 'EMAIL_EXIST') {
+        ElMessage.error('该邮箱已存在')
+      } else {
         ElMessage.error('修改失败')
+      }
+    })
+    .catch((err) => {
+      ElMessage.error('修改失败')
     })
 }
 
-const setttingAvatar = () => {}
+
+
+
+const avatarSelectingUSer = ref('')
+const selectDefault = async(user)=>{
+  await updateAvatar(user,"default.png").then(res=>{
+    if(res.data.msg == 'SUCCESS'){
+      getUserList()
+      ElMessage.success('设置默认头像成功')
+    }
+    else{
+      ElMessage.error('设置默认头像失败')
+    }
+  }).catch(err=>{
+    ElMessage.error('设置默认头像失败')
+  })
+}
+const avatarSelect = (user,e) => {
+  avatarSelectingUSer.value = user
+  if(e == 0){
+    selectDefault(user)
+  }
+  else{
+    fileInput.value.click()
+  }
+}
+const cropper = ref()
+const avatar = ref('')
+const fileInput = ref()
+const setAvatarPage = ref(false)
+const confirmAvatar = async () => {
+  if (avatar.value == '') {
+    ElMessage.error('请先选择图片')
+  } else {
+    await updateAvatar(avatarSelectingUSer.value,avatar.value).then(res=>{
+      if(res.data.msg == 'SUCCESS'){
+        getUserList()
+        ElMessage.success('修改头像成功')
+      }
+      else{
+        ElMessage.error('修改头像失败')
+      }
+    }).catch(err=>{
+      ElMessage.error('修改头像失败')
+    })
+  }
+  fileInput.value.value = ''
+  avatar.value = ''
+}
+const option = reactive({
+  outputSize: 1, // 裁剪生成图片的质量
+  outputType: 'png', // 裁剪生成图片的格式
+  info: true, // 裁剪框的大小信息
+  canScale: false, // 图片是否允许滚轮缩放
+  autoCrop: true, // 是否默认生成截图框
+  autoCropWidth: 100, // 默认生成截图框宽度
+  autoCropHeight: 100, // 默认生成截图框高度
+  fixedBox: false, // 固定截图框大小 不允许改变
+  fixed: true, // 是否开启截图框宽高固定比例，这个如果设置为true，截图框会是固定比例缩放的，如果设置为false，则截图框的狂宽高比例就不固定了
+  fixedNumber: [1, 1], // 截图框的宽高比例 [ 宽度 , 高度 ]
+  canMove: true, // 上传图片是否可以移动
+  canMoveBox: true, // 截图框能否拖动
+  original: false, // 上传图片按照原始比例渲染
+  centerBox: true, // 截图框是否被限制在图片里面
+  infoTrue: false, // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
+  full: true, // 是否输出原图比例的截图
+  enlarge: '1', // 图片根据截图框输出比例倍数
+  mode: 'contain' // 图片默认渲染方式 contain , cover, 100px, 100% auto
+})
+const preview = ref('')
+const realTime = (data) => {
+  preview.value = data
+}
+const onclip = () => {
+  cropper.value.getCropData((data) => {
+    avatar.value = data
+    setAvatarPage.value = false
+    confirmAvatar()
+  })
+}
+const cancle = ()=>{
+  setAvatarPage.value = false
+  avatarSelectingUSer.value = ''
+}
+
+
+
+
 const getUserList = async () => {
   await findAllUser(page.value)
     .then((res) => {
@@ -353,8 +489,40 @@ const getUserList = async () => {
       ElMessage.error('获取用户列表失败')
     })
 }
+const initInput = ()=>{
+  fileInput.value.addEventListener('change', function () {
+    let fileInputValue = fileInput.value
+    // 清除背景图片:
+    if (!fileInputValue.value) {
+      fileInputValue.value = ''
+      return
+    }
+    let file = fileInputValue.files[0]
+    let size = file.size
+    if (size >= 5 * 1024 * 1024) {
+      fileInputValue.value = ''
+      ElMessage.error('文件大小超出限制(5MB)')
+      return false
+    }
+    if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+      fileInputValue.value = ''
+      ElMessage.error('不是有效的图片文件!')
+      return
+    }
+    // 读取文件:
+    let reader = new FileReader()
+    reader.onload = function (e) {
+      let data = e.target.result
+      avatar.value = data
+      setAvatarPage.value = true
+    }
+    // 以DataURL的形式读取文件:
+    reader.readAsDataURL(file)
+  })
+}
 const init = () => {
   getUserList()
+  initInput()
 }
 onMounted(init)
 </script>
@@ -376,13 +544,40 @@ onMounted(init)
   overflow: hidden;
   opacity: 0;
 }
-.avatarMenu .dropmenu{
-    left: -12px;
+.avatarMenu .dropmenu {
+  left: -12px;
 }
 .page {
   margin-top: 20px;
   display: flex;
   justify-content: end;
+}
+.cropperDiv{
+  height: 300px;
+  display: flex;
+}
+.cropper{
+  width: 300px;
+  height: 300px;
+}
+.operateClip{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  margin-left: 80px;
+}
+.preview{
+  width: 100px;
+  height: 100px;
+  transition: all 0.2s;
+  overflow: hidden;
+}
+.preview:hover{
+  border-radius: 50%;
+}
+.previewChild{
+  width: 100px;
+  transform-origin: 0 0;
 }
 .dark {
   --el-table-tr-bg-color: #2b2b2b;
