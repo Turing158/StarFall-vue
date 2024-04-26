@@ -41,12 +41,12 @@
         </el-menu-item>
         <div class="changeTheme">
           <div class="title" :style="{color:isDark ? '#f1f1f1' : '#333'}">{{ isDark ? 'Dark' : 'Light' }}</div>
-          <el-switch v-model="isDark" @change="changeTheme">
+          <el-switch v-model="isDark" @change="changeTheme" class="switch" :style="{'--el-color-white':isDark?'#222':'#f1f1f1'}">
             <template #active-action>
-              <span class="custom-active-action">T</span>
+              <span>🌙</span>
             </template>
             <template #inactive-action>
-              <span class="custom-inactive-action">F</span>
+              <span style="color: chocolate;">☀</span>
             </template>
           </el-switch>
         </div>
@@ -100,5 +100,9 @@ provide('isDark', isDark)
   font-size: 15px;
   font-weight: bold;
   color: #333;
+}
+.switch{
+  --el-switch-off-color: #e29b00;
+  --el-switch-on-color: rgb(24, 69, 138);
 }
 </style>
