@@ -1,13 +1,14 @@
 <template>
-  <div @click="onFocus()">
+  <div @click="onFocus()" :style="{}">
     <input
       class="input"
       type="text"
       ref="onInput"
       v-model="text"
       :placeholder="placeholder"
-      @input="onChange"
-      :style="{ width: inputWidth + 'px', fontSize: fontSize + 'px' }"
+      @change="onChange"
+      @input="onInputFunc"
+      :style="{ width: inputWidth + 'px',fontSize: props.fontSize + 'px' }"
       :maxlength="maxlength"
     />
     <div class="text" ref="onText">{{ text }}</div>
@@ -40,16 +41,14 @@ const props = defineProps({
   fontSize: {
     type: Number,
     default: 12
-  },
-  update: Number
+  }
 })
 const emit = defineEmits(['update:modelValue'])
 const text = ref(props.modelValue)
 const onInput = ref()
 const onText = ref()
 const inputWidth = ref()
-
-const onChange = () => {
+const onInputFunc = ()=>{
   if (text.value == ' ') {
     text.value = ''
   }
@@ -58,7 +57,7 @@ const onChange = () => {
   } else {
     if(props.maxWidth != -1){
       if((onText.value.clientWidth+5)>props.maxWidth){
-        inputWidth.value = onText.value.clientWidth + 5
+        inputWidth.value = onText.value.clientWidth + fontSize.value + 5
       }
       else{
         inputWidth.value = props.maxWidth
@@ -68,8 +67,9 @@ const onChange = () => {
       inputWidth.value = onText.value.clientWidth + 5
     }
   }
+}
+const onChange = () => {
   emit('update:modelValue', text.value)
-  
 }
 const onFocus = () => {
   onChange()
@@ -79,9 +79,7 @@ const init = () => {
   text.value = props.modelValue
   onChange()
 }
-onMounted(() => {
-  init()
-})
+onMounted(init)
 </script>
 <style scoped>
 .input {
@@ -89,7 +87,7 @@ onMounted(() => {
   background-color: #11111100;
   border: 0;
   outline: none;
-  cursor: pointer;
+  cursor: text;
   transition: all 0.2s;
   border-bottom: 1px dashed #131313;
   font-size: 12px;
@@ -100,7 +98,6 @@ onMounted(() => {
   border-bottom: 1px solid #131313;
 }
 .inputText {
-  cursor: pointer;
   border-bottom: 1px dashed #131313;
   transition: all 0.2s;
 }
