@@ -111,3 +111,4 @@ export const updateEmail = (oldEmailCode,newEmail,newEmailCode)=>{
     return request.post('/updateEmail',param)
 }
 
+export const hasPermission = ()=>request.post('/toAdmin')

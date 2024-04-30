@@ -162,7 +162,6 @@ const onDel = (i)=>{
 const getNoticeList = async()=>{
     await findAllNotice(page.value).then(res=>{
         let msg = res.data.msg
-        console.log(res);
         if(msg == 'SUCCESS'){
             notices.value = res.data.object
             total.value = res.data.num

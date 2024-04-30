@@ -57,8 +57,10 @@
     </div>
 </template>
 <script setup>
+import { hasPermission } from '@/api/user';
 import {House} from '@element-plus/icons-vue'
-import { provide, ref } from 'vue'
+import { ElMessage } from 'element-plus';
+import { onMounted, provide, ref } from 'vue'
 import { useRouter } from 'vue-router';
 const router = useRouter()
 const page = ref(router.currentRoute.value.path)
@@ -71,6 +73,21 @@ if(localStorage.getItem('isDark') == 'true'){
   isDark.value = true
 }
 provide('isDark', isDark)
+const init = async()=>{
+  await hasPermission().then(res=>{
+    let msg = res.data.msg
+    if(msg == 'SUCCESS'){
+      
+    }
+    else{
+      router.push('/')
+    }
+  }).catch(err=>{
+    router.push('/')
+    ElMessage.error("服务异常")
+  })
+}
+onMounted(init)
 </script>
 <style scoped>
 *{
