@@ -11,11 +11,12 @@ export const useUserStore = defineStore('user-Sf', () => {
   const birthday = ref('')
   const avatar = ref('')
   const email = ref('')
+  const role = ref('')
   const isLogin = ref(false)
   const token = ref()
 
 
-  const setUserObject = (User, Name, Level, Exp, MaxExp, Gender, Birthday,Avatar,Email) => {
+  const setUserObject = (User, Name, Level, Exp, MaxExp, Gender, Birthday,Avatar,Email,Role) => {
     user.value = User
     name.value = Name
     level.value = Level
@@ -25,6 +26,7 @@ export const useUserStore = defineStore('user-Sf', () => {
     birthday.value = Birthday
     avatar.value = Avatar
     email.value = Email
+    role.value = Role
   }
   const setEmail = (Email)=>{
     email.value = Email
@@ -55,7 +57,7 @@ export const useUserStore = defineStore('user-Sf', () => {
   }
 
 
-  return { user, name, level, exp, maxExp, gender, birthday,avatar,email,isLogin,token,setUserObject,setLogin,setToken,exit,setEmail,setAvatar }
+  return { user, name, level, exp, maxExp, gender, birthday,avatar,email,role,isLogin,token,setUserObject,setLogin,setToken,exit,setEmail,setAvatar }
 },
 {
   persist: true,
