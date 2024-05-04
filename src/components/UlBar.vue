@@ -3,7 +3,7 @@
     <minSearch></minSearch>
     <li class="ul_li" v-for="(item, index) in UlItem" :key="index">
       <router-link
-        v-show="item.eName != 'blog'"
+        v-show="item.eName != 'blog' && flagShow(item)"
         :to="item.href"
         :class="PageIndex === index ? 'active' : 'ul_border'"
         @click="PageIndex = index"
@@ -55,32 +55,52 @@ const UlItem = ref([
     name: '主页',
     eName: 'home',
     href: '/',
-    admin: false
+    admin: false,
+    needLogin: false
   },
   {
     name: '博客',
     eName: 'blog',
     href: 'https://turing158.github.io',
-    admin: false
+    admin: false,
+    needLogin: false
   },
   {
     name: '主题',
     eName: 'topic',
     href: '/topic',
-    admin: false
+    admin: false,
+    needLogin: false
   },{
     name: '签到',
     eName: 'signIn',
     href: '/signIn',
-    admin: true
+    admin: false,
+    needLogin: true
   },
   {
     name: '管理',
     eName: 'admin',
     href: '/admin',
-    admin: true
+    admin: true,
+    needLogin: true
   }
 ])
+
+const flagShow = (item)=>{
+  let flag = true
+  if(item.needLogin){
+    if(!userStore.isLogin){
+      flag = false
+    }
+  }
+  if(item.admin){
+    if(userStore.role != 'admin'){
+      flag = false
+    }
+  }
+  return flag
+}
 
 const PageIndex = ref(props.pageIndex)
 
