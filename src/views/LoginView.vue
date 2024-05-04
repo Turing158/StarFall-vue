@@ -83,7 +83,8 @@ const confirm = async () => {
                 data.gender,
                 data.birthday,
                 data.avatar,
-                data.email
+                data.email,
+                data.role
               )
               userStore.setLogin(true)
               router.push('/')
