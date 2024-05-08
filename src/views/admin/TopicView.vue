@@ -277,7 +277,6 @@ const getTopicList = async()=>{
         else{
             ElMessage.error("获取主题列表失败")
         }
-        console.log(res.data);
     }).catch(err=>{
         ElMessage.error("服务错误")
     })
