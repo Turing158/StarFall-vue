@@ -8,22 +8,22 @@
       <div class="ad">
         <el-carousel trigger="click">
           <el-carousel-item>
-            <img src="../../assets/img/ad/1.jpg" alt="" width="100%" />
+            <img src="../../assets/img/ad/ad1.png" alt="" width="100%" />
           </el-carousel-item>
           <el-carousel-item>
-            <img src="../../assets/img/ad/2.png" alt="" width="100%" />
+            <img src="../../assets/img/ad/ad2.png" alt="" width="100%" />
           </el-carousel-item>
           <el-carousel-item>
-            <img src="../../assets/img/ad/3.png" alt="" width="100%" />
+            <img src="../../assets/img/ad/ad3.png" alt="" width="100%" />
           </el-carousel-item>
           <el-carousel-item>
-            <img src="../../assets/img/ad/4.png" alt="" width="100%" />
+            <img src="../../assets/img/ad/ad4.png" alt="" width="100%" />
           </el-carousel-item>
           <el-carousel-item>
-            <img src="../../assets/img/ad/5.png" alt="" width="100%" />
+            <img src="../../assets/img/ad/ad5.png" alt="" width="100%" />
           </el-carousel-item>
           <el-carousel-item>
-            <img src="../../assets/img/ad/6.png" alt="" width="100%" />
+            <img src="../../assets/img/ad/ad6.png" alt="" width="100%" />
           </el-carousel-item>
         </el-carousel>
       </div>
