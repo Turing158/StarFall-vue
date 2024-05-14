@@ -2,8 +2,10 @@ import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 
+export const url = 'http://10.24.5.7:8080'
+export const getUrl = ()=>url
 const request = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: url,
   timeout: 3000,
   withCredentials: true
 })

@@ -90,7 +90,7 @@ const onClose = (e) => {
 }
 const webSocket = ref()
 const init = ()=>{
-  let url = 'ws://localhost:8080/message/'+userStroe.token
+  let url = 'ws://10.24.5.7:8080/message/'+userStroe.token
   if(userStroe.isLogin){
     webSocket.value = new WebSocket(url)
     webSocket.value.onopen = onOpen

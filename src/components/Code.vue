@@ -5,10 +5,11 @@
 </template>
 <script setup>
 import { ref } from 'vue'
+import request from '@/util/request';
 let date = new Date()
-const codeImg = ref('http://localhost:8080/getCodeImage?r' + date.getTime())
+const codeImg = ref(request.getUri()+'/getCodeImage?r' + date.getTime())
 const changeCode = () => {
-  codeImg.value = 'http://localhost:8080/getCodeImage?r' + new Date().getTime()
+  codeImg.value = request.getUri()+'/getCodeImage?r' + new Date().getTime()
 }
 defineExpose({
     changeCode
