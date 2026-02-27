@@ -1,10 +1,11 @@
 import request from "@/util/request";
 
-const urlHead = "/admin/chat";
+const urlHead = "/starfall/console/chat";
 
-export const findAllMessage = (page)=>{
+export const findAllMessage = (page,keyword)=>{
     let params = new URLSearchParams();
     params.append("page",page);
+    params.append("keyword",keyword);
     return request.post(urlHead+"/adminFindAllMessage",params)
 }
 

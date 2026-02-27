@@ -12,7 +12,7 @@
             <el-table-column label="心情" prop="emotion"/>
             <el-table-column width="200" align="center">
                 <template #header>
-                    <el-input v-model="search" size="small" placeholder="Type to search" />
+                    <el-input v-model="keyword" size="small" placeholder="Type to search" @input="search" title="可搜用户和签到日期"/>
                 </template>
                 <template #default="{row}">
                     <el-button type="primary" @click="openDialog(row)" plain>编辑</el-button>
@@ -22,6 +22,7 @@
         </el-table>
         <div class="page">
             <el-pagination
+            :class="isDark? 'dark':''"
             @current-change="handleCurrentChange"
             :current-page="page"
             :page-size="10"
@@ -29,10 +30,14 @@
             background
             :total="total"/>
         </div>
-        <el-dialog width="300" v-model="editPage" :title="dialogTitle" :style="{'--el-dialog-bg-color':isDark ? '#2b2b2b' : '#fff','--el-text-color-primary':isDark ? '#dedede' : '#131313'}">
+        <el-dialog :class="isDark ? 'dark' : ''" width="300" v-model="editPage" :title="dialogTitle" :show-close="false">
             <el-form ref="formInput" inline :rules="rules" :model="signIn">
                 <el-form-item label="用户" prop="user">
-                    <el-select style="width: 200px;" v-model="signIn.user" placeholder="请选择用户" :disabled="disabled">
+                    <el-select style="width: 200px;" v-model="signIn.user" placeholder="请选择用户" :disabled="disabled"
+                            filterable
+                            remote
+                            reserve-keyword
+                            :remote-method="remoteMethod">
                         <el-option v-for="item in userSelect" :key="item.user" :label="item.user" :value="item.user" >
                             <span style="float: left">{{ item.user }}</span>
                             <span
@@ -114,7 +119,9 @@ const rules = reactive({
 
 const total = ref(0)
 const page = ref(1)
-const search = ref('')
+const search = ()=>{
+    getSignInList()
+}
 const handleCurrentChange = (e)=>{
     page.value = e
     getSignInList()
@@ -230,9 +237,9 @@ const editSignIn = async()=>{
         }
     })
 }
-
+const keyword = ref('')
 const getSignInList = async()=>{
-    await findAllSignIn(page.value).then(res=>{
+    await findAllSignIn(page.value,keyword.value).then(res=>{
         let msg = res.data.msg
         if(msg == 'SUCCESS'){
             signIns.value = res.data.object
@@ -242,20 +249,25 @@ const getSignInList = async()=>{
         ElMessage.error('服务异常')
     })
 }
-const getUserSelect = async()=>{
-    await findAllUsersForSelect().then(res=>{
-        let msg = res.data.msg
-        if(msg == 'SUCCESS'){
-            userSelect.value = res.data.object
-        }
-    }).catch(err=>{
-        ElMessage.error("服务错误")
-    
-    })
+const remoteMethod = async(queryString)=>{
+  if (!queryString) {
+    userSelect.value = [];
+    return;
+  }
+  await findAllUsersForSelect(queryString).then(res=>{
+    if (res.data.msg === 'SUCCESS') {
+      userSelect.value = res.data.object || [];
+    } else {
+      ElMessage.error('获取用户列表失败！');
+    }
+  })
+  .catch(err=>{
+    console.log(err);
+    ElMessage.error('服务异常');
+  })
 }
 const init = ()=>{
     getSignInList()
-    getUserSelect()
 }
 onMounted(init)
 </script>
@@ -268,33 +280,5 @@ onMounted(init)
     margin-top: 20px;
     display: flex;
     justify-content: end;
-}
-.dark {
-  --el-table-tr-bg-color: #2b2b2b;
-  --el-table-row-hover-bg-color: #444;
-  color: #dedede;
-  --el-table-header-text-color: #dedede;
-  --el-table-header-bg-color: #222;
-  --el-table-border-color: #444;
-  --el-input-border-color: #444;
-  --el-input-bg-color: #2b2b2b;
-  --el-input-text-color: #dedede;
-  --el-text-color-primary: #eee;
-  --el-text-color-regular: #eee;
-  --el-fill-color-blank: #2b2b2b;
-  --el-border-color: #444;
-  --el-pagination-button-bg-color: #2b2b2b;
-  --el-disabled-bg-color: #444;
-  --el-color-primary-light-9: #444;
-  --el-color-warning-light-9: #444;
-  --el-color-success-light-9: #444;
-  --el-color-danger-light-9: #444;
-  --el-text-color-primary: #444;
-  --el-text-color-placeholder: #888;
-  --el-fill-color-light: #222;
-  --el-fill-color: #2b2b2b;
-  --el-disabled-border-color: #444;
-  --el-disabled-bg-color: #222;
-  --el-text-color-primary: #888;
 }
 </style>

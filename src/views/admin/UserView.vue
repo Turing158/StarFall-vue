@@ -33,7 +33,7 @@
         <template #default="{ row }">
           <div>
             <img
-              :src="'../src/assets/avatar/' + row.avatar"
+              :src="getAvatarApi + row.avatar"
               style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #999"
             />
             <div class="avatarMenu">
@@ -46,6 +46,7 @@
                 </span>
                 <template #dropdown>
                   <el-dropdown-menu>
+                    <el-dropdown-item @click="viewAvatar(row.avatar)">查看头像</el-dropdown-item>
                     <el-dropdown-item @click="avatarSelect(row.user,0)">设为默认</el-dropdown-item>
                     <el-dropdown-item @click="avatarSelect(row.user,1)">修改头像</el-dropdown-item>
                   </el-dropdown-menu>
@@ -57,21 +58,23 @@
       </el-table-column>
       <el-table-column label="角色" prop="role" align="center">
         <template #default="{ row }">
-          {{ row.role == 'admin' ? '管理员' : '普通用户' }}
+          <el-tag :type="row.role == 'admin' ? 'danger' : row.role.includes('moderator') ? 'warning' : 'primary'">{{ getRowRoleName(row.role) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column width="200" align="center" fixed="right">
+      <el-table-column width="250" align="center" fixed="right">
         <template #header>
-          <el-input v-model="search" size="small" placeholder="Type to search" />
+          <el-input v-model="keyword" size="small" placeholder="Type to search" @input="search" title="可搜用户名、昵称和邮箱"/>
         </template>
         <template #default="{ row }">
           <el-button type="primary" plain @click="onPage(row)">编辑</el-button>
+          <el-button type="warning" plain @click="showCollection(row)">收藏夹</el-button>
           <el-button type="danger" plain @click="onDel(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
     <div class="page">
       <el-pagination
+        :class="isDark? 'dark':''"
         @current-change="handleCurrentChange"
         :current-page="page"
         :page-size="10"
@@ -81,18 +84,16 @@
       />
     </div>
     <el-dialog
+      :class="isDark ? 'dark' : ''"
       :title="dialogTitle"
       v-model="infoPage"
       width="600"
       :close-on-click-modal="false"
-      :style="{
-        '--el-dialog-bg-color': isDark ? '#2b2b2b' : '#fff',
-        '--el-text-color-primary': isDark ? '#dedede' : '#131313'
-      }"
+      :show-close="false"
     >
       <el-form ref="formInput" inline :rules="rules" :model="user">
         <el-form-item label="用户名" prop="user">
-          <el-input v-model="user.user" style="width: 185px" placeholder="请输入用户名"></el-input>
+          <el-input v-model="user.user" style="width: 185px" placeholder="请输入用户名" :disabled="model === 'edit'"></el-input>
         </el-form-item>
         <el-form-item label="昵称" prop="name">
           <el-input v-model="user.name" style="width: 200px" placeholder="请输入昵称"></el-input>
@@ -145,6 +146,9 @@
           <el-select v-model="user.role" style="width: 200px" placeholder="请选择角色">
             <el-option label="管理员" value="admin"></el-option>
             <el-option label="普通用户" value="user"></el-option>
+            <el-option label="直播区版主" value="live_moderator"></el-option>
+            <el-option label="资源区版主" value="resource_moderator"></el-option>
+            <el-option label="有话说版主" value="talk_moderator"></el-option>
           </el-select>
         </el-form-item>
       </el-form>
@@ -153,7 +157,7 @@
         <el-button type="primary" @click="confirm()" plain>确 定</el-button>
       </template>
     </el-dialog>
-    <el-dialog title="裁剪头像" v-model="setAvatarPage" width="600" :close-on-click-modal="false" @close="cancle()">
+    <el-dialog :class="isDark ? 'dark' : ''" title="裁剪头像" v-model="setAvatarPage" width="600" :close-on-click-modal="false" :show-close="false" @close="cancle()">
       <div class="cropperDiv">
         <VueCropper
           class="cropper"
@@ -195,13 +199,145 @@
         </div>
       </div>
     </el-dialog>
-  </div>
-</template>
+    
+    <el-dialog
+      :class="isDark ? 'dark' : ''"
+      title="头像预览"
+      v-model="viewAvatarDialog"
+      width="600"
+      :close-on-click-modal="false"
+      :show-close="false"
+    >
+      <div style="display: flex; justify-content: center; align-items: flex-start; gap: 40px;">
+        <div style="text-align: center;">
+          <p>大尺寸 (256x256)</p>
+          <img :src="getAvatarApi + currentAvatar" style="width: 256px; height: 256px; border-radius: 50%; border: 2px solid #999; margin-top: 10px;" />
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div style="text-align: center;">
+            <p>中尺寸 (128x128)</p>
+            <img :src="getAvatarApi + currentAvatar" style="width: 128px; height: 128px; border-radius: 50%; border: 2px solid #999; margin-top: 10px;" />
+          </div>
+          <div style="text-align: center;">
+            <p>小尺寸 (64x64)</p>
+            <img :src="getAvatarApi + currentAvatar" style="width: 64px; height: 64px; border-radius: 50%; border: 2px solid #999; margin-top: 10px;" />
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <el-button type="primary" @click="viewAvatarDialog = false" plain>关闭</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- 收藏夹对话框 -->
+    <el-dialog
+      :class="isDark ? 'dark' : ''"
+      title="收藏夹"
+      v-model="isShowCollection"
+      width="1000px"
+      :close-on-click-modal="false"
+      <template #title>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>收藏夹</span>
+            <el-button type="success" @click="openAddCollectionDialog" plain>添加</el-button>
+          </div>
+        </template>
+      <el-table :data="collections" :class="isDark ? 'dark' : ''">
+        <el-table-column label="ID" prop="topicId" width="220" />
+        <el-table-column label="分类" prop="label" width="120" />
+        <el-table-column label="标题" prop="title" min-width="400" />
+        <el-table-column label="主题创建者" prop="name" width="150" >
+          <template #default="{row}">
+            {{row.authorName}}({{row.authorUser}})
+          </template>
+        </el-table-column>
+        <el-table-column label="收藏时间" prop="date" width="160" />
+        <el-table-column label="操作" width="120" align="center" fixed="right">
+          <template #default="{row}">
+            <el-button type="warning" @click="handleRemove(row)" plain>取消收藏</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="page">
+        <el-pagination
+          :class="isDark? 'dark':''"
+          @current-change="handleCurrentCollectionChange"
+          :current-page="collectionPage"
+          :page-size="10"
+          layout="total, prev, pager, next"
+          background
+          :total="totalCollection"
+        />
+      </div>
+      <template #footer>
+        <el-button @click="isShowCollection = false">关闭</el-button>
+      </template>
+      </el-dialog>
+      
+      <!-- 添加收藏对话框 -->
+      <el-dialog
+        :class="isDark ? 'dark' : ''"
+        title="添加收藏"
+        v-model="addCollectionDialog"
+        width="500px"
+        :close-on-click-modal="false"
+      >
+        <el-form :model="Collection" label-width="100px">
+          <el-form-item label="主题ID" required>
+            <el-select style="width: 500px" placeholder="请选择主题" v-model="Collection.topicId"
+                            filterable
+                            remote
+                            reserve-keyword
+                            :remote-method="remoteMethodToTopic">
+              <el-option
+                v-for="item in topicSelect"
+                :key="item.id"
+                :label="item.id"
+                :value="item.id">
+                <span style="float: left">{{ item.id }}</span>
+                <span
+                  style="
+                    float: right;
+                    color: var(--el-text-color-secondary);
+                    font-size: 12px;
+                    margin-top: -8px;
+                  "
+                  >{{ item.title }}<br/><span
+                  style="
+                    float: right;
+                    color: var(--el-text-color-secondary);
+                    font-size: 12px;
+                    margin-top: -18px;
+                  "
+                  ><span style="margin-right: 50px;">{{ item.label }}</span>{{ item.user }}</span>
+                </span>
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="收藏时间">
+            <el-date-picker
+              v-model="Collection.date"
+              type="datetime"
+              placeholder="请选择收藏时间"
+              style="width: 300px"
+              format="YYYY-MM-DD HH:mm:ss"
+              value-format="YYYY-MM-DD HH:mm:ss"
+            ></el-date-picker>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="addCollectionDialog = false">取消</el-button>
+          <el-button type="primary" @click="handleAddCollection">确定</el-button>
+        </template>
+      </el-dialog>
+    </div>
+  </template>
 <script setup>
 import 'vue-cropper/dist/index.css'
 import { VueCropper }  from "vue-cropper";
 import Empty from '@/components/FitEmpty.vue'
-import { deleteUser, findAllUser, insertUser, updateAvatar, updateUser } from '@/api/admin/user'
+import { deleteUser, findAllUser, insertUser, updateAvatar, updateUser,getAvatarApi } from '@/api/admin/user'
+import { getUserCollection,findAllTopicForSelect, addUserCollection, deleteUserCollection } from '@/api/admin/topic'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { inject, onMounted, reactive, ref } from 'vue'
 const isDark = inject('isDark')
@@ -213,7 +349,9 @@ const handleCurrentChange = (e) => {
   page.value = e
   getUserList()
 }
-const search = ref('')
+const search = ()=>{
+  getUserList()
+}
 
 const user = ref({
   user: '',
@@ -229,6 +367,7 @@ const user = ref({
 const oldUser = ref('')
 const oldEmail = ref('')
 const formInput = ref()
+const model = ref('')
 const rules = reactive({
   user: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -253,18 +392,16 @@ const rules = reactive({
   role: [{ required: true, message: '请选择角色', trigger: 'blur' }]
 })
 
-const model = ref('')
 const dialogTitle = ref('')
 const infoPage = ref(false)
 const onPage = (e) => {
   if (e === null) {
-    // 添加
     model.value = 'add'
     dialogTitle.value = '添加用户'
   } else {
     user.value = {
       user: e.user,
-      password: '',
+      password: '******',
       email: e.email,
       name: e.name,
       gender: e.gender,
@@ -280,6 +417,7 @@ const onPage = (e) => {
   }
   infoPage.value = true
 }
+
 const onDel = (i) => {
   ElMessageBox.confirm(i.name + '(' + i.user + ')', '确定删除该用户吗?', {
     confirmButtonText: '确定',
@@ -479,9 +617,9 @@ const cancle = ()=>{
 
 
 
-
+const keyword = ref('')
 const getUserList = async () => {
-  await findAllUser(page.value)
+  await findAllUser(page.value,keyword.value)
     .then((res) => {
       users.value = res.data.object
       total.value = res.data.num
@@ -521,6 +659,135 @@ const initInput = ()=>{
     reader.readAsDataURL(file)
   })
 }
+
+const getRowRoleName = (role)=>{
+  return role == 'admin' ? '管理员' 
+  : role == 'resource_moderator' ? '资源区版主' 
+  : role == 'talk_moderator' ? '有话说版主' 
+  : role == 'live_moderator' ? '直播区版主' 
+  : '普通用户'
+}
+
+// 头像查看相关变量
+const viewAvatarDialog = ref(false)
+const currentAvatar = ref('')
+
+// 查看头像方法
+const viewAvatar = (avatar) => {
+  currentAvatar.value = avatar
+  viewAvatarDialog.value = true
+}
+
+const isShowCollection = ref(false)
+const collections = ref([])
+const totalCollection = ref(0)
+const CollectionUser = ref('')
+
+// 添加收藏对话框相关变量
+const addCollectionDialog = ref(false)
+const Collection = ref({})
+// 打开添加收藏对话框
+const openAddCollectionDialog = () => {
+  Collection.value = {
+    topicId: '',
+    date: new Date()
+  }
+  addCollectionDialog.value = true
+}
+
+// 处理添加收藏
+const handleAddCollection = async() => {
+  // 这里可以添加表单验证
+  if (!Collection.value.topicId) {
+    ElMessage.warning('请输入主题ID')
+    return
+  }
+  Collection.value.user = CollectionUser.value
+  await addUserCollection(Collection.value)
+  .then(res=>{
+    if(res.data.msg == 'SUCCESS'){
+      ElMessage.success('添加收藏成功')
+      getCollection()
+    }
+    else if(res.data.msg == 'EXIST_ERROR'){
+      ElMessage.warning('已收藏过该主题')
+    }
+    else{
+      ElMessage.error('添加收藏失败')
+    }
+  })
+  .catch(err=>{
+    ElMessage.error('添加收藏失败')
+  })
+  
+  addCollectionDialog.value = false
+}
+
+const showCollection = (user)=>{
+  CollectionUser.value = user.user
+  isShowCollection.value = true
+  getCollection()
+}
+const collectionPage = ref(1)
+const handleCurrentCollectionChange = (e)=>{
+  collectionPage.value = e
+  getCollection()
+}
+const getCollection = async () => {
+  await getUserCollection(CollectionUser.value,collectionPage.value)
+  .then(res=>{
+    console.log(res)
+    totalCollection.value = res.data.num
+    collections.value = res.data.object
+  })
+  .catch(err=>{
+    ElMessage.error('获取用户收藏失败')
+  })
+}
+const topicSelect = ref([])
+const remoteMethodToTopic = async (queryString) => {
+  if (!queryString) {
+    topicSelect.value = [];
+    return;
+  }
+  await findAllTopicForSelect(queryString).then(res=>{
+    if (res.data.msg === 'SUCCESS') {
+      topicSelect.value = res.data.object || [];
+    } else {
+      ElMessage.error('获取主题列表失败！');
+    }
+  })
+  .catch(err=>{
+    console.log(err);
+    ElMessage.error('服务异常');
+  })
+}
+
+const handleRemove = async(collection)=>{
+  ElMessageBox.confirm('确定删除收藏吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async()=>{
+    await deleteUserCollection(collection.topicId,collection.user)
+    .then(res=>{
+      if(res.data.msg == 'SUCCESS'){
+        ElMessage.success('删除收藏成功')
+        getCollection()
+      }
+      else if(res.data.msg == 'NOT_EXIST_ERROR'){
+        ElMessage.warning('收藏不存在')
+      }
+      else{
+        ElMessage.error('删除收藏失败')
+      }
+    })
+    .catch(err=>{
+      ElMessage.error('删除收藏失败')
+    })
+  })
+}
+
 const init = () => {
   getUserList()
   initInput()
@@ -579,28 +846,5 @@ onMounted(init)
 .previewChild{
   width: 100px;
   transform-origin: 0 0;
-}
-.dark {
-  --el-table-tr-bg-color: #2b2b2b;
-  --el-table-row-hover-bg-color: #444;
-  color: #dedede;
-  --el-table-header-text-color: #dedede;
-  --el-table-header-bg-color: #222;
-  --el-table-border-color: #444;
-  --el-input-border-color: #444;
-  --el-input-bg-color: #2b2b2b;
-  --el-input-text-color: #dedede;
-  --el-text-color-primary: #eee;
-  --el-text-color-regular: #eee;
-  --el-fill-color-blank: #2b2b2b;
-  --el-border-color: #444;
-  --el-pagination-button-bg-color: #2b2b2b;
-  --el-disabled-bg-color: #444;
-  --el-color-primary-light-9: #444;
-  --el-color-warning-light-9: #444;
-  --el-color-success-light-9: #444;
-  --el-color-danger-light-9: #444;
-  --el-text-color-primary: #444;
-  --el-fill-color: ##2b2b2b;
 }
 </style>

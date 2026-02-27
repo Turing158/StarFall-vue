@@ -7,12 +7,13 @@
         </div>
         <div class="avatar">
           <a :href="'/personal/other/'+props.data.user">
-            <img src="../assets/avatar/default.png" alt="" />
+            <img :src="props.data.avatar" alt="" />
           </a>
         </div>
         <div class="exp">
           <ExpBar :lv="props.data.level" :exp="props.data.exp" :maxExp="props.data.maxExp" />
         </div>
+        <go-chat :user="props.data.user"/>
       </div>
     </td>
     <td>

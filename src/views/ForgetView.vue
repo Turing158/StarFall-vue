@@ -1,11 +1,15 @@
+<!-- 找回密码页面 -->
+
 <template>
     <div class="out">
         <div class="forgetDiv">
-            <button class="back" onclick="window.location.href='/home'">
-                <span>home</span>
-                <br>
-                <span>首页</span>
-            </button>
+            <router-link to="/login">
+                <button class="back">
+                    <span>Login</span>
+                    <br />
+                    <span>登录</span>
+                </button>
+            </router-link>
             <form>
                 <br><br>
                 <h1>找回密码</h1><br><br>
@@ -16,20 +20,14 @@
                 <input type="search" class="email_code_input" name="code" v-model="emailCode" required>
                 <span class="email_code_span">邮箱验证码：</span>
                 <div class="email_code_underline"></div>
-               <div class="getCode" @click="onGetEmailCode()"><McBtn text="获取验证码"/></div>
+               <div class="getCode"><McBtn text="获取验证码" @click="onGetEmailCode()" :cooldown-tamp="timerStore.forgetPasswordTimer" delaySuffix="秒可获取"/></div>
                 <br>
                 <input type="search" class="code_input" name="code" v-model="code" required>
                 <span class="code_span">验证码：</span>
                 <div class="code_underline"></div>
                 <Code ref="codeImg" class="code" width="100px" height="40px" margin="0 5px"/>
                 <div class="operate">
-                    <router-link to="/reg">
-                        <McBtn text="注册" :margin="0" />
-                    </router-link>
-                    <router-link to="/login">
-                        <McBtn text="登录" :margin="50"/>
-                    </router-link>
-                    <McBtn text="验证" :margin="0" @click="onCheck()"/>
+                    <McBtn text="验&emsp;证" :width="100" :height="35" :font-size="18" @click="onCheck()"/>
                 </div>
             </form>
         </div>
@@ -62,9 +60,11 @@ import Code from '@/components/Code.vue';
 import McBtn from '@/components/McBtn.vue';
 import Empty from '@/components/FitEmpty.vue';
 import useUserStore from '@/stores/user';
+import useTimerStore from '@/stores/timer';
 import { ElMessage, ElNotification } from 'element-plus';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { ElLoading } from 'element-plus'
 const forgetPage = ref(false)
 const password = ref('')
 const againPassword = ref('')
@@ -72,26 +72,39 @@ const codeImg = ref()
 const email = ref('')
 const emailCode = ref('')
 const code = ref('')
+const timerStore = useTimerStore()
 const onGetEmailCode = async() => {
+    console.log(email.value)
     if(email.value.length == 0){
         ElMessage.error('邮箱不能为空')
     }
     else{
-        await getEmailCode(email.value).then(res=>{
-            if(res.data.msg === "SUCCESS"){
-                ElMessage.success('验证码发送成功')
-            }
-            else{
-                ElMessage.error('验证码发送失败')
-            }
+        let loading = ElLoading.service({
+            lock: true,
+            text: '发送中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
+        timerStore.setForgetPasswordTimer(Date.now()+60000)
+        await getEmailCode(email.value,false).then(res=>{
+        if(res.data.msg === "SUCCESS"){
+            ElMessage.success('验证码发送成功')
+        }
+        else if(res.data.msg === "SEND_FAST_ERROR"){
+            ElMessage.error('验证码发送过快')
+        }
+        else{
+            ElMessage.error('验证码发送失败')
+        }
         }).catch(err=>{
             ElMessage.error('验证码发送失败')
         })
+        loading.close()
     }
 }
+const changeToken = ref()
 const userStore = useUserStore()
 const onCheck = async() => {
-    if(!userStore.token){
+    if(!changeToken.value){
         if(email.value.length == 0){
             ElMessage.error('邮箱不能为空')
         }
@@ -102,10 +115,15 @@ const onCheck = async() => {
             ElMessage.error('验证码不能为空')
         }
         else{
-            await checkForget(email.value,emailCode.value,code.value).then(res=>{
+            let loading = ElLoading.service({
+                lock: true,
+                text: '验证中...',
+                background: 'rgba(0, 0, 0, 0.7)'
+            })
+            await checkForget(email.value,emailCode.value,codeImg.value.random+":"+code.value).then(res=>{
                 let msg = res.data.msg
                 if(msg === 'SUCCESS'){
-                    userStore.setToken(res.data.object)
+                    changeToken.value = res.data.object
                     forgetPage.value = true
                 }
                 else if(msg === 'EMAIL_CODE_EXPIRED'){
@@ -119,8 +137,9 @@ const onCheck = async() => {
                 }
             }).catch(err=>{
                 ElMessage.error('验证失败')
+                codeImg.value.changeCode()
             })
-            codeImg.value.changeCode()
+            loading.close()
         }
     }
     else{
@@ -145,7 +164,12 @@ const confirm = async()=>{
         ElMessage.error('两次密码不一致')
     }
     else{
-        await forgetPassword(password.value).then(res=>{
+        let loading = ElLoading.service({
+            lock: true,
+            text: '修改中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
+        await forgetPassword(changeToken.value,password.value).then(res=>{
             if(res.data.msg === "SUCCESS"){
                 flag.value = false
                 forgetPage.value = false
@@ -163,7 +187,8 @@ const confirm = async()=>{
         }).catch(err=>{
             ElMessage.error('密码修改失败')
         })
-        
+        loading.close()
+    
     }
 }
 const flag = ref(true)
@@ -330,6 +355,8 @@ p{
     left: 150px;
 }
 .operate{
+    position: relative;
+    top: -20px;
     display: flex;
     justify-content: center;
 }

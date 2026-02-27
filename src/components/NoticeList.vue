@@ -1,7 +1,7 @@
 <template>
     <div class="item" :class="props.active ? 'active' : 'none'">
         <div class="avatar">
-            <img :src="'/src/assets/avatar/'+props.item.avatar" alt="">
+            <img :src="getAvatarApi+props.item.avatar" alt="">
         </div>
         <div class="info">
             <div class="username">{{ props.item.name }}</div>
@@ -10,6 +10,7 @@
     </div>
 </template>
 <script setup>
+import { getAvatarApi } from '@/api/user'
 const props = defineProps({
     item:Object,
     active:Boolean

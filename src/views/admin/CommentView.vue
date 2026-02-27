@@ -1,13 +1,21 @@
 <template>
   <div class="comment" :class="isDark ? 'dark' : ''">
     <h2>评论管理</h2>
-    <div style="margin: 10px 0;">
-      <el-button type="primary" @click="openDialog(0)" plain>添加</el-button></div>
+    <div style="margin: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+      <el-button type="primary" @click="openDialog(0)" plain>添加</el-button>
+      <el-input
+        v-model="keyword"
+        placeholder="请输入搜索内容"
+        style="width: 200px"
+        @input="search"
+        title="可搜主题id、标题和发表用户"
+      />
+    </div>
     <el-collapse
+      :class="isDark ? 'dark' : ''"
       v-model="collapse"
       accordion
       @change="change"
-      :style="{ '--el-text-color-primary': isDark ? '#dedede' : '#131313' }"
     >
       <el-collapse-item
         v-for="(item, index) in topics"
@@ -16,8 +24,8 @@
         :name="item.id"
       >
         <template #title>
-          <span style="width: 100px">{{ item.id }}</span>
-          <span style="width: 600px; text-align: left">{{ item.title }}</span>
+          <span style="width: 250px">{{ item.id }}</span>
+          <span class="title" text-align: left>{{ item.title }}</span>
           <span style="width: 100px">{{ item.label }}</span>
           <span style="width: 100px">{{ item.user }}</span>
         </template>
@@ -25,7 +33,15 @@
           <el-table-column label="发布用户" prop="user" width="80" />
           <el-table-column label="内容" prop="content" />
           <el-table-column label="时间" width="200" prop="date" />
+          <el-table-column label="置顶" width="100">
+            <template #default="{ row }">
+              {{ row.weight === 0 || !row.weight ? '否' : `是[${row.weight}]` }}
+            </template>
+          </el-table-column>
           <el-table-column width="200" align="center">
+            <template #header="{ row }">
+                <el-input :class="isDark? 'dark':''" v-model="commentKeyword" size="small" placeholder="Type to search" @input="searchComment"  title="可搜用户和评论"/>
+            </template>
             <template #default="{ row }">
               <el-button type="primary" @click="openDialog(row)" plain>编辑</el-button>
               <el-button type="danger" @click="onDel(row)" plain>删除</el-button>
@@ -34,6 +50,7 @@
         </el-table>
         <div class="page">
           <el-pagination
+            :class="isDark? 'dark':''"
             @current-change="handleCommentCurrentChange"
             :current-page="pageComment"
             :page-size="10"
@@ -46,6 +63,7 @@
     </el-collapse>
     <div class="page">
       <el-pagination
+        :class="isDark? 'dark':''"
         @current-change="handleTopicCurrentChange"
         :current-page="pageTopic"
         :page-size="10"
@@ -55,20 +73,22 @@
       />
     </div>
     <el-dialog
+      :class="isDark ? 'dark' : ''"
       v-model="dialog"
       align-center
       :title="dialogTitle"
       :width="600"
+      :show-close="false"
       :close-on-click-modal="false"
-      :style="{
-        '--el-dialog-bg-color': isDark ? '#2b2b2b' : '#fff',
-        '--el-text-color-primary': isDark ? '#dedede' : '#131313'
-      }"
     >
       <div class="dialog">
         <el-form inline :rules="rules" :model="editComment" ref="formInput">
           <el-form-item label="主题" prop="topicId">
-            <el-select style="width: 500px" placeholder="请选择主题" v-model="editComment.topicId">
+            <el-select style="width: 500px" placeholder="请选择主题" v-model="editComment.topicId"
+                            filterable
+                            remote
+                            reserve-keyword
+                            :remote-method="remoteMethodToTopic">
               <el-option
                 v-for="item in topicSelect"
                 :key="item.id"
@@ -97,7 +117,11 @@
             </el-select>
           </el-form-item>
           <el-form-item label="用户" prop="user">
-            <el-select style="width: 200px" placeholder="请选择用户" v-model="editComment.user">
+            <el-select style="width: 200px" placeholder="请选择用户" v-model="editComment.user"
+                            filterable
+                            remote
+                            reserve-keyword
+                            :remote-method="remoteMethod">
               <el-option
                 v-for="item in userSelect"
                 :key="item.user"
@@ -115,12 +139,22 @@
           <el-form-item label="日期" prop="date">
             <el-date-picker
               v-model="editComment.date"
-              type="date"
+              type="datetime"
               placeholder="请选择发布日期"
               style="width: 200px"
               format="YYYY-MM-DD HH:mm:ss"
               value-format="YYYY-MM-DD HH:mm:ss"
             ></el-date-picker>
+          </el-form-item>
+          <el-form-item label="置顶权重" prop="weight">
+            <el-input
+              v-model.number="editComment.weight"
+              type="number"
+              placeholder="请输入置顶权重(0表示不置顶)"
+              style="width: 200px"
+              :min="0"
+              :max="5"
+            ></el-input>
           </el-form-item>
         </el-form>
         <el-form label-position="top" :rules="rules" :model="editComment">
@@ -158,7 +192,6 @@ const showComments = ref([
     date: '2021-10-10'
   }
 ])
-const search = ref('')
 const pageTopic = ref(1)
 const totalTopic = ref(0)
 const handleTopicCurrentChange = (e) => {
@@ -176,16 +209,20 @@ const editComment = ref({
   topicId: '',
   user: '',
   content: '',
-  date: ''
+  date: '',
+  weight: 0
 })
 const oldComment = ref({
   topicId: '',
   user: '',
   content: '',
-  date: ''
+  date: '',
+  weight: 0
 })
+const commentKeyword = ref('')
+const keyword = ref('')
 const getTopicComments = async (id, page) => {
-  await findAllTopicComment(id, page)
+  await findAllTopicComment(id, page, commentKeyword.value)
     .then((res) => {
       let msg = res.data.msg
       if (msg == 'SUCCESS') {
@@ -203,6 +240,7 @@ const change = (e) => {
   if (e != '') {
     pageComment.value = 1
     currentId.value = e
+    commentKeyword.value = ''
     getTopicComments(e, 1)
   }
 }
@@ -219,7 +257,8 @@ const openDialog = (e) => {
         topicId: e.topicId,
         user: e.user,
         content: e.content,
-        date: e.date
+        date: e.date,
+        weight: e.weight || 0
     }
   }
 }
@@ -228,18 +267,20 @@ const rules = reactive({
     topicId: [{ required: true, message: '请选择主题', trigger: 'blur' }],
     user: [{ required: true, message: '请选择用户', trigger: 'blur' }],
     date: [{ required: true, message: '请选择日期', trigger: 'blur' }],
-    content: [{ required: true, message: '请输入评论内容', trigger: 'blur' }]
+    content: [{ required: true, message: '请输入评论内容', trigger: 'blur' }],
+    weight: [{ type: 'number', message: '权重必须是数字', trigger: 'blur' }]
 })
 const confirm = () => {
     formInput.value.validate(async(valid) => {
         if (valid && editComment.value.content.length > 0) {
             if(dialogTitle.value == '添加评论'){
                 let comment = {
-                    topicId: editComment.value.topicId,
-                    user: editComment.value.user,
-                    content: editComment.value.content,
-                    date: editComment.value.date
-                }
+                topicId: editComment.value.topicId,
+                user: editComment.value.user,
+                content: editComment.value.content,
+                date: editComment.value.date,
+                weight: editComment.value.weight || 0
+            }
                 await addTopicComment(comment).then(res=>{
                     let msg = res.data.msg
                     if(msg == 'SUCCESS'){
@@ -264,11 +305,13 @@ const confirm = () => {
                     user: editComment.value.user,
                     content: editComment.value.content,
                     date: editComment.value.date,
+                    weight: editComment.value.weight || 0,
                     oldTopicId: oldComment.value.topicId,
                     oldUser: oldComment.value.user,
-                    oldDate: oldComment.value.date
+                    oldDate: oldComment.value.date,
+                    oldWeight: oldComment.value.weight || 0
                 }
-                if(editComment.value.topicId == oldComment.value.topicId && editComment.value.user == oldComment.value.user && editComment.value.date == oldComment.value.date && editComment.value.content == oldComment.value.content){
+                if(editComment.value.topicId == oldComment.value.topicId && editComment.value.user == oldComment.value.user && editComment.value.date == oldComment.value.date && editComment.value.content == oldComment.value.content && editComment.value.weight == oldComment.value.weight){
                     ElMessage.error('未修改任何内容')
                 }
                 else{
@@ -282,9 +325,6 @@ const confirm = () => {
                         }
                         else if(msg == 'NOT_EXIST_ERROR'){
                             ElMessage.error('不存在改评论，你在干嘛！')
-                        }
-                        else if(msg == 'EXIST_ERROR'){
-                            ElMessage.error('已存在该评论，请换个时间再试')
                         }
                         else{
                             ElMessage.error('修改失败')
@@ -303,7 +343,8 @@ const clear = () => {
     topicId: '',
     user: '',
     content: '',
-    date: ''
+    date: '',
+    weight: 0
   }
 }
 const onDel = (i) => {
@@ -340,7 +381,7 @@ const onDel = (i) => {
     })
 }
 const getTopicList = async () => {
-  await findAllTopic(pageTopic.value)
+  await findAllTopic(pageTopic.value, keyword.value)
     .then((res) => {
       let msg = res.data.msg
       if (msg == 'SUCCESS') {
@@ -355,35 +396,51 @@ const getTopicList = async () => {
     })
 }
 const userSelect = ref([])
-const getUserSelect = async () => {
-  await findAllUsersForSelect()
-    .then((res) => {
-      let msg = res.data.msg
-      if (msg == 'SUCCESS') {
-        userSelect.value = res.data.object
-      }
-    })
-    .catch((err) => {
-      ElMessage.error('服务错误')
-    })
+const remoteMethod = async(queryString)=>{
+  if (!queryString) {
+    userSelect.value = [];
+    return;
+  }
+  await findAllUsersForSelect(queryString).then(res=>{
+    if (res.data.msg === 'SUCCESS') {
+      userSelect.value = res.data.object || [];
+    } else {
+      ElMessage.error('获取用户列表失败！');
+    }
+  })
+  .catch(err=>{
+    console.log(err);
+    ElMessage.error('服务异常');
+  })
 }
 const topicSelect = ref([])
-const getTopicSelect = async () => {
-  await findAllTopicForSelect()
-    .then((res) => {
-      let msg = res.data.msg
-      if (msg == 'SUCCESS') {
-        topicSelect.value = res.data.object
-      }
-    })
-    .catch((err) => {
-      ElMessage.error('服务错误')
-    })
+const remoteMethodToTopic = async (queryString) => {
+  if (!queryString) {
+    topicSelect.value = [];
+    return;
+  }
+  await findAllTopicForSelect(queryString).then(res=>{
+    if (res.data.msg === 'SUCCESS') {
+      topicSelect.value = res.data.object || [];
+    } else {
+      ElMessage.error('获取主题列表失败！');
+    }
+  })
+  .catch(err=>{
+    console.log(err);
+    ElMessage.error('服务异常');
+  })
+}
+const search = ()=>{
+    getTopicList()
+}
+const searchComment = ()=>{
+  console.log(currentId.value)
+  pageComment.value = 1
+  getTopicComments(currentId.value, pageComment.value)
 }
 const init = () => {
   getTopicList()
-  getUserSelect()
-  getTopicSelect()
 }
 onMounted(init)
 </script>
@@ -403,27 +460,11 @@ onMounted(init)
   justify-content: end;
   margin-right: 10px;
 }
-.dark {
-  --el-table-tr-bg-color: #2b2b2b;
-  --el-table-row-hover-bg-color: #444;
-  color: #dedede;
-  --el-table-header-text-color: #dedede;
-  --el-table-header-bg-color: #222;
-  --el-table-border-color: #444;
-  --el-input-border-color: #444;
-  --el-input-bg-color: #2b2b2b;
-  --el-input-text-color: #dedede;
-  --el-text-color-primary: #eee;
-  --el-text-color-regular: #eee;
-  --el-fill-color-blank: #2b2b2b;
-  --el-border-color: #444;
-  --el-pagination-button-bg-color: #2b2b2b;
-  --el-fill-color: #222;
-  --el-disabled-bg-color: #444;
-  --el-color-primary-light-9: #444;
-  --el-color-warning-light-9: #444;
-  --el-color-success-light-9: #444;
-  --el-color-danger-light-9: #444;
-  --el-text-color-primary: #eee;
+.title{
+  width: 600px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

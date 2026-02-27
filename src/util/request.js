@@ -2,10 +2,10 @@ import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 
-export const url = 'http://10.24.5.7:8080'
+export const url = window.location.href.split("/").slice(0,3).join("/") + "/api"
 export const getUrl = ()=>url
 const request = axios.create({
-  baseURL: url,
+  baseURL: "/api",
   timeout: 3000,
   withCredentials: true
 })
@@ -25,4 +25,11 @@ request.interceptors.response.use(res=>{
   }
   return res
 })
+
+export const bilibiliApi = axios.create({
+  baseURL: "/bilibiliApi",
+  timeout: 3000,
+  withCredentials: true
+})
+
 export default request

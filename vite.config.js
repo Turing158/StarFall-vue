@@ -14,5 +14,22 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+server: {
+    proxy: {
+      '/bilibiliApi': {
+        target: 'https://api.live.bilibili.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/bilibiliApi/, ''),
+        secure: false
+      },
+      '/api': {
+        target: "http://localhost:8312",
+        changeOrigin: true,
+        ws: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: false
+      }
+    }
   }
 })

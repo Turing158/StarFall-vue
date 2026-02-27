@@ -1,6 +1,6 @@
 import request from "@/util/request";
 
-const urlHead = "/admin/notice";
+const urlHead = "/starfall/console/notice";
 
 export const findAllNotice = (page)=>{
     let params = new URLSearchParams();

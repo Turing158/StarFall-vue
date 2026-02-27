@@ -1,3 +1,4 @@
+<!-- 个人中心(页面：个人信息、收藏夹、个人设置、修改密码、邮箱) -->
 <template>
   <div>
     <Ul class="ul"></Ul>
@@ -30,6 +31,10 @@ const pages = [
     path: '/personal'
   },
   {
+    name: '收藏夹',
+    path: '/personal/collection'
+  },
+  {
     name: '个人设置',
     path: '/personal/setting'
   },
@@ -46,19 +51,22 @@ const route = useRoute()
 const pageIndex = ref(0)
 if (route.path == '/personal') {
   pageIndex.value = 0
-} else if (route.path == '/personal/setting') {
+} else if (route.path == '/personal/collection') {
   pageIndex.value = 1
-} else if (route.path == '/personal/password') {
+} else if (route.path == '/personal/setting') {
   pageIndex.value = 2
-} else if (route.path == '/personal/email') {
+} else if (route.path == '/personal/password') {
   pageIndex.value = 3
+} else if (route.path == '/personal/email') {
+  pageIndex.value = 4
 } else {
   pageIndex.value = -1
 }
 </script>
 <style scoped>
 .ul {
-  position: fixed;
+  position: absolute;
+  top:0;
 }
 .outContent {
   min-height: calc(100vh - 200px);

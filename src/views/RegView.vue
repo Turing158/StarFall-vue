@@ -1,11 +1,12 @@
+<!-- 注册 -->
 <template>
   <div class="out">
     <div class="regDiv" v-on:keydown.enter="onReg">
-      <router-link to="/">
+      <router-link to="/login">
         <button class="back">
-          <span>home</span>
+          <span>Login</span>
           <br />
-          <span>首页</span>
+          <span>登录</span>
         </button>
       </router-link>
       <form method="get">
@@ -34,7 +35,7 @@
           maxlength="6"
         />
         <div class="getCode" v-show="flag" @click="onGetEmailCode()"><McBtn text="获取验证码" /></div>
-        <div class="getCode" v-show="!flag"><McBtn :text="second + '秒后重试'" /></div>
+        <div class="getCode" v-show="!flag"><McBtn>{{ second }}秒后重试</McBtn></div>
         <span class="emailCode_span">邮箱验证码：</span>
         <div class="emailCode_underline"></div>
         <br />
@@ -43,11 +44,8 @@
         <div class="code_underline"></div>
         <Code class="code" ref="codeImg" width="100px" height="40px" margin="0 5px" />
         <div class="operate">
-          <router-link to="/login">
-            <McBtn text="登录" :margin="25" />
-          </router-link>
           <div @click="onReg()">
-            <McBtn text="注册" :margin="25" />
+            <McBtn text="注&emsp;册" :width="100" :height="40" />
           </div>
         </div>
       </form>
@@ -61,6 +59,7 @@ import { ElMessage, ElNotification } from 'element-plus'
 import Code from '@/components/Code.vue'
 import { ref } from 'vue'
 import router from '@/router'
+import { ElLoading } from 'element-plus'
 const user = ref('')
 const password = ref('')
 const email = ref('')
@@ -72,7 +71,12 @@ const second = ref(30)
 const onGetEmailCode = async () => {
   if (flag.value) {
     if (email.value.length != 0) {
-      await getEmailCode(email.value)
+      let loading = ElLoading.service({
+        lock: true,
+        text: '发送中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
+      await getEmailCode(email.value,true)
         .then((res) => {
           let msg = res.data.msg
           if (msg == 'EMAIL_ERROR') {
@@ -100,6 +104,9 @@ const onGetEmailCode = async () => {
           console.log(err)
           ElMessage.error('服务异常')
         })
+        .finally(()=>{
+          loading.close()
+        })
     } else {
       ElMessage.error('邮箱不能为空')
     }
@@ -118,7 +125,12 @@ const onReg = async () => {
   } else if (code.value.length == 0) {
     ElMessage.error('验证码不能为空')
   } else {
-    await register(user.value, password.value, email.value, emailCode.value, code.value).then(
+    let loading = ElLoading.service({
+      lock: true,
+      text: '注册中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
+    await register(user.value, password.value, email.value, emailCode.value, codeImg.value.random+":"+code.value).then(
       (res) => {
         let msg = res.data.msg
         if (msg == 'EMAIL_ERROR') {
@@ -127,18 +139,26 @@ const onReg = async () => {
           ElMessage.error('邮箱验证码错误')
         } else if (msg == 'USER_ERROR') {
           ElMessage.error('用户名已存在')
-        } else {
+        } else if (msg == 'CODE_ERROR') {
+          ElMessage.error('验证码错误')
+        }else if(msg == 'SUCCESS'){
+          router.push('/login')
           ElNotification({
               title: '注册成功',
               message:'已前往登录界面，可进行登录',
               type:'success'
             })
-          router.push('/login')
+        } else {
+          ElMessage.error('服务异常')
         }
+        console.log(res)
       }
     )
     .catch((err) => {
       ElMessage.error('服务异常')
+    })
+    .finally(()=>{
+      loading.close()
     })
     codeImg.value.changeCode()
   }
@@ -149,6 +169,9 @@ const upper = (e) => {
 
 </script>
 <style scoped>
+*{
+  transition: all 0.2s;
+}
 .out {
   display: flex;
   justify-content: center;
@@ -305,6 +328,7 @@ img {
 .operate {
   display: flex;
   justify-content: center;
+  margin-top: -20px;
 }
 .getCode {
   position: absolute;

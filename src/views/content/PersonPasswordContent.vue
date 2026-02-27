@@ -59,7 +59,7 @@ import Empty from '@/components/FitEmpty.vue'
 import McBtn from '@/components/McBtn.vue'
 import useUserStore from '@/stores/user'
 import Code from '@/components/Code.vue'
-import { ElMessage, ElNotification } from 'element-plus'
+import { ElMessage, ElNotification, ElLoading } from 'element-plus'
 import { ref } from 'vue'
 
 
@@ -78,7 +78,12 @@ const confirm = async () => {
   } else if (newPassword.value != againPassword.value) {
     ElMessage.error('新密码与再次输入的密码不同')
   } else {
-    await settingPassword(oldPassword.value, newPassword.value, code.value)
+    let loading = ElLoading.service({
+      lock: true,
+      text: '正在修改...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
+    await settingPassword(oldPassword.value, newPassword.value, codeImg.value.random+":"+code.value)
       .then((res) => {
         let msg = res.data.msg
         if (msg == 'CODE_ERROR') {
@@ -100,6 +105,9 @@ const confirm = async () => {
       })
       .catch((err) => {
         ElMessage.error('服务异常')
+      })
+      .finally(() => {
+        loading.close()
       })
       code.value = ''
       codeImg.value.changeCode()

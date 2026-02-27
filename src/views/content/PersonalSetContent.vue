@@ -102,8 +102,8 @@ import Book from '@/components/Book.vue'
 import Empty from '@/components/FitEmpty.vue'
 import McBtn from '@/components/McBtn.vue'
 import useUserStore from '@/stores/user'
-import { ElMessage, ElNotification } from 'element-plus'
-import { saveInfo, settingAvatar } from '@/api/user'
+import { ElMessage, ElNotification, ElLoading } from 'element-plus'
+import { saveInfo, settingAvatar, getAvatarApi } from '@/api/user'
 import Code from '@/components/Code.vue'
 import { useRouter } from 'vue-router';
 const codeImg = ref()
@@ -169,7 +169,12 @@ const onSaveInfo = async () => {
   } else {
     if(name.value.length <= 10){
       if(code.value.length != 0){
-        await saveInfo(name.value, checkGenderToValue(gender.value),birthday.value,code.value)
+        let loading = ElLoading.service({
+          lock: true,
+          text: '正在修改...',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
+        await saveInfo(name.value, checkGenderToValue(gender.value),birthday.value,codeImg.value.random+":"+code.value)
           .then((res) => {
             let msg = res.data.msg
             
@@ -181,7 +186,7 @@ const onSaveInfo = async () => {
             }
             else {
               let data = res.data.object
-              userStore.setUserObject(data.user,data.name,data.level,data.exp,data.maxExp,data.gender,data.birthday,data.avatar,data.email)
+              userStore.setUserObject(data.user,data.name,data.level,data.exp,data.maxExp,data.gender,data.birthday,data.avatar,data.email,data.role)
               name.value = data.name,
               gender.value = checkGenderToLabel(data.gender)
               birthday.value = data.birthday
@@ -194,6 +199,8 @@ const onSaveInfo = async () => {
           })
           .catch((err) => {
             ElMessage.error('服务异常')
+          }).finally(() => {
+            loading.close()
           })
           code.value = ''
           codeImg.value.changeCode()
@@ -216,7 +223,7 @@ const reset = () => {
 const cropper = ref()
 const fileInput = ref()
 const tip = ref('')
-const avatar = ref('/src/assets/avatar/' + userStore.avatar)
+const avatar = ref(userStore.avatar)
 const init = ()=>{
   fileInput.value.addEventListener('change', function() {
     let fileInputValue = fileInput.value
@@ -251,10 +258,16 @@ const init = ()=>{
 
 const setAvatarPage = ref(false)
 const confirmAvatar = async()=>{
-  if(avatar.value == '/src/assets/avatar/' + userStore.avatar){
+  console.log(avatar.value)
+  if(avatar.value == userStore.avatar){
     ElMessage.error('请先选择图片')
   }
   else{
+    let loading = ElLoading.service({
+      lock: true,
+      text: '正在修改...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
     await settingAvatar(avatar.value).then(res=>{
       let msg = res.data.msg
       if(msg == 'SUCCESS'){
@@ -265,12 +278,14 @@ const confirmAvatar = async()=>{
         })
         let fileName = res.data.object
         userStore.setAvatar(fileName)
-        avatar.value = '/src/assets/avatar/' + fileName
+        avatar.value =  getAvatarApi + fileName
       }
       else{
         ElMessage.error('更改头像失败')
 
       }
+    }).finally(() => {
+      loading.close()
     })
   }
 }
@@ -324,6 +339,7 @@ onMounted(init)
   height: 90px;
   margin: 5px;
   background-size: cover;
+  image-rendering: auto;
 }
 .setAvatarInput{
   position: absolute;

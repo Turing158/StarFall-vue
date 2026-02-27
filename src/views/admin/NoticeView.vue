@@ -8,9 +8,6 @@
             <el-table-column label="id" prop="id" width="80"/>
             <el-table-column label="公告内容" prop="content"/>
             <el-table-column width="200" align="center">
-                <template #header>
-                    <el-input v-model="search" size="small" placeholder="Type to search" />
-                </template>
                 <template #default="{row}">
                     <el-button type="primary" @click="onEdit(row)" plain>编辑</el-button>
                     <el-button type="danger" @click="onDel(row)" plain>删除</el-button>
@@ -19,6 +16,7 @@
         </el-table>
         <div class="page">
             <el-pagination
+            :class="isDark? 'dark':''"
             @current-change="handleCurrentChange"
             :current-page="page"
             :page-size="10"
@@ -26,7 +24,7 @@
             background
             :total="total"/>
         </div>
-        <el-dialog v-model="editPage" title="编辑公告" :style="{'--el-dialog-bg-color':isDark ? '#2b2b2b' : '#fff','--el-text-color-primary':isDark ? '#dedede' : '#131313'}">
+        <el-dialog :class="isDark ? 'dark' : ''" v-model="editPage" title="编辑公告">
             <el-form>
                 <el-form-item label="公告内容">
                     <el-input v-model="noticeContent"></el-input>
@@ -37,7 +35,7 @@
                 <el-button type="primary" @click="confirmEdit()" plain>确 定</el-button>
             </template>
         </el-dialog>
-        <el-dialog v-model="addPage" title="添加公告" :style="{'--el-dialog-bg-color':isDark ? '#2b2b2b' : '#fff','--el-text-color-primary':isDark ? '#dedede' : '#131313'}">
+        <el-dialog :class="isDark ? 'dark' : ''" v-model="addPage" title="添加公告">
             <el-form>
                 <el-form-item label="公告内容">
                     <el-input v-model="noticeContent"></el-input>
@@ -55,7 +53,6 @@ import { addNotice, deleteNotice, findAllNotice, updateNotice } from '@/api/admi
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {inject, onMounted, ref} from 'vue'
 const isDark = inject('isDark')
-const search = ref('')
 const notices = ref([])
 const total = ref(0)
 const page = ref(1)
@@ -184,28 +181,5 @@ onMounted(init)
     margin-top: 20px;
     display: flex;
     justify-content: end;
-}
-.dark{
-    --el-table-tr-bg-color: #2b2b2b;
-    --el-table-row-hover-bg-color: #444;
-    color: #dedede;
-    --el-table-header-text-color:#dedede;
-    --el-table-header-bg-color: #222;
-    --el-table-border-color: #444;
-    --el-input-border-color: #444;
-    --el-input-bg-color: #2b2b2b;
-    --el-input-text-color: #dedede;
-    --el-text-color-primary: #eee;
-    --el-text-color-regular: #eee;
-    --el-fill-color-blank: #2b2b2b;
-    --el-border-color: #444;
-    --el-pagination-button-bg-color: #2b2b2b;
-    --el-fill-color: #2b2b2b;
-    --el-disabled-bg-color: #444;
-    --el-color-primary-light-9: #444;
-    --el-color-warning-light-9: #444;
-    --el-color-success-light-9: #444;
-    --el-color-danger-light-9: #444;
-    --el-text-color-primary: #888;
 }
 </style>

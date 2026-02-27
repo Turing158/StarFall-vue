@@ -5,7 +5,7 @@
             <el-button type="primary" @click="onAdd()" plain>添加</el-button>
         </div>
         <el-table :data="topics" :class="isDark ? 'dark' : ''">
-            <el-table-column label="主题id" prop="id" width="80"/>
+            <el-table-column label="主题id" prop="id" width="250"/>
             <el-table-column label="标题" prop="title" width="600"/>
             <el-table-column label="分类" prop="label"/>
             <el-table-column label="用户" prop="user"/>
@@ -13,7 +13,7 @@
             <el-table-column label="踩" prop="dislike"/>
             <el-table-column width="120" align="center" fixed="right">
                 <template #header>
-                    <el-input v-model="search" size="small" placeholder="Type to search" />
+                    <el-input v-model="keyword" size="small" placeholder="Type to search" @input="search" title="可搜主题id、标题和发表用户"/>
                 </template>
                 <template #default="{row}">
                     <el-button type="primary" @click="onEdit(row)" plain>编辑</el-button>
@@ -22,6 +22,7 @@
         </el-table>
         <div class="page">
             <el-pagination
+            :class="isDark? 'dark':''"
             @current-change="handleCurrentChange"
             :current-page="page"
             :page-size="10"
@@ -29,10 +30,14 @@
             background
             :total="total"/>
         </div>
-        <el-dialog v-model="addPage" :width="600" title="添加点赞信息" :close-on-click-modal="false" :style="{'--el-dialog-bg-color':isDark ? '#2b2b2b' : '#fff','--el-text-color-primary':isDark ? '#dedede' : '#131313'}">
+        <el-dialog :class="isDark ? 'dark' : ''" v-model="addPage" :width="600" title="添加点赞信息" :close-on-click-modal="false" :show-close="false">
             <el-form ref="formInput" inline :rules="rules" :model="like">
                 <el-form-item label="主题id" prop="topicId">
-                    <el-select v-model="like.topicId" style="width: 500px;">
+                    <el-select v-model="like.topicId" style="width: 500px;" 
+                            filterable
+                            remote
+                            reserve-keyword
+                            :remote-method="remoteMethodToTopic">
                         <el-option
                             v-for="item in topicSelect"
                             :key="item.id"
@@ -61,7 +66,11 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="用户" prop="user">
-                    <el-select v-model="like.user" style="width: 200px;">
+                    <el-select v-model="like.user" style="width: 200px;"
+                            filterable
+                            remote
+                            reserve-keyword
+                            :remote-method="remoteMethod">
                         <el-option
                             v-for="item in userSelect"
                             :key="item.user"
@@ -88,7 +97,7 @@
                 <el-button type="primary" @click="confirm()" plain>确 定</el-button>
             </template>
         </el-dialog>
-        <el-dialog v-model="editPage" width="600" title="修改点赞信息" align-center :close-on-click-modal="false" :style="{'--el-dialog-bg-color':isDark ? '#2b2b2b' : '#fff','--el-text-color-primary':isDark ? '#dedede' : '#131313'}">
+        <el-dialog :class="isDark ? 'dark' : ''" v-model="editPage" width="800" title="修改点赞信息" align-center :close-on-click-modal="false">
             <el-table :data="likeList" max-height="500" :class="isDark ? 'dark' : ''">
                 <el-table-column label="用户" prop="user" width="250">
                     <template #default="{row}">
@@ -102,8 +111,11 @@
                         <span v-show="row.status == 2">踩</span>
                     </template>
                 </el-table-column>
-                <el-table-column label="时间" prop="date" width="200"/>
+                <el-table-column label="时间" prop="date" width="250"/>
                 <el-table-column align="right" width="180" fixed="right">
+                    <template #header>
+                        <el-input :class="isDark? 'dark':''" v-model="likeKeyword" size="small" placeholder="Type to search" @input="searchLike" title="可搜用户和点赞状态（0和1）"/>
+                    </template>
                     <template #default="{row}">
                         <el-button type="success" @click="onEditLike(1,row)" v-show="row.status == 2" plain>改赞</el-button>
                         <el-button type="danger" @click="onEditLike(2,row)" v-show="row.status == 1" plain>改踩</el-button>
@@ -113,6 +125,7 @@
             </el-table>
             <div class="page">
                 <el-pagination
+                :class="isDark? 'dark':''"
                 @current-change="handleLikeItemCurrentChange"
                 :current-page="pageLikeItem"
                 :page-size="10"
@@ -133,7 +146,9 @@ const topics = ref([])
 
 const likeList = ref([])
 
-const search = ref('')
+const search = ()=>{
+    getTopicLikeList()
+}
 const page = ref(1)
 const total = ref(0)
 const handleCurrentChange = (e)=>{
@@ -233,8 +248,9 @@ const handleLikeItemCurrentChange = (e)=>{
     pageLikeItem.value = e
     getLikeItem()
 }
+const likeKeyword = ref('')
 const getLikeItem = async()=>{
-    await findAllLikeItem(onEditTopicId.value,pageLikeItem.value ).then(res=>{
+    await findAllLikeItem(onEditTopicId.value,pageLikeItem.value,likeKeyword.value).then(res=>{
         let msg = res.data.msg
         if(msg == 'SUCCESS'){
             likeList.value = res.data.object
@@ -245,33 +261,44 @@ const getLikeItem = async()=>{
     })
 }
 const userSelect = ref([])
-const getUserSelect = async () => {
-  await findAllUsersForSelect()
-    .then((res) => {
-      let msg = res.data.msg
-      if (msg == 'SUCCESS') {
-        userSelect.value = res.data.object
-      }
-    })
-    .catch((err) => {
-      ElMessage.error('服务错误')
-    })
+const remoteMethod = async(queryString)=>{
+  if (!queryString) {
+    userSelect.value = [];
+    return;
+  }
+  await findAllUsersForSelect(queryString).then(res=>{
+    if (res.data.msg === 'SUCCESS') {
+      userSelect.value = res.data.object || [];
+    } else {
+      ElMessage.error('获取用户列表失败！');
+    }
+  })
+  .catch(err=>{
+    console.log(err);
+    ElMessage.error('服务异常');
+  })
 }
 const topicSelect = ref([])
-const getTopicSelect = async () => {
-  await findAllTopicForSelect()
-    .then((res) => {
-      let msg = res.data.msg
-      if (msg == 'SUCCESS') {
-        topicSelect.value = res.data.object
-      }
-    })
-    .catch((err) => {
-      ElMessage.error('服务错误')
-    })
+const remoteMethodToTopic = async (queryString) => {
+  if (!queryString) {
+    userSelect.value = [];
+    return;
+  }
+  await findAllTopicForSelect(queryString).then(res=>{
+    if (res.data.msg === 'SUCCESS') {
+      topicSelect.value = res.data.object || [];
+    } else {
+      ElMessage.error('获取用户列表失败！');
+    }
+  })
+  .catch(err=>{
+    console.log(err);
+    ElMessage.error('服务异常');
+  })
 }
+const keyword = ref('')
 const getTopicLikeList = async()=>{
-    await findAllTopicLikeItem(page.value).then(res=>{
+    await findAllTopicLikeItem(page.value,keyword.value).then(res=>{
         let msg = res.data.msg
         if(msg == 'SUCCESS'){
             topics.value = res.data.object
@@ -281,10 +308,11 @@ const getTopicLikeList = async()=>{
         ElMessage.error('服务错误')
     })
 }
+const searchLike = ()=>{
+    getLikeItem()
+}
 const init = ()=>{
     getTopicLikeList()
-    getUserSelect()
-    getTopicSelect()
 }
 onMounted(init)
 </script>
@@ -297,31 +325,5 @@ onMounted(init)
     margin-top: 20px;
     display: flex;
     justify-content: end;
-}
-.dark{
-    --el-table-tr-bg-color: #2b2b2b;
-    --el-table-row-hover-bg-color: #444;
-    color: #dedede;
-    --el-table-header-text-color:#dedede;
-    --el-table-header-bg-color: #222;
-    --el-table-border-color: #444;
-    --el-input-border-color: #444;
-    --el-input-bg-color: #2b2b2b;
-    --el-input-text-color: #dedede;
-    --el-text-color-primary: #eee;
-    --el-text-color-regular: #eee;
-    --el-fill-color-blank: #2b2b2b;
-    --el-border-color: #444;
-    --el-pagination-button-bg-color: #2b2b2b;
-    --el-fill-color: #2b2b2b;
-    --el-disabled-bg-color: #444;
-    --el-color-primary-light-9: #444;
-    --el-color-warning-light-9: #444;
-    --el-color-success-light-9: #444;
-    --el-color-danger-light-9: #444;
-    --el-text-color-primary: #888;
-    --el-color-info-light-9: #424344;
-    --el-color-info: #aaa;
-    --el-button-hover-bg-color: #444;
 }
 </style>

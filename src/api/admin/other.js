@@ -1,6 +1,6 @@
 import request from "@/util/request";
 
-const urlHead = "/admin";
+const urlHead = "/starfall/console";
 const urlActuator = "/admin/actuator";
 
 export const getHealth = () => request.get(urlActuator + "/health");

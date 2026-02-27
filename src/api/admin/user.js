@@ -1,12 +1,17 @@
-import request from "@/util/request";
+import request, { url } from "@/util/request";
 
-const urlHead = "/admin/user";
+const urlHead = "/starfall/console/user";
 
-export const findAllUsersForSelect = ()=>request.post(urlHead+"/adminFindAllUsersForSelect")
+export const findAllUsersForSelect = (keyword)=>{
+    let param = new URLSearchParams();
+    param.append("keyword",keyword)
+    return request.post(urlHead+"/adminFindAllUsersForSelect",param)
+}
 
-export const findAllUser = (page)=>{
+export const findAllUser = (page,keyword)=>{
     let param = new URLSearchParams();
     param.append("page",page)
+    param.append("keyword",keyword)
     return request.post(urlHead+"/adminFindAllUsers",param)
 }
 
@@ -30,9 +35,10 @@ export const updateAvatar = (user,avatar) =>{
 }
 
 
-export const findAllSignIn = (page)=>{
+export const findAllSignIn = (page,keyword)=>{
     let param = new URLSearchParams();
     param.append("page",page)
+    param.append("keyword",keyword)
     return request.post(urlHead+"/adminFindAllSignIn",param)
 }
 
@@ -41,3 +47,5 @@ export const appendSignIn = (signIn)=>request.post(urlHead+"/adminAppendSignIn",
 export const updateSignIn = (signIn)=>request.post(urlHead+"/adminUpdateSignIn",signIn)
 
 export const deleteSignIn = (signIn)=>request.post(urlHead+"/adminDeleteSignIn",signIn)
+
+export const getAvatarApi = url + "/file/url/origin/"

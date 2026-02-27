@@ -50,21 +50,9 @@
             <div class="item"><span>Redis 状态</span> <el-tag :type="redisState ? 'success' : 'danger'" :effect="isDark ? 'dark' : 'light'">{{ redisState ? '正常' : '异常' }}</el-tag></div>
             <div class="item reflesh"><el-button type="primary" @click="getActuator()">刷新面板状态</el-button></div>
         </div>
-        <div class="imgSettingOperate">
-            <el-segmented :class="isDark ? 'dark' : ''" v-model="imgSettingPage" :options="options" block @change="imgSettingPageChange"/>
-        </div>
-        <div class="imgSetting" :style="{transform: 'translateX('+(imgSettingPage==='顶部图片设置' ? '0' : 'calc(-50% - 20px)')+')'}">
-            <TopSettingView />
-            <div>
-                <div style="width:40px"></div>
-            </div>
-            <TopicAdSettingView />
-        </div>
     </div>
 </template>
 <script setup>
-import TopSettingView from "./TopSettingView.vue";
-import TopicAdSettingView from "./TopicAdSettingView.vue";
 import { getCPUUsed, getHealth, getJVMMemoryTotal, getJVMMemoryUsed, getRequestActive } from "@/api/admin/other";
 import { reactive, ref,inject, onMounted } from "vue"
 const isDark = inject('isDark')

@@ -1,14 +1,24 @@
 <template>
-    <div class="main" :style="{backgroundColor:isDark ? '#222' : '#f1f1f1'}">
+    <div class="main" :style="{backgroundColor:isDark ? '#55504a' : '#faedca'}">
         <el-menu
         :default-active="page"
         router
-        :background-color="isDark ? '#333' : '#fefefe'"
+        :background-color="isDark ? '#99876c' : '#fbf2db'"
         :text-color="isDark ? '#fff' : '#333'"
+        class="dark"
       >
       <el-menu-item index="/admin">
         <el-icon><House /></el-icon>
           <span>主页</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/ad">
+          <span>公屏广告</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/hometalk">
+          <span>每日一言</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/live">
+          <span>直播申请</span>
         </el-menu-item>
         <el-menu-item index="/admin/notice">
           <span>公告列表</span>
@@ -41,7 +51,7 @@
         </el-menu-item>
         <div class="changeTheme">
           <div class="title" :style="{color:isDark ? '#f1f1f1' : '#333'}">{{ isDark ? 'Dark' : 'Light' }}</div>
-          <el-switch v-model="isDark" @change="changeTheme" class="switch" :style="{'--el-color-white':isDark?'#222':'#f1f1f1'}">
+          <el-switch v-model="isDark" @change="changeTheme" class="switch" :style="{'--el-color-white':isDark?'#55504a':'#fbf2db'}">
             <template #active-action>
               <span>🌙</span>
             </template>
@@ -51,7 +61,7 @@
           </el-switch>
         </div>
       </el-menu>
-      <div class="content" :style="{backgroundColor:isDark ? '#333' : '#fefefe',color: isDark ? '#f1f1f1' : '#131313'}">
+      <div class="content" :style="{backgroundColor:isDark ? '#99876c' : '#fbf2db',color: isDark ? '#fbf2db' : '#99876c'}">
         <router-view/>
       </div>
     </div>
@@ -77,7 +87,7 @@ const init = async()=>{
   await hasPermission().then(res=>{
     let msg = res.data.msg
     if(msg == 'SUCCESS'){
-      
+      console.log("管理员权限验证成功")
     }
     else{
       router.push('/')

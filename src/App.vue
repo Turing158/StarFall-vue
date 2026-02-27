@@ -1,5 +1,5 @@
 <script setup>
-import MainView from './views/MainView.vue'
+
 </script>
 
 <template>
@@ -9,9 +9,9 @@ import MainView from './views/MainView.vue'
 </template>
 
 <style scoped>
+/* 添加背景 */
 .main {
   background-image: url(./assets/img/bg.png);
   overflow-x: hidden;
 }
-
 </style>

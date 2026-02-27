@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Book ref="bookOut">
+        <Book>
             <div>
                 <div class="search">
                     <el-select
@@ -10,8 +10,8 @@
                     >
                     <el-option label="综合" value="综合"></el-option>
                     <el-option label="作者" value="作者"></el-option>
-                    <el-option label="主题" value="主题"></el-option>
-                    <el-option label="内容" value="内容"></el-option>
+                    <el-option label="主题" value="主题标题"></el-option>
+                    <el-option label="内容" value="主题内容"></el-option>
                     </el-select>
                     <input type="text" v-model="text" v-on:keydown.enter="onSearch"/>
                     <div class="btn" @click="onSearch()">
@@ -27,7 +27,7 @@
                             <td>搜点！现在啥都没有</td>
                         </tr>
                     </tbody>
-                    <SearchInfomation v-for="(item,index) in result" :key="index" :data="item" :keyStr="key"/>
+                    <SearchInfomation v-for="(item,index) in result" :key="index" :data="item"/>
                 </table>
                 <div class="operate">
                     <el-pagination
@@ -49,7 +49,7 @@ import Book from '@/components/Book.vue';
 import SearchInfomation from '@/components/SearchInfomation.vue';
 import { ElMessage } from 'element-plus';
 import { onMounted, ref } from 'vue';
-const bookOut = ref()
+import { ElLoading } from 'element-plus'
 const text = ref('')
 const classification = ref('综合')
 const pageNum = ref(1);
@@ -65,17 +65,20 @@ const onSearch = async()=>{
         ElMessage.warning('搜点什么吧！') 
     }
     else{
+        let loading = ElLoading.service({
+            lock: true,
+            text: '搜索中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
         await searchTopic(text.value,classification.value,pageNum.value).then(res=>{
             let data = res.data.object
-            let num = res.data.num
+            total.value = res.data.num
             result.value = data
-            total.value = num
-            key.value = text.value
-
+            console.log(res.data.num)
         }).catch(err=>{
             ElMessage.error('搜索失败')
         })
-        bookOut.value.setHeight()
+        loading.close()
     }
 }
 const init = ()=>{
@@ -89,16 +92,23 @@ onMounted(init)
 </script>
 <style scoped>
 .result{
-    width: 90%;
+    width: 96%;
+    min-height: 500px;
     border: 0;
     border-collapse: collapse;
-    margin: 0 5%;
-    margin-top: 50px;
+    margin: 0 2.5%;
+    margin-top: 10px;
+    display: block;
 }
 .none{
     text-align: center;
     font-size: 20px;
     color: gray;
+    height: 500px; /* 为无结果状态设置最小高度 */
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .operate{
     width: 100%;

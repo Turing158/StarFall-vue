@@ -1,17 +1,14 @@
 <template>
-  <div @click="onFocus()" :style="{}">
+  <div class="text-input-container">
     <input
-      class="input"
       type="text"
-      ref="onInput"
-      v-model="text"
-      :placeholder="placeholder"
+      :value="text"
       @change="onChange"
-      @input="onInputFunc"
-      :style="{ width: inputWidth + 'px',fontSize: props.fontSize + 'px' }"
-      :maxlength="maxlength"
-    />
-    <div class="text" ref="onText">{{ text }}</div>
+      :placeholder="placeholder"
+      :style="{ fontSize: `${fontSize}px`, width: `${width}px` }"
+      class="text-input"
+      
+    >
   </div>
 </template>
 
@@ -28,7 +25,7 @@ const props = defineProps({
   },
   width: {
     type: Number,
-    default: 100
+    default: 400
   },
   maxWidth:{
     type: Number,
@@ -45,66 +42,25 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue'])
 const text = ref(props.modelValue)
-const onInput = ref()
-const onText = ref()
-const inputWidth = ref()
-const onInputFunc = ()=>{
-  if (text.value == ' ') {
-    text.value = ''
-  }
-  if (text.value.length == 0) {
-    inputWidth.value = props.width
-  } else {
-    if(props.maxWidth != -1){
-      if((onText.value.clientWidth+5)>props.maxWidth){
-        inputWidth.value = onText.value.clientWidth + fontSize.value + 5
-      }
-      else{
-        inputWidth.value = props.maxWidth
-      }
-    }
-    else{
-      inputWidth.value = onText.value.clientWidth + 5
-    }
-  }
-}
-const onChange = () => {
+const onChange = (e) => {
+  text.value = e.target.value
   emit('update:modelValue', text.value)
 }
-const onFocus = () => {
-  onChange()
-  onInput.value.focus()
-}
-const init = () => {
-  text.value = props.modelValue
-  onChange()
-}
-onMounted(init)
+
+// 初始化逻辑已通过ref直接赋值，无需额外调用onChange
 </script>
 <style scoped>
-.input {
-  /* color: #11111100; */
-  background-color: #11111100;
-  border: 0;
+.text-input-container {
+  position: relative;
+  display: inline-block;
+}
+
+.text-input {
+  border: none;
   outline: none;
-  cursor: text;
-  transition: all 0.2s;
-  border-bottom: 1px dashed #131313;
-  font-size: 12px;
-  padding: 0 5px;
-}
-.input:focus {
-  color: #000260;
-  border-bottom: 1px solid #131313;
-}
-.inputText {
-  border-bottom: 1px dashed #131313;
-  transition: all 0.2s;
-}
-.text {
-  position: absolute;
-  width: fit-content;
-  visibility: hidden;
-  z-index: -999;
+  background: transparent;
+  padding: 5px 0;
+  font-size: inherit;
+  min-width: 50px;
 }
 </style>

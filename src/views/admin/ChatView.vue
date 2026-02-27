@@ -22,7 +22,7 @@
             <el-table-column label="聊天内容" prop="content"  min-width="400"/>
             <el-table-column width="200" align="center" fixed="right">
                 <template #header>
-                    <el-input v-model="search" size="small" placeholder="Type to search" />
+                    <el-input v-model="keyword" size="small" placeholder="Type to search" @input="search" title="可搜发送方和接收方的用户名和名称，以及内容"/>
                 </template>
                 <template #default="{row}">
                     <el-button type="primary" @click="openDialog(row)" plain>编辑</el-button>
@@ -32,6 +32,7 @@
         </el-table>
         <div class="page">
             <el-pagination
+            :class="isDark ? 'dark' : ''"
             @current-change="handleCurrentChange"
             :current-page="page"
             :page-size="10"
@@ -39,11 +40,15 @@
             background
             :total="total"/>
         </div>
-        <el-dialog v-model="editPage" width="600" :title="dialogTitle" :show-close="false" :style="{'--el-dialog-bg-color':isDark ? '#2b2b2b' : '#fff','--el-text-color-primary':isDark ? '#dedede' : '#131313'}" :close-on-click-modal="false">
+        <el-dialog :class="isDark ? 'dark' : ''" v-model="editPage" width="600" :title="dialogTitle" :show-close="false" :close-on-click-modal="false">
             <div class="dialogContent">
                 <el-form ref="formInput" inline label-position="top" :rules="rules" :model="chat">
                     <el-form-item label="发送方" prop="fromUser">
-                        <el-select style="width: 200px;" v-model="chat.fromUser" placeholder="请选择发送用户">
+                        <el-select style="width: 200px;" v-model="chat.fromUser" placeholder="请输入发送用户"
+                            filterable
+                            remote
+                            reserve-keyword
+                            :remote-method="remoteMethod">
                                 <el-option v-for="item in userSelect" :key="item.user" :label="item.user" :value="item.user" :disabled="chat.toUser == item.user">
                                     <span style="float: left">{{ item.user }}</span>
                                     <span
@@ -67,7 +72,12 @@
                         
                     </el-form-item>
                     <el-form-item label="接收方" prop="toUser">
-                        <el-select style="width: 200px;" v-model="chat.toUser" placeholder="请选择接收用户">
+                        <el-select style="width: 200px;" v-model="chat.toUser"
+                            placeholder="请输入接收用户"
+                            filterable
+                            remote
+                            reserve-keyword
+                            :remote-method="remoteMethod">
                                 <el-option v-for="item in userSelect" :key="item.user" :label="item.user" :value="item.user" :disabled="chat.fromUser == item.user">
                                     <span style="float: left">{{ item.user }}</span>
                                     <span
@@ -105,7 +115,9 @@ import { findAllUsersForSelect } from '@/api/admin/user';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {inject, onMounted, ref} from 'vue'
 const isDark = inject('isDark')
-const search = ref('')
+const search = ()=>{
+    getChatList()
+}
 const chats = ref([])
 
 
@@ -117,6 +129,25 @@ const chat = ref({
 })
 const oldChat = ref()
 const userSelect = ref([])
+const remoteMethod = async(queryString)=>{
+  if (!queryString) {
+    userSelect.value = [];
+    return;
+  }
+  await findAllUsersForSelect(queryString).then(res=>{
+    if (res.data.msg === 'SUCCESS') {
+      userSelect.value = res.data.object || [];
+    } else {
+      ElMessage.error('获取用户列表失败！');
+    }
+  })
+  .catch(err=>{
+    console.log(err);
+    ElMessage.error('服务异常');
+  })
+}
+
+
 const rules = ref({
     fromUser: [
         { required: true, message: '发送用户不能为空', trigger: 'blur' }
@@ -269,8 +300,9 @@ const onDel = (i)=>{
         ElMessage.info('已取消删除')
       });
 }
+const keyword = ref('')
 const getChatList = async()=>{
-    await findAllMessage(page.value).then(res=>{
+    await findAllMessage(page.value,keyword.value).then(res=>{
         let msg = res.data.msg
         if(msg == 'SUCCESS'){
             chats.value = res.data.object
@@ -283,20 +315,9 @@ const getChatList = async()=>{
         ElMessage.error("服务异常")
     })
 }
-const getUserSelect = async()=>{
-    await findAllUsersForSelect().then(res=>{
-        let msg = res.data.msg
-        if(msg == 'SUCCESS'){
-            userSelect.value = res.data.object
-        }
-    }).catch(err=>{
-        ElMessage.error("服务错误")
-    
-    })
-}
+
 const init = ()=>{
     getChatList()
-    getUserSelect()
 }
 onMounted(init)
 </script>
@@ -314,28 +335,5 @@ onMounted(init)
     height: 300px;
     overflow-x: hidden;
     overflow-y: auto;
-}
-.dark{
-    --el-table-tr-bg-color: #2b2b2b;
-    --el-table-row-hover-bg-color: #444;
-    color: #dedede;
-    --el-table-header-text-color:#dedede;
-    --el-table-header-bg-color: #222;
-    --el-table-border-color: #444;
-    --el-input-border-color: #444;
-    --el-input-bg-color: #2b2b2b;
-    --el-input-text-color: #dedede;
-    --el-text-color-primary: #eee;
-    --el-text-color-regular: #eee;
-    --el-fill-color-blank: #2b2b2b;
-    --el-border-color: #444;
-    --el-pagination-button-bg-color: #2b2b2b;
-    --el-fill-color: #2b2b2b;
-    --el-disabled-bg-color: #444;
-    --el-color-primary-light-9: #444;
-    --el-color-warning-light-9: #444;
-    --el-color-success-light-9: #444;
-    --el-color-danger-light-9: #444;
-    --el-text-color-primary: #888;
 }
 </style>

@@ -6,7 +6,7 @@
         <th>作者</th>
         <th style="text-align: left">观看/评论</th>
         <th>头像</th>
-        <th v-show="props.isEdit">操作</th>
+        <th v-show="props.isEdit" style="width: 130px">操作</th>
       </tr>
       <tr v-show="props.isNull && !loading">
         <td class="item" colspan="6"><div class="null">未找到数据！</div></td>

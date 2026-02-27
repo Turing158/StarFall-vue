@@ -2,32 +2,35 @@
   <div
     v-if="(type == null) | 'spruce'"
     class="btn"
-    @click="onClick"
+    @click="OnClick"
     :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px',fontSize: props.fontSize+'px',width: props.width+'px',height: props.height+'px' }"
   >
-    {{ props.text }}
+    {{ BtnText }}
     <slot></slot>
   </div>
   <div
     v-if="type == 'oak'"
     class="btn oak"
-    @click="onClick"
+    @click="OnClick"
     :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px',fontSize: props.fontSize+'px' }"
   >
-    {{ props.text }}
+    {{ BtnText }}
     <slot></slot>
   </div>
   <div
     v-if="type == 'birch'"
     class="btn birch"
-    @click="onClick"
+    @click="OnClick"
     :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px',fontSize: props.fontSize+'px' }"
   >
-    {{ props.text }}
+    {{ BtnText }}
     <slot></slot>
   </div>
 </template>
 <script setup>
+import { ElMessage } from "element-plus"
+import { ref,onMounted, watch } from "vue"
+
 const props = defineProps({
   text: String,
   onClick: Function,
@@ -61,7 +64,68 @@ const props = defineProps({
     type:Number,
     require:false,
     defalut:15
+  },
+  cooldownTamp:{
+    type:Number,
+    require:false,
+    defalut:0
+  },
+  delaySuffix:{
+    type:String,
+    require:false,
+    default:"s"
+  },
+  disabled:{
+    type:Boolean,
+    require:false,
+    default:false
   }
+})
+
+const OnClick = ()=>{
+  if(props.cooldownTamp - Date.now() > 0){
+    ElMessage({
+      message: '请等待'+Math.ceil((props.cooldownTamp - Date.now())/1000)+props.delaySuffix,
+      type: 'warning',
+      duration: 1000
+    })
+  }
+  else{
+    if(props.onClick){
+      if(!props.disabled){
+         props.onClick()
+      }
+      else{
+        ElMessage({
+          message: '按钮被禁用',
+          type: 'warning',
+          duration: 1000
+        })
+      }
+    }
+  }
+}
+let interval = null
+const BtnText = ref(props.text)
+watch(()=>props.cooldownTamp,()=>{
+  updateDelay()
+})
+const updateDelay = ()=>{
+  if(props.cooldownTamp - Date.now() > 0){
+    BtnText.value = Math.ceil((props.cooldownTamp - Date.now())/1000)+props.delaySuffix
+    interval = setInterval(()=>{
+      if(props.cooldownTamp - Date.now() > 0){
+        BtnText.value = Math.ceil((props.cooldownTamp - Date.now())/1000)+props.delaySuffix
+      }
+      else{
+        BtnText.value = props.text
+        clearInterval(interval)
+      }
+    },1000)
+  }
+}
+onMounted(()=>{
+  updateDelay()
 })
 </script>
 <style scoped>
@@ -81,6 +145,9 @@ const props = defineProps({
   color: aliceblue;
   cursor: pointer;
   transition: all 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .btn:hover {
   border-top: 2px solid rgb(184, 147, 93);

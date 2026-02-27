@@ -1,3 +1,4 @@
+<!-- 评论内容 -->
 <template>
   <UserContentModel :data="props.data">
     <template v-slot:top>
@@ -5,7 +6,10 @@
         <div class="date">
           <img src="../../assets/img/time.png" alt="" /> 发表于{{ props.data.date }}
         </div>
-        <div class="count">
+        <div class="count" v-if="props.isTopComment">
+          <a href=""># 置顶 {{ props.data.weight }}</a>
+        </div>
+        <div class="count" v-if="!props.isTopComment">
           <a href="" v-show="props.index == 0 && page == 1"># 沙发</a>
           <a href="" v-show="props.index == 1 && page == 1"># 板凳</a>
           <a href="" v-show="props.index == 2 && page == 1"># 地板</a>
@@ -21,8 +25,11 @@
     </template>
     <template v-slot:bottom>
       <div class="bottom">
+        <span class="del" v-show="isTopicUser">
+          <slot name="top"></slot>
+        </span>
         <span class="del" v-show="isMe">
-          <slot></slot>
+          <slot name="del"></slot>
         </span>
       </div>
     </template>
@@ -34,7 +41,9 @@ const props = defineProps({
   index: Number,
   data: Object,
   page: Number,
-  isMe: Boolean
+  isMe: Boolean,
+  isTopicUser: Boolean,
+  isTopComment: Boolean
 })
 import { marked } from 'marked'
 const toMd = () => {

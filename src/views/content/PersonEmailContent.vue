@@ -8,7 +8,7 @@
         <tr>
           <td>验证码：</td>
           <td><el-input placeholder="请输入旧邮箱验证码" style="width: 120px" v-model="oldCode"/></td>
-          <td><div @click="onGetOldEmailCode()"><McBtn text="获取"/></div></td>
+          <td><div><McBtn text="获取" :cooldown-tamp="timerStore.oldEmailTimer" delaySuffix="秒" @click="onGetOldEmailCode()"/></div></td>
         </tr>
         <tr>
           <td>新邮箱：</td>
@@ -17,7 +17,7 @@
         <tr>
           <td>验证码：</td>
           <td><el-input placeholder="请输入新邮箱验证码" style="width: 120px" v-model="newCode"/></td>
-          <td><div @click="onGetNewEmailCode()"><McBtn text="获取" /></div></td>
+          <td><div><McBtn text="获取" :cooldown-tamp="timerStore.newEmailTimer" @click="onGetNewEmailCode()" delaySuffix="秒"/></div></td>
         </tr>
         <tr>
           <td colspan="3"></td>
@@ -38,15 +38,17 @@ import Book from '@/components/Book.vue'
 import Empty from '@/components/FitEmpty.vue'
 import McBtn from '@/components/McBtn.vue'
 import useUserStore from '@/stores/user'
-import { ElMessage } from 'element-plus'
-
+import useTimerStore from '@/stores/timer';
+import { ElMessage, ElLoading } from 'element-plus'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 const userStore = useUserStore()
 const oldCode = ref('')
 const newEmail = ref('')
 const newCode = ref('')
+const timerStore = useTimerStore()
 const onGetOldEmailCode = async() => {
+  timerStore.setOldEmailTimer(Date.now()+60000)
   await getOldEmailCode().then(res => {
     if(res.data.msg === "SUCCESS"){
       ElMessage.success('验证码发送成功')
@@ -63,6 +65,7 @@ const onGetNewEmailCode = async() => {
     ElMessage.error('请输入新邮箱')
   }
   else{
+    timerStore.setNewEmailTimer(Date.now()+60000)
     await getNewEmailCode(newEmail.value).then(res => {
       if(res.data.msg === "SUCCESS"){
         ElMessage.success('验证码发送成功')
@@ -87,6 +90,11 @@ const changeEmail = async() => {
     ElMessage.error('请输入新邮箱验证码')
   }
   else{
+    let loading = ElLoading.service({
+      lock: true,
+      text: '正在修改...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
     await updateEmail(oldCode.value, newEmail.value, newCode.value).then(res => {
       console.log(res);
       let msg = res.data.msg
@@ -117,6 +125,8 @@ const changeEmail = async() => {
       }
     }).catch(err => {
       ElMessage.error('服务异常')
+    }).finally(() => {
+      loading.close()
     })
   }
 }

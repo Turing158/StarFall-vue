@@ -4,7 +4,7 @@
       <div class="content">
         <div class="left">
           <div class="avatarOut">
-            <img :src="'/src/assets/avatar/'+userStore.avatar" alt="">
+            <img :src="userStore.avatar" alt="">
           </div>
           <el-dialog 
             v-model="signPage"
@@ -84,8 +84,8 @@ import McBtn from '@/components/McBtn.vue'
 import Empty from '@/components/FitEmpty.vue'
 import { onMounted, ref } from 'vue'
 import useUserStore from '@/stores/user'
-import { countSignIn, findAllSignIn, getUserInfo, signIn } from '@/api/user'
-import { ElMessage, ElNotification } from 'element-plus'
+import { countSignIn, findAllSignIn, getUserInfo, signIn, getAvatarApi } from '@/api/user'
+import { ElMessage, ElNotification, ElLoading } from 'element-plus'
 const isSignIn = ref(false)
 const continueSignIn = ref(0)
 const userStore = useUserStore()
@@ -149,6 +149,11 @@ const confirmSignIn = async()=>{
     ElMessage.error('请选择心情')
   }
   else{
+    let loading = ElLoading.service({
+      lock: true,
+      text: '签到中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
     await signIn(message.value,emotion.value).then(async(res)=>{
       let msg = res.data.msg
       if(msg == 'SUCCESS'){
@@ -166,16 +171,18 @@ const confirmSignIn = async()=>{
           if(msg == 'SUCCESS'){
             let data = res.data.object
             userStore.setUserObject(
-              data.user,
-              data.name,
-              data.level,
-              data.exp,
-              data.maxExp,
-              data.gender,
-              data.birthday,
-              data.avatar,
-              data.email
-            )
+                data.user,
+                data.name,
+                data.level,
+                data.exp,
+                data.maxExp,
+                data.gender,
+                data.birthday,
+                data.avatar,
+                data.email,
+                data.role
+              )
+
           }
         }).catch(err=>{
           ElMessage.error('服务异常')
@@ -190,8 +197,8 @@ const confirmSignIn = async()=>{
       }
     }).catch(err=>{
       ElMessage.error('签到失败')
-    
     })
+    loading.close()
   }
   
 }
@@ -242,7 +249,7 @@ onMounted(getSignList)
 .right {
   width: calc(100% - 240px);
   min-height: 300px;
-  background-color: #f3debf;
+  background-color: #f7e9d4;
   border: 1px solid #a58960;
 }
 .operate {
@@ -253,5 +260,4 @@ onMounted(getSignList)
 .operate div{
   margin-top: -5px;
 }
-
 </style>

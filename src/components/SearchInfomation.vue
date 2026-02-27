@@ -4,23 +4,34 @@
             <Empty :height="20"/>
         </tr>
         <tr>
-            <th><router-link class="keyContent" :to="'/topic/detail/'+props.data.id">{{ props.data.title }}</router-link></th>
+            <th>
+                <router-link class="title" :to="'/topic/detail/'+props.data.id" target="_blank" v-html="props.data.title"/>
+            </th>
         </tr>
         <tr>
-            <td class="viewComment">评论:<span th:text="${topic.comment}">{{ props.data.comment }}</span> - 查看:<span>{{ props.data.view }}</span></td>
+            <td class="viewComment">
+                <router-link class="title" :to="'/topic/detail/'+props.data.id" target="_blank">
+                    <span v-html="props.data.topicTitle"/> | <span v-html="props.data.enTitle"/>
+                </router-link>
+                
+            </td>
         </tr>
         <tr>
             <td class="content">
-                <div class="keyContent" v-html="content"></div>
+                <div class="keyContent" v-html="props.data.content"></div>
             </td>
         </tr>
         <tr>
             <td class="info">
-                <span th:text="${topic.date}">{{ props.data.date }}</span>
-                -
-                <span><router-link :to="'/personal/other/'+props.data.user">{{ props.data.name }}</router-link></span>
-                -
-                <span>{{ props.data.label }}</span>
+                <div>
+                    <span>更新：<span class="date">{{ props.data.refreshTime }}</span></span>
+                    <span>创建: <span class="date">{{ props.data.date.split('T')[0] }}</span></span>
+                </div>
+                <div>
+                    <span><router-link :to="'/personal/other/'+props.data.user" v-html="props.data.name"/></span>
+                    -
+                    <span>{{ props.data.label }}</span>
+                </div>
             </td>
         </tr>
     </tbody>
@@ -42,53 +53,35 @@ const props = defineProps({
             user: 'admin',
             name: '管理员'
         }
-    },
-    keyStr:String
+    }
 })
 
-const keyContent = (content,key)=>{
-    let outKeyContent = props.data.content.split(key)
-    if(content.length <= 100){
-        let newContent = ''
-        for (let i = 0; i < outKeyContent.length; i++) {
-            newContent += outKeyContent[i]
-            if(i != outKeyContent.length - 1){
-                newContent += '<span style="color:darkred;font-weight:bold">'+key+'</span>'
-            }
-        }
-        return newContent
-    }
-    else{
-        let newContent = ''
-        for (let i = 0; i < outKeyContent.length; i++) {
-            if(outKeyContent[i].length>100){
-                newContent += outKeyContent[i].substring(50,100)
-            }
-            else{
-                newContent += outKeyContent[i]
-            }
-            if(i != outKeyContent.length - 1){
-                newContent += '<span style="color:darkred;font-weight:bold">'+key+'</span>'
-            }
-            if(newContent.length >= 200){
-                newContent += '...'
-                break
-            }
-        }
-        return newContent
-    }
-}
-const content = ref(keyContent(props.data.content,props.keyStr))
+const content = ref(props.data.content)
 </script>
+<style>
+hk{
+    color: #b17822 !important;
+    font-weight: bold;
+}
+</style>
 <style scoped>
-.tbody{
+tbody{
     width: 100%;
+}
+tbody:hover{
+    background-color: #f8f1e0;
+    /* background-color: #7a5807; */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    transition: all 0.3s ease;
 }
 th{
     background-color: transparent;
     border: 0;
     font-size: 20px;
     text-align: left;
+    vertical-align: top;
+    padding: 0 2%;
 }
 th a{
     color: darkblue;
@@ -102,18 +95,43 @@ th a:hover{
 td{
     background-color: transparent;
     border: 0;
+    vertical-align: top;
+    padding: 0 2%;
+}
+.title{
+    text-decoration: none;
+}
+.title:hover{
+    text-decoration: underline;
 }
 .viewComment{
-    color: gray;
-    font-size: 10px;
+    color: #492e04;
+    font-size: 12px;
 }
 .content{
     font-size: 14px;
+    overflow: hidden;
+}
+.info{
+    height: auto;
+    min-height: 30px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
 }
 .info div{
-    height: 40px;
+    height: auto;
+    min-height: 20px;
     overflow: hidden;
     text-overflow:ellipsis;
+    flex: 1;
+}
+.info div:nth-child(1){
+    display: flex;
+    flex-direction: row;
+}
+.info div:nth-child(2){
+    text-align: right;
 }
 .info,.info a{
     color: #666666;
@@ -127,7 +145,13 @@ td{
     color: #333333;
     text-decoration: underline;
 }
-.info span:nth-child(1){
+.info span{
+    flex: 1;
+}
+.info span:nth-child(2){
+    text-align: right;
+}
+.info span .date{
     color: #037703;
 }
 </style>

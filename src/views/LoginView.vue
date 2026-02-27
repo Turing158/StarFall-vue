@@ -1,3 +1,4 @@
+<!-- 登录页面 -->
 <template>
   <div class="out">
     <div class="loginDIv" v-on:keydown.enter="confirm">
@@ -25,13 +26,15 @@
         <div class="code_underline"></div>
         <Code ref="codeImg" width="100px" height="40px" margin="0 5px" />
         <div class="operate">
-          <router-link to="/reg">
-            <McBtn text="注册" :margin="0" />
-          </router-link>
-          <McBtn text="登录" :margin="50" @click="confirm()" />
-          <router-link to="/forget">
-            <McBtn text="忘记密码" :margin="0" />
-          </router-link>
+          <div class="left-buttons">
+            <router-link to="/reg">
+              <McBtn text="注册" :margin="0" />
+            </router-link>
+            <router-link to="/forget">
+              <McBtn text="忘记密码" :margin="0" />
+            </router-link>
+          </div>
+          <McBtn text="登录" :margin="0" @click="confirm()" />
         </div>
       </form>
     </div>
@@ -45,6 +48,8 @@ import { getUserInfo, login } from '@/api/user'
 import { ElMessage,ElNotification } from 'element-plus'
 import Code from '@/components/Code.vue'
 import useUserStore from '@/stores/user'
+import { ElLoading } from 'element-plus'
+
 const router = useRouter()
 const account = ref('')
 const password = ref('')
@@ -59,7 +64,12 @@ const confirm = async () => {
   } else if (code.value.length == 0) {
     ElMessage.error('验证码不能为空')
   } else {
-    await login(account.value, password.value, code.value)
+    let loading = ElLoading.service({
+      lock: true,
+      text: '登录中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
+    await login(account.value, password.value, codeImg.value.random+":"+code.value)
       .then(async(res) => {
         let msg = res.data.msg
         if (msg == 'USER_PASSWORD') {
@@ -74,6 +84,7 @@ const confirm = async () => {
             userStore.setToken(res.data.object)
             await getUserInfo().then(res=>{
               let data = res.data.object
+              console.log(data)
               userStore.setUserObject(
                 data.user,
                 data.name,
@@ -95,17 +106,20 @@ const confirm = async () => {
               })
             })
         }
-        codeImg.value.changeCode()
       })
       .catch((err) => {
         ElMessage.error('服务异常')
       })
       code.value = ''
+      loading.close()
   }
 }
 
 </script>
 <style scoped>
+*{
+  transition: all 0.2s;
+}
 .out {
   display: flex;
   justify-content: center;
@@ -241,6 +255,14 @@ input[type='password']::-ms-reveal {
 }
 .operate {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+  width: calc(100% - 200px);
+  padding: 0 10px;
+  margin: -20px auto 0;
+}
+.left-buttons {
+  display: flex;
+  gap: 10px;
 }
 </style>

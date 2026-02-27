@@ -11,9 +11,12 @@
 </template>
 <script setup>
 import useUserStore from '@/stores/user'
-import { ElMessage, ElNotification } from 'element-plus'
-import { onMounted, provide, ref } from 'vue'
+import { initWebSocket } from '@/util/handleNotice'
+import { ElNotification } from 'element-plus'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+
 const userStroe = useUserStore()
 const router = useRouter()
 router.beforeResolve((to,from,next)=>{
@@ -24,7 +27,6 @@ router.beforeResolve((to,from,next)=>{
     to.path == '/personal/email'||
     to.path == '/signIn'||
     to.path == '/notices'
-
     ){
     if(userStroe.user != '' || userStroe.isLogin){
       next()
@@ -66,42 +68,11 @@ router.beforeResolve((to,from,next)=>{
     }
   }
 })
-const onOpen = (e) => {
-  console.log('WebSocket连接成功')
-}
-const onError = (e) => {
-  ElMessage.error('服务异常')
-  console.log('onError', e)
-}
-const onSend = (e) => {
-  console.log('onSend', e)
-}
-const onMessage = (e) => {
-  let data = JSON.parse(e.data)
-  console.log(data);
-  ElNotification({
-        title:'新消息-来自'+data.fromUser+'的消息',
-        message:data.content,
-        type:'success'
-      })
-}
-const onClose = (e) => {
-  console.log('WebSocket关闭')
-}
-const webSocket = ref()
+
 const init = ()=>{
-  let url = 'ws://10.24.5.7:8080/message/'+userStroe.token
-  if(userStroe.isLogin){
-    webSocket.value = new WebSocket(url)
-    webSocket.value.onopen = onOpen
-    webSocket.value.onerror = onError
-    webSocket.value.onmessage = onMessage
-    webSocket.value.onclose = onClose
-    webSocket.value.send = onSend
-    
-  }
+  initWebSocket()
 }
-provide('webSocket',webSocket)
+
 onMounted(init)
 </script>
 <style scoped>

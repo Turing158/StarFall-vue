@@ -6,13 +6,38 @@
 <script setup>
 import { ref } from 'vue'
 import request from '@/util/request';
-let date = new Date()
-const codeImg = ref(request.getUri()+'/getCodeImage?r' + date.getTime())
+const getRandomCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const randomValues = new Uint32Array(20);
+    crypto.getRandomValues(randomValues);
+    const now = Date.now();
+    const perfNow = Date.now();
+    const timeMix = (now ^ Math.floor(perfNow * 1000)) ;
+    for(let i = 0; i < 20; i++) {
+        const combined = (randomValues[i] ^ (timeMix >>> (i % chars.length))) % chars.length;
+        result += chars[Math.abs(combined)];
+    }
+    return result;
+}
+const initCode = () => {
+    if(localStorage.getItem('code')){
+        let oldKey = localStorage.getItem('code')
+        localStorage.setItem('code',random.value)
+        return request.getUri()+'/other/getCodeImage?' + random.value + '&' + oldKey
+    }
+    return request.getUri()+'/other/getCodeImage?' + random.value
+}
+const random = ref(getRandomCode())
+const codeImg = ref(initCode())
 const changeCode = () => {
-  codeImg.value = request.getUri()+'/getCodeImage?r' + new Date().getTime()
+  let newKey = getRandomCode()
+  codeImg.value = request.getUri()+'/other/getCodeImage?' + newKey + '&' + random.value
+  random.value = newKey
+  localStorage.setItem('code',newKey)
 }
 defineExpose({
-    changeCode
+    random,changeCode
 })
 const props = defineProps({
     width:{

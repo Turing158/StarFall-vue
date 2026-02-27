@@ -1,9 +1,9 @@
 <template>
-  <Book ref="bookOut">
+  <Book>
     <Empty :height="30" />
     <div class="basicInfo">
       <div class="avatarOut">
-        <img class="avatar" :src="'/src/assets/avatar/'+userStore.avatar" alt="" width="100%" height="100%"/>
+        <img class="avatar" :src="userStore.avatar" alt="" width="100%" height="100%"/>
       </div>
     
       <div class="info">
@@ -12,8 +12,7 @@
         </div>
         <div class="infomation">
           <span
-            >{{ userStore.name }} <span class="user">({{ userStore.user }})</span></span
-          ><br />
+            >{{ userStore.name }} <span class="user">({{ userStore.user }})[{{ userStore.role=='admin'?'管理员':userStore.role=='moderator'?'版主':'普通用户'}}]</span></span><br />
           <span class="birth">出生日期：{{ userStore.birthday }}</span
           ><br />
           <span class="gender">性别：{{ gender }}</span>
@@ -37,7 +36,7 @@
           class="custom"
           layout="prev, pager, next"
           :total="topicTotal"
-          :page-size="10"
+          :page-size="20"
           :background="true"
           @current-change="changePage"
         />
@@ -51,13 +50,14 @@ import Empty from '../../components/FitEmpty.vue'
 import TopicList from '@/components/TopicList.vue'
 import TopicItem from '@/components/TopicItem.vue'
 import { useUserStore } from '@/stores/user'
+import { getAvatarApi } from '@/api/user'
+
 import Book from '@/components/Book.vue'
 import { onMounted, ref } from 'vue'
 import { findAllTopicByUser } from '@/api/topic'
 import { ElMessage } from 'element-plus'
 const loading = ref(true)
 const userStore = useUserStore()
-const bookOut = ref()
 const gender = ref('')
 if (userStore.gender == 0) {
   gender.value = '隐藏'
@@ -88,17 +88,18 @@ const getTopic = async () => {
       ElMessage.error('获取主题列表失败')
       loading.value = false
     })
-  bookOut.value.setHeight()
 }
 onMounted(getTopic)
 
 </script>
 <style scoped>
 .basicInfo {
-  height: 100px;
+  height: 115px;
   padding: 10px;
   display: flex;
   flex-direction: row;
+  width: 100%;
+  box-sizing: border-box;
 }
 .avatarOut {
   width: 80px;
@@ -111,6 +112,16 @@ onMounted(getTopic)
   margin: 0 10px;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+.infomation {
+  margin: 0px 10px;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .exp {
   width: 400px;

@@ -1,3 +1,4 @@
+<!-- 搜索页面框架 -->
 <template>
     <div>
         <Ul class="ul"></Ul>

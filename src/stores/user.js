@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { getAvatarApi } from '@/api/user'
 
 export const useUserStore = defineStore('user-Sf', () => {
   const user = ref('')
@@ -15,6 +16,8 @@ export const useUserStore = defineStore('user-Sf', () => {
   const isLogin = ref(false)
   const token = ref()
 
+  const unreadNum = ref(0)
+
 
   const setUserObject = (User, Name, Level, Exp, MaxExp, Gender, Birthday,Avatar,Email,Role) => {
     user.value = User
@@ -24,7 +27,7 @@ export const useUserStore = defineStore('user-Sf', () => {
     maxExp.value = MaxExp
     gender.value = Gender
     birthday.value = Birthday
-    avatar.value = Avatar
+    avatar.value = getAvatarApi + Avatar
     email.value = Email
     role.value = Role
   }
@@ -32,7 +35,7 @@ export const useUserStore = defineStore('user-Sf', () => {
     email.value = Email
   }
   const setAvatar = (Avatar)=>{
-    avatar.value = Avatar
+    avatar.value = getAvatarApi + Avatar
   }
   const setLogin = (bool)=>{
     isLogin.value = bool
@@ -40,6 +43,9 @@ export const useUserStore = defineStore('user-Sf', () => {
 
   const setToken = (Token)=>{
     token.value = Token
+  }
+  const setUnreadNum = (num)=>{
+    unreadNum.value = num
   }
 
   const exit = ()=>{
@@ -57,7 +63,7 @@ export const useUserStore = defineStore('user-Sf', () => {
   }
 
 
-  return { user, name, level, exp, maxExp, gender, birthday,avatar,email,role,isLogin,token,setUserObject,setLogin,setToken,exit,setEmail,setAvatar }
+  return { user, name, level, exp, maxExp, gender, birthday,avatar,email,role,isLogin,token,unreadNum,setUserObject,setLogin,setToken,exit,setEmail,setAvatar,setUnreadNum }
 },
 {
   persist: true,
