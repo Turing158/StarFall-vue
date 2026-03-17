@@ -139,7 +139,7 @@
 <script setup>
 import { addTopicLikeItem, findAllLikeItem, findAllTopicForSelect, findAllTopicLikeItem, updateTopicLikeItem } from '@/api/admin/topic';
 import { findAllUsersForSelect } from '@/api/admin/user';
-import { ElMessage, ElNotification } from 'element-plus';
+import { ElMessage, ElNotification, ElLoading } from 'element-plus';
 import {inject,onMounted,reactive, ref} from 'vue'
 const isDark = inject('isDark')
 const topics = ref([])
@@ -160,7 +160,15 @@ const onEditTopicId = ref(0)
 const onEdit = async(i)=>{
     onEditTopicId.value = i.id
     pageLikeItem.value = 1
+    const loading = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     await getLikeItem()
+        .finally(() => {
+            loading.close()
+        })
     if(likeList.value.length > 0){
         editPage.value = true
     }
@@ -168,8 +176,13 @@ const onEdit = async(i)=>{
         ElMessage.error('无点赞信息')
     }
 }
-const onEditLike = async(i,item)=>{ 
+const onEditLike = async(i,item)=>{
     item.status = i
+    const loading = ElLoading.service({
+        lock: true,
+        text: '处理中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     await updateTopicLikeItem(item).then(async(res)=>{
         let msg = res.data.msg
         if(msg == 'SUCCESS'){
@@ -190,6 +203,9 @@ const onEditLike = async(i,item)=>{
     }).catch(err=>{
         ElMessage.error('服务错误')
     })
+    .finally(() => {
+        loading.close()
+    })
 }
 const like = reactive({
     topicId: '',
@@ -208,6 +224,11 @@ const onAdd = ()=>{
 }
 const confirm = ()=>{
     formInput.value.validate(async(valid)=>{
+        const loading = ElLoading.service({
+            lock: true,
+            text: '处理中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
         await addTopicLikeItem(like).then(res=>{
             let msg = res.data.msg
             if(msg == 'SUCCESS'){
@@ -234,6 +255,9 @@ const confirm = ()=>{
         }).catch(err=>{
             ElMessage.error('服务错误')
         })
+        .finally(() => {
+            loading.close()
+        })
     })
 }
 const clear = ()=>{
@@ -250,6 +274,11 @@ const handleLikeItemCurrentChange = (e)=>{
 }
 const likeKeyword = ref('')
 const getLikeItem = async()=>{
+    const loading = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     await findAllLikeItem(onEditTopicId.value,pageLikeItem.value,likeKeyword.value).then(res=>{
         let msg = res.data.msg
         if(msg == 'SUCCESS'){
@@ -259,6 +288,9 @@ const getLikeItem = async()=>{
     }).catch(err=>{
         ElMessage.error('服务错误')
     })
+    .finally(() => {
+        loading.close()
+    })
 }
 const userSelect = ref([])
 const remoteMethod = async(queryString)=>{
@@ -266,6 +298,11 @@ const remoteMethod = async(queryString)=>{
     userSelect.value = [];
     return;
   }
+  const loading = ElLoading.service({
+      lock: true,
+      text: '搜索中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllUsersForSelect(queryString).then(res=>{
     if (res.data.msg === 'SUCCESS') {
       userSelect.value = res.data.object || [];
@@ -277,6 +314,9 @@ const remoteMethod = async(queryString)=>{
     console.log(err);
     ElMessage.error('服务异常');
   })
+  .finally(() => {
+      loading.close()
+  })
 }
 const topicSelect = ref([])
 const remoteMethodToTopic = async (queryString) => {
@@ -284,6 +324,11 @@ const remoteMethodToTopic = async (queryString) => {
     userSelect.value = [];
     return;
   }
+  const loading = ElLoading.service({
+      lock: true,
+      text: '搜索中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllTopicForSelect(queryString).then(res=>{
     if (res.data.msg === 'SUCCESS') {
       topicSelect.value = res.data.object || [];
@@ -295,9 +340,17 @@ const remoteMethodToTopic = async (queryString) => {
     console.log(err);
     ElMessage.error('服务异常');
   })
+  .finally(() => {
+      loading.close()
+  })
 }
 const keyword = ref('')
 const getTopicLikeList = async()=>{
+    const loading = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     await findAllTopicLikeItem(page.value,keyword.value).then(res=>{
         let msg = res.data.msg
         if(msg == 'SUCCESS'){
@@ -306,6 +359,9 @@ const getTopicLikeList = async()=>{
         }
     }).catch(err=>{
         ElMessage.error('服务错误')
+    })
+    .finally(() => {
+        loading.close()
     })
 }
 const searchLike = ()=>{

@@ -88,7 +88,7 @@
 <script setup>
 
 import { appendSignIn, deleteSignIn, findAllSignIn, findAllUsersForSelect, updateSignIn } from '@/api/admin/user';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus';
 import { inject, onMounted, reactive, ref } from 'vue';
 const isDark = inject('isDark')
 
@@ -155,6 +155,11 @@ const onDel = (row)=>{
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async() => {
+        const loading = ElLoading.service({
+            lock: true,
+            text: '处理中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
         await deleteSignIn(row).then(res=>{
             let msg = res.data.msg
             if(msg == 'SUCCESS'){
@@ -170,6 +175,9 @@ const onDel = (row)=>{
         }).catch(err=>{
             ElMessage.error("服务异常")
         
+        })
+        .finally(() => {
+            loading.close()
         })
       }).catch(() => {
         ElMessage.info('已取消删除')
@@ -199,6 +207,11 @@ const confirm = ()=>{
 const addSignIn = async()=>{
     formInput.value.validate(async(valid)=>{
         if(valid){
+            const loading = ElLoading.service({
+                lock: true,
+                text: '处理中...',
+                background: 'rgba(0, 0, 0, 0.7)'
+            })
             await appendSignIn(signIn.value).then(res=>{
                 let msg = res.data.msg
                 if(msg == 'SUCCESS'){
@@ -215,12 +228,20 @@ const addSignIn = async()=>{
             }).catch(err=>{
                 ElMessage.error('服务异常')
             })
+            .finally(() => {
+                loading.close()
+            })
         }
     })
 }
 const editSignIn = async()=>{
     formInput.value.validate(async(valid)=>{
         if(valid){
+            const loading = ElLoading.service({
+                lock: true,
+                text: '处理中...',
+                background: 'rgba(0, 0, 0, 0.7)'
+            })
             await updateSignIn(signIn.value).then(res=>{
                 let msg = res.data.msg
                 if(msg == 'SUCCESS'){
@@ -234,11 +255,19 @@ const editSignIn = async()=>{
             }).catch(err=>{
                 ElMessage.error('服务异常')
             })
+            .finally(() => {
+                loading.close()
+            })
         }
     })
 }
 const keyword = ref('')
 const getSignInList = async()=>{
+    const loading = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     await findAllSignIn(page.value,keyword.value).then(res=>{
         let msg = res.data.msg
         if(msg == 'SUCCESS'){
@@ -248,12 +277,20 @@ const getSignInList = async()=>{
     }).catch(err=>{
         ElMessage.error('服务异常')
     })
+    .finally(() => {
+        loading.close()
+    })
 }
 const remoteMethod = async(queryString)=>{
   if (!queryString) {
     userSelect.value = [];
     return;
   }
+  const loading = ElLoading.service({
+      lock: true,
+      text: '搜索中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllUsersForSelect(queryString).then(res=>{
     if (res.data.msg === 'SUCCESS') {
       userSelect.value = res.data.object || [];
@@ -264,6 +301,9 @@ const remoteMethod = async(queryString)=>{
   .catch(err=>{
     console.log(err);
     ElMessage.error('服务异常');
+  })
+  .finally(() => {
+      loading.close()
   })
 }
 const init = ()=>{

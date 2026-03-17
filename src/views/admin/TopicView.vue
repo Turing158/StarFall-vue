@@ -482,6 +482,11 @@ const topicLabel = computed(() => {
 const lookDialog = ref(false)
 const lookTopic = ref({})
 const look = async (i)=>{
+    const loading = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     lookTopic.value = i
     lookDialog.value = true
     await getTopicContent(lookTopic.value.user,lookTopic.value.id)
@@ -491,6 +496,9 @@ const look = async (i)=>{
     })
     .catch(err=>{
         ElMessage.error("获取文章内容失败")
+    })
+    .finally(() => {
+        loading.close()
     })
 }
 const goToTopic = ()=>{
@@ -668,11 +676,24 @@ const tmpFile = ref({
 })
 
 const openGallery = async (row)=>{
+    const loading = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     gallery.value = row
     galleryDialog.value = true
     await getGallery(row.id)
+        .finally(() => {
+            loading.close()
+        })
 }
 const getGallery = async (id)=>{
+    const loading = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     await findAllTopicGallery(id).then(res=>{
         if(res.data.msg == 'SUCCESS'){
             galleryImages.value = res.data.object
@@ -688,6 +709,9 @@ const getGallery = async (id)=>{
     }).catch(err=>{
         ElMessage.error("服务错误")
     })
+    .finally(() => {
+        loading.close()
+    })
 }
 
 // 删除图片
@@ -701,6 +725,11 @@ const deleteImage = async (img)=>{
             type: 'warning'
         }
     ).then(async () => {
+        const loading = ElLoading.service({
+            lock: true,
+            text: '处理中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
         await deleteTopicGallery(img.id)
         .then(res=>{
             if(res.data.msg == 'SUCCESS'){
@@ -714,7 +743,9 @@ const deleteImage = async (img)=>{
         .catch(err=>{
             ElMessage.error("服务错误")
         })
-        
+        .finally(() => {
+            loading.close()
+        })
     }).catch(() => {
         // 取消删除
     })
@@ -804,6 +835,11 @@ const onclip = async () => {
   try {
     // 获取裁剪后的图片数据
     cropper.value.getCropData(async(data) => {
+      const loading = ElLoading.service({
+          lock: true,
+          text: '上传中...',
+          background: 'rgba(0, 0, 0, 0.7)'
+      })
       // 调用上传接口
       await uploadTopicGallery(gallery.value.id, galleryImageTmpLabel.value, userStore.user, data)
         .then(res => {
@@ -821,6 +857,9 @@ const onclip = async () => {
         .catch(error => {
           console.error('图片上传失败', error)
           ElMessage.error('图片上传失败，请重试')
+        })
+        .finally(() => {
+            loading.close()
         })
     })
   } catch (error) {

@@ -4,17 +4,17 @@
       <div>{{ handleTime(props.chats.date,true) }}</div>
     </div>
     <div v-for="(item, index) in props.chats.contents" :key="index">
-      <div class="item" v-show="props.chats.fromUser != userStore.user">
+      <div class="item" v-if="props.chats.fromUser != userStore.user">
         <div class="avatar">
           <img :src="(props.chats.fromAvatar.includes('http') ? '' : getAvatarApi) + props.chats.fromAvatar" alt="" />
         </div>
-        <div class="chatCloud" v-html="toMd(item)"></div>
+        <div class="chatCloud" v-html="handleContent(item)"></div>
       </div>
-      <div class="item self" v-show="props.chats.fromUser == userStore.user">
+      <div class="item self" v-else>
         <div class="sending-animation" v-show="!props.chats.date">
           <div class="spinner"></div>
         </div>
-        <div class="chatCloud" v-html="toMd(item)"></div>
+        <div class="chatCloud" v-html="handleContent(item)"></div>
         <div class="avatar">
           <img :src="userStore.avatar" alt="" />
         </div>
@@ -28,6 +28,7 @@ import { ref } from 'vue'
 import { marked } from 'marked'
 import { getAvatarApi } from '@/api/user'
 import { handleTime } from '@/util/handleNotice'
+import { handleContent } from '@/util/chatContent'
 const props = defineProps({
   chats: Object,
   previousDate: String
@@ -39,10 +40,6 @@ renderer.link = function (href, title, text) {
   }>${text}</a>`
 }
 const userStore = useUserStore()
-const toMd = (item) => {
-  if (item == null) return
-  return marked(item, renderer)
-}
 const isShowTime = (previousDate , currentDate)=>{
     if(!previousDate){
         return true
@@ -51,7 +48,7 @@ const isShowTime = (previousDate , currentDate)=>{
     const current = new Date(currentDate)
     return current.getFullYear() != previous.getFullYear() || current.getMonth() != previous.getMonth() || current.getDate() != previous.getDate() || current.getHours() != previous.getHours() || current.getMinutes() != previous.getMinutes()
 }
-toMd()
+
 </script>
 <style scoped>
 .datetime {
@@ -108,6 +105,9 @@ toMd()
   border-radius: 50%;
   border-top-color: #666;
   animation: spin 1s ease-in-out infinite;
+}
+.link{
+  color: #007bff !important;
 }
 @keyframes spin {
   to {

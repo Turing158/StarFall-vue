@@ -24,15 +24,15 @@ const initCode = () => {
     if(localStorage.getItem('code')){
         let oldKey = localStorage.getItem('code')
         localStorage.setItem('code',random.value)
-        return request.getUri()+'/other/getCodeImage?' + random.value + '&' + oldKey
+        return request.getUri()+'/code/image/find?' + random.value + '&' + oldKey
     }
-    return request.getUri()+'/other/getCodeImage?' + random.value
+    return request.getUri()+'/code/image/find?' + random.value
 }
 const random = ref(getRandomCode())
 const codeImg = ref(initCode())
 const changeCode = () => {
   let newKey = getRandomCode()
-  codeImg.value = request.getUri()+'/other/getCodeImage?' + newKey + '&' + random.value
+  codeImg.value = request.getUri()+'/code/image/find?' + newKey + '&' + random.value
   random.value = newKey
   localStorage.setItem('code',newKey)
 }

@@ -49,6 +49,10 @@
                           {{ item.isTop ? '取消顶置' : '顶置' }}
                         </el-dropdown-item>
                         <el-dropdown-item
+                          :command="handleCommandAndParam( item.relation == 0 ? 'unDND' : 'DND', item)"
+                          >{{ item.relation == 0 ? '接收消息' : '免打扰' }}</el-dropdown-item
+                        >
+                        <el-dropdown-item
                           :command="handleCommandAndParam( item.relation == -1 ? 'unBlack' : 'black', item)"
                           >{{ item.relation == -1 ? '取消拉黑' : '拉黑' }}</el-dropdown-item
                         >
@@ -75,14 +79,29 @@
                 </div>
 
                 <div class="sendBlock">
-                  <textarea
-                    type="text"
+                  <el-input
+                    ref="editorRef"
                     class="sendBox"
+                    type="textarea"
+                    maxlength="1000"
+                    show-word-limit
+                    word-limit-position="inside"
+                    input-style="height: 165px;"
                     v-model="contentValue"
                     :disabled="disableSend"
-                  ></textarea>
+                  ></el-input>
                   <div class="operate">
-                    <div>
+                    <div class="operate-left">
+                      <el-dropdown ref="emojiDropdown" trigger="hover" :hide-timeout="300">
+                        <button class="actionBtn">
+                        <img src="/src/assets/img/Cicon.gif" alt="">
+                        </button>
+                        <template #dropdown>
+                          <EmojiMenu @insertEmoji="insertEmoji"></EmojiMenu>
+                        </template>
+                      </el-dropdown>
+                    </div>
+                    <div class="operate-right">
                       <McBtn
                         text="发送"
                         @click="send()"
@@ -106,9 +125,11 @@ import Book from '@/components/Book.vue'
 import FriendListItem from '@/components/FriendListItem.vue'
 import ChatCloudItem from '@/components/ChatCloudItem.vue'
 import McBtn from '@/components/McBtn.vue'
-import { getAllFriend, findMsgByFriend, sendMessage, applyFriend, changeAlias, changeTop, changeRelation } from '@/api/friend'
+import EmojiMenu from '@/components/emojiMenu.vue'
+
+import { getAllFriend, findMsgByFriend, sendMessage, applyFriend, changeAlias, changeTop, changeRelation, deleteFriend } from '@/api/friend'
 import { ElCheckbox, ElMessage, ElMessageBox, ElRadio } from 'element-plus'
-import { onMounted, onUnmounted, ref, h } from 'vue'
+import { onMounted, onUnmounted, ref, h, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import useTimerStore from '@/stores/timer'
@@ -256,6 +277,7 @@ const handleCommandAndParam = (command, item) => {
 const handleMenuCommand = (commandHandle) => {
   let command = commandHandle.command
   let item = commandHandle.item
+  console.log(command)
   switch (command) {
     case 'goProfile':
       router.push('/personal/other/' + item.user)
@@ -268,6 +290,12 @@ const handleMenuCommand = (commandHandle) => {
       break
     case 'cancelTop':
       handleSetTop(item, false)
+      break
+    case 'DND':
+      handleDNDFriend(item,true)
+      break
+    case 'unDND':
+      handleDNDFriend(item,false)
       break
     case 'black':
       handleBlackFriend(item,true)
@@ -385,11 +413,11 @@ const handleBlackFriend = async(item, black) =>{
     await setBlock(item, black)
   })
 }
-const handleBlackBool = (black) => black ? -1 : 0
+
 const setBlock = async(item, black)=>{
   let isSuccess = false
   let oldRelation = item.relation
-  await changeRelation(item.user, black)
+  await changeRelation(item.user, black ? -1 : 1)
   .then(res=>{
     if(res.data.msg == 'SUCCESS'){
       isSuccess = true
@@ -403,12 +431,53 @@ const setBlock = async(item, black)=>{
     ElMessage.error('服务异常')
   })
   if(isSuccess){
-    item.relation = handleBlackBool(black)
+    item.relation = black ? -1 : 1
   }
   else{
     item.relation = oldRelation
   }
 }
+
+const handleDNDFriend = async(item, DND) =>{
+  if(!DND){
+    await setDND(item, DND)
+    return
+  }
+  ElMessageBox.confirm('确定要免打扰该好友吗？免打扰后将接收不到他的消息提醒', '免打扰好友', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+  .then(async()=>{
+    await setDND(item, DND)
+  })
+}
+
+const setDND = async(item, DND)=>{
+  let isSuccess = false
+  let oldRelation = item.relation
+  await changeRelation(item.user, DND ? 0 : 1)
+  .then(res=>{
+    if(res.data.msg == 'SUCCESS'){
+      isSuccess = true
+      ElMessage.success('设置成功')
+    }
+    else{
+      ElMessage.error('设置失败')
+    }
+  })
+  .catch(e=>{
+    ElMessage.error('服务异常')
+  })
+  if(isSuccess){
+    item.relation = DND ? 0 : 1
+  }
+  else{
+    item.relation = oldRelation
+  }
+}
+
+
 const handleDeleteAfter = (item)=>{
   const index = friendList.value.findIndex((i) => i.user === item.user)
       if (index !== -1) {
@@ -438,11 +507,33 @@ const handleDeleteFriend = (item) => {
     cancelButtonText: '取消',
     type: 'warning'
   })
-    .then(() => {
-      
+    .then(async() => {
+      await deleteFriend(item.user, deleteChat.value)
+      .then(res=>{
+        if(res.data.msg == 'SUCCESS'){
+          handleDeleteAfter(item)
+        }
+        else{
+          ElMessage.error('删除失败')
+        }
+      })
     })
     .catch(() => {})
 }
+
+const emojiDropdown = ref(null)
+const editorRef = ref(null)
+const insertEmoji = (item) => {
+  emojiDropdown.value.handleClose()
+  let start = editorRef.value.textarea.selectionStart
+  contentValue.value = contentValue.value.substring(0, start) + `:${item.id}:` + contentValue.value.substring(start)
+  setTimeout(() => {
+    editorRef.value.textarea.focus()
+    editorRef.value.textarea.selectionStart = start
+    editorRef.value.textarea.selectionEnd = start + item.id.length + 2
+  }, 500)
+}
+
 const send = async () => {
   if(!currentFriend.value){
     ElMessage.error('请先选择好友')
@@ -630,12 +721,84 @@ const init = async () => {
   if (chatUserFrame.value) {
     chatUserFrame.value.addEventListener('scroll', handleScroll)
   }
+  
+  // 添加拖拽事件监听
+  nextTick(() => {
+    setupDragEvents()
+  })
 }
+
+// 设置拖拽事件
+const setupDragEvents = () => {
+  // 为聊天区域添加dragstart事件委托，捕获emoji图片的拖拽
+  if (chatUserFrame.value) {
+    chatUserFrame.value.addEventListener('dragstart', handleChatDragStart)
+  }
+  
+  // 为输入框添加drop事件
+  if (editorRef.value && editorRef.value.textarea) {
+    editorRef.value.textarea.addEventListener('dragover', handleDragOver)
+    editorRef.value.textarea.addEventListener('drop', handleDrop)
+  }
+}
+
+// 处理聊天区域emoji图片的拖拽开始
+const handleChatDragStart = (e) => {
+  // 检查拖拽的是否是emoji图片
+  if (e.target.classList.contains('chat_emoji')) {
+    // 获取emoji的alt属性（即emoji标签，如 :smile:）
+    const emojiTag = e.target.getAttribute('alt')
+    if (emojiTag) {
+      // 设置拖拽数据
+      e.dataTransfer.setData('text/plain', emojiTag)
+      e.dataTransfer.effectAllowed = 'copy'
+    }
+  }
+}
+
+// 处理拖拽经过输入框
+const handleDragOver = (e) => {
+  e.preventDefault()
+  e.dataTransfer.dropEffect = 'copy'
+}
+
+// 处理在输入框中放置
+const handleDrop = (e) => {
+  e.preventDefault()
+  
+  // 获取拖拽的数据
+  const data = e.dataTransfer.getData('text/plain')
+  
+  // 检查是否是emoji标签（以:开头和结尾）
+  if (data && data.startsWith(':') && data.endsWith(':')) {
+    // 获取输入框的光标位置
+    const textarea = editorRef.value.textarea
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    
+    // 在光标位置插入emoji标签
+    contentValue.value = contentValue.value.substring(0, start) + data + contentValue.value.substring(end)
+    
+    // 设置新的光标位置
+    nextTick(() => {
+      textarea.focus()
+      const newPosition = start + data.length
+      textarea.selectionStart = newPosition
+      textarea.selectionEnd = newPosition
+    })
+  }
+}
+
 onMounted(init)
 onUnmounted(() => {
   unregisterMessageCallback(handleFriendMessage)
   if (chatUserFrame.value) {
     chatUserFrame.value.removeEventListener('scroll', handleScroll)
+    chatUserFrame.value.removeEventListener('dragstart', handleChatDragStart)
+  }
+  if (editorRef.value && editorRef.value.textarea) {
+    editorRef.value.textarea.removeEventListener('dragover', handleDragOver)
+    editorRef.value.textarea.removeEventListener('drop', handleDrop)
   }
 })
 
@@ -749,21 +912,47 @@ const handleScroll = () => {
   border-right: 1px solid #c9b896;
 }
 .sendBox {
-  border: 0;
-  outline: none;
-  width: 760px;
-  height: 150px;
+  width: 775px;
+  height: 165px;
   font-size: 18px;
-  padding: 5px;
-  resize: none;
+  font-family:Arial, Helvetica, sans-serif;
   background-color: #f8f1e0;
 }
 .operate {
   width: 100%;
   display: flex;
-  justify-content: flex-end;
-  height: 60px;
+  justify-content: space-between;
+  height: 35px;
   background-color: #f0e8d0;
+}
+.operate .operate-left{
+  display: flex;
+  align-items: center;
+}
+.operate .operate-right{
+  display: flex;
+}
+.operate .actionBtn{
+  width: 28px;
+  height: 28px;
+  border: 0;
+  outline: 0;
+  margin: 0 5px;
+  border-radius: 5px;
+  background-color: transparent;
+  color: #58442a;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.operate .actionBtn:hover{
+  background-color: #c9bea8;
+}
+.operate .actionBtn:active{
+  background-color: #e4dcca;
 }
 .empty {
   position: absolute;

@@ -50,7 +50,7 @@
 </template>
 <script setup>
 import { addNotice, deleteNotice, findAllNotice, updateNotice } from '@/api/admin/notice';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus';
 import {inject, onMounted, ref} from 'vue'
 const isDark = inject('isDark')
 const notices = ref([])
@@ -77,6 +77,11 @@ const confirmAdd = async()=>{
             id: noticeId.value,
             content: noticeContent.value
         }
+        const loading = ElLoading.service({
+            lock: true,
+            text: '处理中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
         await addNotice(obj).then(res=>{
             let msg = res.data.msg
             if(msg == 'SUCCESS'){
@@ -89,6 +94,9 @@ const confirmAdd = async()=>{
             }
         }).catch(err=>{
             ElMessage.error("服务异常")
+        })
+        .finally(() => {
+            loading.close()
         })
     }
 }
@@ -106,6 +114,11 @@ const confirmEdit = async()=>{
             id: noticeId.value,
             content: noticeContent.value
         }
+        const loading = ElLoading.service({
+            lock: true,
+            text: '处理中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
         await updateNotice(obj).then(res=>{
             let msg = res.data.msg
             if(msg == 'SUCCESS'){
@@ -122,6 +135,9 @@ const confirmEdit = async()=>{
         }).catch(err=>{
             ElMessage.error("服务异常")
         })
+        .finally(() => {
+            loading.close()
+        })
     }
 }
 const clear = ()=>{
@@ -136,6 +152,11 @@ const onDel = (i)=>{
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async() => {
+        const loading = ElLoading.service({
+            lock: true,
+            text: '处理中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
         await deleteNotice(i.id).then(res=>{
             let msg = res.data.msg
             if(msg == 'SUCCESS'){
@@ -152,11 +173,19 @@ const onDel = (i)=>{
             ElMessage.error("服务异常")
         
         })
+        .finally(() => {
+            loading.close()
+        })
       }).catch(() => {
         ElMessage.info('已取消删除')
       });
 }
 const getNoticeList = async()=>{
+    const loading = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     await findAllNotice(page.value).then(res=>{
         let msg = res.data.msg
         if(msg == 'SUCCESS'){
@@ -165,6 +194,9 @@ const getNoticeList = async()=>{
         }
     }).catch(err=>{
         ElMessage.error("获取公告列表失败！")
+    })
+    .finally(() => {
+        loading.close()
     })
 }
 const init = ()=>{

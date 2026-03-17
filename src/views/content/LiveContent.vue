@@ -22,6 +22,9 @@
             <a :href="item.link">
               <img class="adImg" :src="adPictureApi + item.file" alt="" width="100%" />
             </a>
+            <div class="carousel-texts">
+              {{ item.title }}
+            </div>
           </el-carousel-item>
         </el-carousel>
       </div>

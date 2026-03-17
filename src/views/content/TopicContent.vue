@@ -16,7 +16,7 @@
               <img class="adImg" :src="adPictureApi + item.file" alt="" width="100%" />
             </a>
             <div class="carousel-texts">
-              asdfghjklasd阿萨大大股份过户
+              {{ item.title }}
             </div>
           </el-carousel-item>
         </el-carousel>

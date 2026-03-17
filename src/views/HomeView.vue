@@ -6,14 +6,14 @@
     </div>
     <el-carousel height="500px" trigger="click" motion-blur :interval="3000" 
         v-loading="isLoading"
-        element-loading-background="#fbf2db"
+        element-loading-background="#f3debf"
         element-loading-text="加载中...">
       <el-carousel-item v-for="(item,index) in ads" :key="index" label=" ">
         <a :href="item.link">
           <img class="adImg" :src="adPictureApi+item.file" alt="" :width="imgWidth" :height="imgHeight" />
         </a>
         <div class="carousel-texts">
-          asdfghjklasd阿萨大大股份过户
+          {{ item.title }}
         </div>
       </el-carousel-item>
     </el-carousel>

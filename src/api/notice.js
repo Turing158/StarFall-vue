@@ -2,7 +2,7 @@ import request from '@/util/request'
 
 
 // 公告列表
-export const findAllNotice = ()=>request.post('/notice/findAllNotice')
+export const findAllNotice = ()=>request.post('/home/notice/find')
 
 // 最新通知和未读数量
 export const findLastNoticeAndUnreadNum = () =>request.post('/user/notice/last')

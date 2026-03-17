@@ -78,25 +78,37 @@
 
                       <div v-else-if="notice.type === 'topic'" class="noticeContent topicType">
                         <div class="topicText">
-                          你的主题帖 (<a
+                          <span v-if="notice.action.operator">你的</span>主题帖 (<a
                             :href="`/topic/detail/${notice.action.id}`"
                             target="_blank"
                             title="点击跳转"
                             >{{ notice.action.title }}</a
-                          >) 显示状态已更新为：
-                          <span class="red" v-if="notice.action.status == -1">待整改</span>
-                          <span class="green" v-else>正常显示</span>
-                          <br />
-                          操作员：<a
-                            :href="`/personal/other/${notice.action.operator}`"
-                            target="_blank"
-                            title="点击跳转"
-                            >{{ notice.action.operator }}</a
-                          >
-                          <br />
-                          原因：{{ notice.action.reason }}
+                          >) 
+                          <span v-if="notice.action.operator">显示状态已更新为：</span>
+                          <span v-else>已整改完毕！<br/>请再次审核该主题，并操作主题状态！</span>
+                          <span v-if="notice.action.operator">
+                            <span class="red" v-if="notice.action.status == -1">待整改</span>
+                            <span class="green" v-else>正常显示</span>
+                          </span>
+                          <div v-if="notice.action.operator">
+                            操作员：<a
+                              :href="`/personal/other/${notice.action.operator}`"
+                              target="_blank"
+                              title="点击跳转"
+                              v-if="notice.action.reason"
+                              >{{ notice.action.operator }}</a
+                            >
+                            <br />
+                            原因：{{ notice.action.reason }}
+                          </div>
                         </div>
-                        <button class="goButton" @click="goToTopic(notice.action.id)">前往</button>
+                        <div class="topicOperate" :class="!notice.action.operator ? 'againOperate' : ''">
+                          <button v-if="!notice.action.handle && notice.action.operator" class="actionButton" @click="completeAdjust(notice)">已整改</button>
+                          <button v-if="notice.action.handle && notice.action.operator" class="actionButton disableBtn">已通知</button>
+                          <button v-if="!notice.action.handle && !notice.action.operator" class="actionButton" @click="operateTopic(notice)">操作</button>
+                          <button v-if="notice.action.handle && !notice.action.operator" class="actionButton disableBtn">已处理</button>
+                          <button class="actionButton" @click="goToTopic(notice.action.id)">前往</button> 
+                        </div>
                       </div>
 
                       <div v-else-if="notice.type === 'live'" class="noticeContent">
@@ -120,24 +132,40 @@
                       </div>
 
                       <div v-else-if="notice.type === 'msg'" class="noticeContent">
-                        {{ notice.action }}
+                        <div class="medal-notice" v-if="notice.action && notice.action.medal">
+                          <img class="medal-icon" :src="`/src/assets/img${notice.action.icon}`" alt="">
+                          <div class="medal-info">
+                            <span>
+                              恭喜你获得了 <span class="medan-name">{{ notice.action.medal }}</span> 勋章！
+                            </span>
+                            <span>
+                              获得时间：{{ notice.action.gainTime }}
+                            </span>
+                            <span v-if="notice.action.expireTime">
+                              过期时间：{{ notice.action.expireTime }}
+                            </span>
+                          </div>
+                        </div>
+                        <div v-else>{{ notice.action }}</div>
                       </div>
+
 
                       <div v-else-if="notice.type === 'all'" class="noticeContent allType">
                         <img
-                          :src="notice.image || '/src/assets/img/emoji/item/emerald.png'"
+                          :src="getImageUrl(notice.action.img)"
                           class="allImage"
                         />
                         <div class="allDetail">
-                          <div class="allText">{{ notice.content }}</div>
-                          <button class="goButton">前往</button>
+                          <div class="allText">{{ notice.action.content }}</div>
+                          <div class="subText">{{ notice.action.subContent }}</div>
                         </div>
+                        <button class="actionButton" style="height: 30px;" @click="goToTopic(notice.action.id)">前往</button>
                       </div>
 
                       <div class="noticeTime">{{ handleTime(notice.createTime, true) }}</div>
                     </div>
                     <div class="noticeStatus">
-                      <span v-if="notice.status === 0" class="unreadDot"></span>
+                      <span v-if="notice.status === 0 && notice.type !== 'all'" class="unreadDot"></span>
                     </div>
                   </div>
                   <div class="loading" @click="!isLoading && loadMoreNotices()">
@@ -165,7 +193,8 @@ import { getNoticeIcon, handleTime, registerMessageCallback, unregisterMessageCa
 import { findAllUserNotice, readNotice } from '@/api/notice'
 import { getAvatarApi } from '@/api/user'
 import { handleFriendApplication } from '@/api/friend'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { adjustTopicDisplayAgain, completeAdjustTopic } from '@/api/topic'
 const notices = ref([])
 const isLoading = ref(false)
 const userStore = useUserStore()
@@ -226,12 +255,112 @@ const handleFriendAccept = async(notice,accept) => {
   }
 }
 
-
 const goToTopic = (id) => {
   router.push({ name: 'topicDetail', params: { id: id } })
 }
+
+const completeAdjust = async(notice)=>{
+  notice.action.handle = true
+  let isSuccess = false;
+  await completeAdjustTopic(notice.id,notice.action.id)
+  .then(res=>{
+    let msg = res.data.msg
+    if(msg == 'SUCCESS'){
+      ElMessage.success('已完成整改')
+      isSuccess = true
+    }
+    else if(msg == 'NO_PERMISSION'){
+      ElMessage.error('您没有权限操作')
+    }
+    else if(msg == 'NOT_AFTER_1_DAY'){
+      ElMessage.error('帖子超过1天未编辑，若已整改编辑，请在完成编辑后1天内并完成整改')
+    }
+    else if(msg == 'NOT_BEFORE_5_MIN'){
+      ElMessage.error('请修改帖子后，5分钟后再完成整改')
+    }
+    else if(msg == 'NOT_EXIST_NOTICE'){
+      ElMessage.error('该通知不存在')
+    }
+    else if(msg == 'ALREADY_HANDLE'){
+      ElMessage.error('该通知已处理')
+    }
+    else if(msg == 'NOT_EXIST_TOPIC'){
+      ElMessage.error('该帖子不存在')
+    }
+  })
+  .catch(e=>{
+    ElMessage.error('服务异常')
+  })
+  if(!isSuccess){
+    notice.action.handle = false
+  }
+}
+
+const operateTopic = async(notice) => {
+  let isClose = false
+  let reason = ''
+  let canDisplay = false
+  await ElMessageBox.prompt('请操作该主题的显示状态，是否符合主题规范。若不符合请输入原因，并点击“再次整改”按钮；符合请点击“恢复”按钮', '提示', {
+    confirmButtonText: '再次整改',
+    cancelButtonText: '恢复',
+    distinguishCancelAndClose: true,
+    inputValidator: (value) => {
+      if (!value) {
+        return '请输入整改原因'
+      }
+      return true
+    }
+  }).then(({ value }) => {
+    reason = value
+    canDisplay = false
+  }).catch((action) => {
+    canDisplay = true
+    if(action == 'close'){
+      isClose = true
+    }
+  })
+  if(isClose){
+    return 
+  }
+  if (!canDisplay && !reason) {
+    ElMessage.error('请输入整改原因')
+    return
+  }
+  let isSuccess = false
+  notice.action.handle = true
+  await adjustTopicDisplayAgain(notice.action.id, reason, canDisplay ? 1 : -1, notice.id)
+  .then(res=>{
+    let msg = res.data.msg
+    if(msg == 'SUCCESS'){
+      ElMessage.success('操作成功')
+      isSuccess = true
+    }
+    else if(msg == 'NO_PERMISSION'){
+      ElMessage.error('您没有权限操作')
+    }
+    else if(msg == 'DONT_DO'){
+      ElMessage.error('该操作不符合规范')
+    }
+    else if(msg == 'ALREADY_HANDLE'){
+      ElMessage.error('该通知已处理')
+    }
+    else if(msg == 'NOT_EXIST_TOPIC'){
+      ElMessage.error('该帖子不存在')
+    }
+    else if(msg == 'NOT_AFTER_5_MIN'){
+      ElMessage.error('请仔细审核，5分钟内不能再次审核该帖子')
+    }
+  })
+  .catch(e=>{
+    ElMessage.error('服务异常')
+  })
+  if(!isSuccess){
+    notice.action.handle = false
+  }
+}
+
 const toRead = async (notice) => {
-  if (notice.status != 0) {
+  if (notice.status != 0 || notice.type === 'all') {
     return
   }
   notice.status = 1
@@ -244,7 +373,6 @@ const toRead = async (notice) => {
     status: notice.status,
     action: JSON.stringify(notice.action)
   }
-  console.log(tmp)
   await readNotice([tmp])
     .then((res) => {
       ElMessage.success('已读成功')
@@ -288,6 +416,9 @@ const loadMoreNotices = async () => {
   if (noticeLength == notices.value.length) {
     isEnd.value = true
   }
+}
+const getImageUrl = (img) => {
+  return img.includes(':') ? img : `/src/assets/img${img}`
 }
 onMounted(init)
 onUnmounted(()=>{
@@ -365,6 +496,7 @@ table {
 }
 .noticeList {
   height: 550px;
+  /* height: 1000px; */
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
@@ -416,17 +548,14 @@ table {
   color: #6b5d4d;
   margin-bottom: 8px;
   line-height: 1.5;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
+}
+.noticeContent img{
+  image-rendering: auto;
 }
 .friendType {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  -webkit-line-clamp: unset;
 }
 .friendAvatar {
   width: 40px;
@@ -457,7 +586,7 @@ table {
   align-items: center;
 }
 .actionButton {
-  padding: 6px 16px;
+  padding: 4px 10px;
   border: none;
   border-radius: 4px;
   color: #131313;
@@ -466,9 +595,17 @@ table {
   cursor: pointer;
   transition: all 0.3s;
   flex-shrink: 0;
+  background-image: url('@/assets/img/set/oak.png');
 }
 .actionButton:hover {
-  background-image: url('@/assets/img/set/oak.png');
+  transform: scale(1.1);
+}
+.disableBtn{
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+.disableBtn:hover{
+  transform: scale(1);
 }
 .acceptButton {
   background-image: url('@/assets/img/set/birch.png');
@@ -483,11 +620,46 @@ table {
   gap: 10px;
   -webkit-line-clamp: unset;
 }
+
+.topicOperate {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.topicOperate.againOperate{
+  height: 30px;
+  flex-direction: row;
+}
 .topicText {
   font-size: 14px;
   color: #6b5d4d;
   line-height: 1.5;
   flex: 1;
+}
+.medal-notice{
+  display: flex;
+  align-items: flex-start;
+}
+.medal-icon {
+  width: 80px;
+  height: 80px;
+  margin-right: 5px;
+  flex-shrink: 0;
+  image-rendering: auto;
+  border-radius: 4px;
+  border: 2px solid #835a26;
+}
+.medal-info{
+  padding: 5px 2px;
+  display: flex;
+  flex-direction: column;
+}
+.medan-name{
+  font-size: 14px;
+  font-weight: bold;
+  color: #756f68;
+  margin-bottom: 8px;
+  padding: 0px 4px;
 }
 .allType {
   display: flex;
@@ -515,21 +687,12 @@ table {
   flex: 1;
   margin-bottom: 8px;
 }
-.goButton {
-  align-self: flex-end;
-  padding: 6px 14px;
-  background-image: url('@/assets/img/set/oak.png');
-  color: #1d1d1d;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s;
+.subText{
+  font-size: 12px;
+  color: #8b7d6d;
+  font-style: italic;
 }
-.goButton:hover {
-  background-color: #5c5542;
-}
+
 .noticeTime {
   font-size: 12px;
   color: #8b7d6d;

@@ -201,7 +201,7 @@ const editComment = ref() // 评论输入框内容
 const onComment = async () => {
   if (editComment.value.code.length == 0) {
     ElMessage.error('请输入验证码')
-  } else if (editComment.value.content.length < 10) {
+  } else if (editComment.value.contentEditor.content.length < 10) {
     ElMessage.error('评论内容不能少于10个字符')
   } else {
     let loading = ElLoading.service({
@@ -209,7 +209,7 @@ const onComment = async () => {
       text: '评论中...',
       background: 'rgba(0, 0, 0, 0.7)'
     })
-    await appendComment(route.params.id, editComment.value.content, editComment.value.codeImg.random+":"+editComment.value.code)
+    await appendComment(route.params.id, editComment.value.contentEditor.content, editComment.value.codeImg.random+":"+editComment.value.code)
       .then((res) => {
         let msg = res.data.msg
         if (msg == 'CODE_ERROR') {

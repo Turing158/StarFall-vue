@@ -1,9 +1,10 @@
 import { ElNotification, ElMessage } from 'element-plus'
-import { ref } from 'vue'
+import { ref, h } from 'vue'
 import { useUserStore } from '@/stores/user'
-import { isExpire } from '@/api/user'
+import { getAvatarApi, isExpire } from '@/api/user'
 import request from '@/util/request'
 import { useRouter } from 'vue-router'
+import { handleLastContent } from './chatContent'
 
 const router = useRouter()
 
@@ -58,9 +59,15 @@ export const initWebSocket = async () => {
           console.log('过期')
           userStroe.exit()
           router.push('/')
+          return
         }
       })
-      .catch()
+      .catch(e=>{
+          console.log('未登录')
+          userStroe.exit()
+          router.push('/')
+          return
+      })
   }
   let url = 'ws://' + window.location.href.split('/')[2] + '/api/message/' + userStroe.token
   if (userStroe.isLogin) {
@@ -113,30 +120,57 @@ export const getNoticeIcon = (type) => {
       return getIconPath('jungle_hanging_sign')
   }
 }
-const getNoticeContent = (action, type) => {
-  let ope = JSON.parse(action)
+const getNoticeContent = (notice) => {
+  let ope = JSON.parse(notice.action)
+  let type = notice.type
   console.log(ope)
   if (type == 'live') {
     return `直播申请${ope.url ? `(<a href="${ope.url}" target="_blank" title="点击跳转">${ope.url}</a>)` : ''}<span class="${ope.status == 1 ? 'green' : 'red'}"> ${ope.status == 1 ? '已通过' : ope.status == -1 ? '未通过' : '暂未审核'}</span><br/>原因：${ope.reason}`
   } else if (type == 'topic') {
-    return `主题帖(<a href="/topic/detail/${ope.id}" target="_blank" title="点击跳转">${ope.title}</a>)状态已更新：<span class="${ope.status == -1 ? 'red' : 'green'}">${ope.status == -1 ? '待整改' : '正常发布'}</span><br/>审核员：<a href="/personal/other/${ope.operator}">${ope.operator}</a><br/>原因：${ope.reason}`
+    return ope.operator ? `主题帖(<a href="/topic/detail/${ope.id}" target="_blank" title="点击跳转">${ope.title}</a>)状态已更新：<span class="${ope.status == -1 ? 'red' : 'green'}">${ope.status == -1 ? '待整改' : '正常发布'}</span><br/>审核员：<a href="/personal/other/${ope.operator}">${ope.operator}</a>${ope.status == -1 ? `<br/>原因：${ope.reason}` : ''}`
+    : `主题帖(<a href="/topic/detail/${ope.id}" target="_blank" title="点击跳转">${ope.title}</a>)已修改完毕！请审核员审核！`
   } else if (type == 'friend') {
+    if(ope.alias){
+      return `${ope.alias}[${ope.name}](${ope.user})已把你删除好友${ope.deleteAllMsg ? '，并清空了聊天记录' : ''}！`
+    }
     return ope.name
       ? `<a href="/personal/other/${ope.user}" target="_blank" title="点击跳转">${ope.name}(${ope.user})</a> 向你发出好友申请 !<br/>[${ope.reason}]`
       : `对方(<a href="/personal/other/${ope.user}" target="_blank" title="点击跳转">${ope.user}</a>) <span class="${ope.status == 1 ? 'green' : 'red'}">${ope.status == 1 ? '已同意' : '已拒绝'}</span> 你的好友申请`
   } else if (type == 'all') {
-    return `${ope.subContent || ope.content}<br/><div class="rightContent"><a href="/topic/detail/${ope.id}">查看详情</a></div>`
+    return `${ope.subContent || ope.content}<br/><div class="rightContent"><a href="/topic/detail/${ope.id}">查看详情</a></div><div class="rightContent"><a class="allOperate" href="javascript:void(0);" onclick="localStorage.setItem('hideNotice', '${notice.id}')" title="只隐藏当前的活动消息，下次有新活动消息时还会提示">隐藏</a> <a class="allOperate" href="javascript:void(0);" onclick="localStorage.setItem('hideNotice', 'all')" title="隐藏所有活动消息，下次有新活动消息时不会再提示">隐藏所有</a></div>`
   }
-  return action
+  else if(type == 'msg'){
+    if(ope.medal){
+      return `
+      <div style="display: flex; margin-right: 4px;">
+        <img class="medal" src="/src/assets/img${ope.icon}">
+        <div class="medal-info">
+          <span>${ope.medal}</span>
+          <span>${ope.description}</span>
+          <span>获得:${ope.gainTime}</span>
+          ${ope.expireTime ? `过期:<span>${ope.expireTime}</span>` : ``}
+        </div>
+      </div>
+      `
+    }
+  }
+  return notice.action
 }
 export const handleNotification = (notice, isLast, num) => {
   if (!notice) {
     return
   }
+  
   if (notice.type) {
+    let hideNotice = localStorage.getItem('hideNotice')
+    if(notice.type == 'all' && hideNotice){
+      if(hideNotice == 'all' || hideNotice == notice.id){
+        return
+      }
+    }
     const messageHtml = `
             <div class="notice-message">
-                <div class="notice-content">${getNoticeContent(notice.action, notice.type) || ''}</div>
+                <div class="notice-content">${getNoticeContent(notice) || ''}</div>
                 <div class="notice-footer">
                     <img class="notice-icon" src="${getNoticeIcon(notice.type)}" title="${gettypeTitle(notice.type)}"/>
                     <span class="notice-time">${handleTime(notice.createTime, true)}</span>
@@ -196,7 +230,58 @@ export const handleNotification = (notice, isLast, num) => {
                 .rightContent{
                     text-align: right;
                 }
+                .medal{
+                    width:100px;
+                    height:100px;
+                    image-rendering: auto;
+                    border-radius: 10px;
+                    border: 1px solid #99876c;
+                }
+                .medal-info{
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: flex-start;
+                  color: #99876c;
+                  padding-left: 4px;
+                  font-size: 12px;
+                }
+                .medal-info span:nth-child(1){
+                  font-size: 15px;
+                  font-weight: bold;
+                  text-align: center;
+                }
+                .medal-info span:nth-child(2){
+                  font-size: 12px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  max-height: 40px;
+                  display: -webkit-box;
+                  -webkit-box-orient: vertical;
+                  -webkit-line-clamp: 2;
+                }
+                .allOperate{
+                  color: #99876c;
+                  font-size: 12px;
+                  cursor: pointer;
+                }
+                .allOperate:hover{
+                  color: #63533d;
+                }
             </style>
+            <script>
+
+                function hideAllMsg(id,isAll) {
+                    console.log("asdasdasdasd")
+                    return;
+                    if(isAll){
+                      localStorage.setItem('hideNotice', 'all')
+                    }
+                    else{
+                      localStorage.setItem('hideNotice', id)
+                    }
+                    
+                }
+            </script>
         `
     ElNotification({
       title: notice.title || '通知',
@@ -207,9 +292,18 @@ export const handleNotification = (notice, isLast, num) => {
     userStroe.setUnreadNum(userStroe.unreadNum + 1)
   } else {
     ElNotification({
-      title: '新消息-来自' + notice.fromUser + '的消息',
-      message: notice.content,
-      type: 'success'
+      title: notice.fromName,
+      icon: () => h('img', { 
+        src: `${getAvatarApi}${notice.fromAvatar}`, 
+        style: { 
+          width: '35px', 
+          height: '35px' , 
+          borderRadius: '4px', 
+          border: '1px solid #99876c',
+          imageRendering: 'auto' } 
+        }),
+      message: handleLastContent(notice.content),
+      duration: 0,
     })
   }
 }

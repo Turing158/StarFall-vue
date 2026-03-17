@@ -48,7 +48,6 @@
                 <ExpBar :lv="userStore.level" :exp="userStore.exp" :maxExp="userStore.maxExp" />
               </div>
               <div class="switch">
-      <McBtn text="预览\编辑" @click="switchMd"/>
     </div>
             </div>
           </td>
@@ -136,19 +135,7 @@
               </tr>
               <tr>
                 <td style="border: 0; background-color: initial">
-                  <div class="contentInput" v-if="!isMd">
-                      <mavon-editor v-model="content" 
-                                    style="z-index: 100; max-height: 800px;" 
-                                    :subfield="false" 
-                                    :boxShadow="false"
-                                    toolbarsBackground="#e3c99e"
-                                    previewBackground="#fbf2db"
-                                    :toolbars="toolbars" 
-                                    :minHeight="200"
-                                    @imgAdd="imgAdd" />
-                  </div>
-                  <div class="contentMd" id="contentMd" v-highlight v-html="contentMd" v-if="isMd"/>
-                  
+                  <ContentEditor ref="ContentEditorRef" class="contentInput" :value="content" v-show="!isMd" :switchHandler="initImageClick"/>
                   <Empty :height="10" />
                   <div class="gallery">
                     <div class="gallery-header">
@@ -332,6 +319,7 @@ import { editTopic, hasPromiseToEdit, isPromiseToEdit,getTopicContent,findTopicG
 import { appendTopic,downloadFile } from '@/api/topic'
 import { useRoute, useRouter } from 'vue-router'
 import { getUserInfo } from '@/api/user'
+import ContentEditor from '@/components/ContentEditor.vue'
 const route = useRoute()
 const router = useRouter()
 let talkLabels = ['问答', '闲聊', '服务器推荐', '教程', '视频']
@@ -339,7 +327,7 @@ let resourceLabels = ['模组', '服务端', '客户端', '插件', '材质包',
 const labels = ref(route.params.belong == "resource" ? resourceLabels : talkLabels)
 const label = ref()
 const isMd = ref(false)
-const contentMd = ref()
+const ContentEditorRef = ref(null)
 const codeImg = ref()
 const code = ref('')
 const title = ref('')
@@ -373,10 +361,12 @@ const initImageClick = () => {
     if (contentMd) {
       const images = contentMd.querySelectorAll('img')
       images.forEach(img => {
-        img.style.cursor = 'pointer'
-        img.addEventListener('click', () => {
-          openBigImg(img.src)
-        })
+        if(!img.className.includes('marked-emoji-img')){
+          img.style.cursor = 'pointer'
+          img.addEventListener('click', () => {
+            openBigImg(img.src)
+          })
+        }
       })
     }
   }, 100)
@@ -550,15 +540,6 @@ const deleteAttachment = (id) => {
   })
 }
 
-const toMd = () => {
-    if (content.value == null) return
-    contentMd.value = marked(content.value)
-}
-const switchMd = () => {
-  isMd.value = !isMd.value
-  toMd()
-  initImageClick()
-}
 const userStore = useUserStore()
 const fileInput = ref(null)
 // 处理文件选择
@@ -874,7 +855,7 @@ const onConfirm = async (display) => {
       type: 'warning',
       duration: 2000
     })
-  } else if (content.value.length < 10) {
+  } else if (ContentEditorRef.value.content.length < 10) {
     ElNotification({
       title: '内容过短',
       message: '内容长度不得少于10个字符',
@@ -901,7 +882,7 @@ const onConfirm = async (display) => {
       language: language.value,
       address: address.value,
       download: download.value,
-      content: content.value,
+      content: ContentEditorRef.value.content,
       code: codeImg.value.random+":"+code.value,
       belong: route.params.belong,
       display: display
@@ -914,33 +895,7 @@ const onConfirm = async (display) => {
     codeImg.value.changeCode()
   }
 }
-const toolbars = ref({
-  bold: true, // 粗体
-    italic: true, // 斜体
-    header: true, // 标题
-    underline: true, // 下划线
-    strikethrough: true, // 中划线
-    mark: true, // 标记
-    superscript: true, // 上角标
-    subscript: true, // 下角标
-    quote: true, // 引用
-    ol: true, // 有序列表
-    ul: true, // 无序列表
-    link: true, // 链接
-    imagelink: true, // 图片链接
-    code: true, // code
-    table: true, // 表格
-    help: true, // 帮助
-    undo: true, // 上一步
-    redo: true, // 下一步
-    trash: true, // 清空
-    alignleft: true, // 左对齐
-    aligncenter: true, // 居中
-    alignright: true
-})
-const imgAdd = ()=>{
-  ElMessage.warning('此图片上传功能暂未开放，请使用画廊添加图片')
-}
+
 const selectImg = ()=>{
   if(route.params.id){
     fileInput.value.click()
@@ -1260,10 +1215,10 @@ onMounted(() => {
 }
 .contentInput {
   position: relative;
-  left: -10px;
+  padding-right: 24px;
   margin: 20px 0 5px 0;
   min-height: 300px;
-  width: 800px;
+  width: 776px;
 }
 .contentInf {
   position: relative;
@@ -1305,21 +1260,7 @@ onMounted(() => {
 .contentInf td a:hover {
   text-decoration: underline;
 }
-.contentMd {
-  position: relative;
-  width: 740px;
-  left: 20px;
-  top: 20px;
-  line-height: 2;
-  word-wrap: break-word;
-  font-size: 1rem;
-  font-weight: 400;
-  padding-bottom: 50px;
-  overflow: hidden;
-}
-.contentMd h2 {
-  color: #c2a678;
-}
+
 .likeDiv {
   right: 0;
   height: 35px;
@@ -1379,16 +1320,6 @@ onMounted(() => {
 .operateBtn{
   display: inline-flex;
   margin: 0 10px;
-}
-.switch{
-  cursor: pointer;
-  font-size: 12px;
-  position: relative;
-  top: 80px;
-  z-index: 10;
-  display:flex;
-  justify-content: right;
-  right: 10px;
 }
 
 .gallery {

@@ -112,7 +112,7 @@
 <script setup>
 import { deleteMessage, findAllMessage, insertMessage, updateMessage } from '@/api/admin/message';
 import { findAllUsersForSelect } from '@/api/admin/user';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus';
 import {inject, onMounted, ref} from 'vue'
 const isDark = inject('isDark')
 const search = ()=>{
@@ -134,6 +134,11 @@ const remoteMethod = async(queryString)=>{
     userSelect.value = [];
     return;
   }
+  const loading = ElLoading.service({
+      lock: true,
+      text: '搜索中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllUsersForSelect(queryString).then(res=>{
     if (res.data.msg === 'SUCCESS') {
       userSelect.value = res.data.object || [];
@@ -144,6 +149,9 @@ const remoteMethod = async(queryString)=>{
   .catch(err=>{
     console.log(err);
     ElMessage.error('服务异常');
+  })
+  .finally(() => {
+      loading.close()
   })
 }
 
@@ -210,6 +218,11 @@ const confirm = async()=>{
 const addChat = ()=>{
     formInput.value.validate(async(valid)=>{
         if(valid){
+            const loading = ElLoading.service({
+                lock: true,
+                text: '处理中...',
+                background: 'rgba(0, 0, 0, 0.7)'
+            })
             await insertMessage(chat.value).then(res=>{
                 let msg = res.data.msg
                 if(msg == 'SUCCESS'){
@@ -226,6 +239,9 @@ const addChat = ()=>{
             }).catch(err=>{
                 ElMessage.error("服务异常")
             })
+            .finally(() => {
+                loading.close()
+            })
         }
     })
 }
@@ -240,6 +256,11 @@ const editChat = ()=>{
                 oldMessage: oldChat.value,
                 newMessage: chat.value
             }
+            const loading = ElLoading.service({
+                lock: true,
+                text: '处理中...',
+                background: 'rgba(0, 0, 0, 0.7)'
+            })
             await updateMessage(msgs).then(res=>{
                 let msg = res.data.msg
                 if(msg == 'SUCCESS'){
@@ -256,6 +277,9 @@ const editChat = ()=>{
             }).catch(err=>{
                 ElMessage.error("服务异常")
             
+            })
+            .finally(() => {
+                loading.close()
             })
         }
     })
@@ -281,6 +305,11 @@ const onDel = (i)=>{
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async() => {
+        const loading = ElLoading.service({
+            lock: true,
+            text: '处理中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
         await deleteMessage(i).then(res=>{
             let msg = res.data.msg
             if(msg == 'SUCCESS'){
@@ -296,12 +325,20 @@ const onDel = (i)=>{
         }).catch(err=>{
             ElMessage.error("服务异常")
         })
+        .finally(() => {
+            loading.close()
+        })
       }).catch(() => {
         ElMessage.info('已取消删除')
       });
 }
 const keyword = ref('')
 const getChatList = async()=>{
+    const loading = ElLoading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     await findAllMessage(page.value,keyword.value).then(res=>{
         let msg = res.data.msg
         if(msg == 'SUCCESS'){
@@ -313,6 +350,9 @@ const getChatList = async()=>{
         }
     }).catch(err=>{
         ElMessage.error("服务异常")
+    })
+    .finally(() => {
+        loading.close()
     })
 }
 

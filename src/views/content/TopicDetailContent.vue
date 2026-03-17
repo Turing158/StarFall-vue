@@ -42,7 +42,6 @@
           <div class="authorInf">
             <ExpBar :lv="data.level" :exp="data.exp" :maxExp="data.maxExp" />
           </div>
-          <go-chat :user="data.user"/>
         </div>
       </td>
       <td class="content">
@@ -76,7 +75,7 @@
           </tr>
           <tr>
             <td style="background-color: initial; border: 0">
-              <table class="contentInf">
+              <table class="contentInfo">
                 <caption>
                   <span>{{ data.label }}</span
                   >作品发布
@@ -122,7 +121,7 @@
           </tr>
           <tr>
             <td style="border: 0; background-color: initial">
-              <div class="contentMd" id="contentMd" v-highlight v-html="content"></div>
+              <div class="contentMd" id="contentMd" v-html="content"></div>
             </td>
           </tr>
           <tr>
@@ -151,7 +150,7 @@
                   <span class="attachment-title">附件</span>
                 </div>
                 <div class="attachment-container">
-                  <a v-for="(attachment, index) in attachments.slice(0, 3)" :key="index" :alt="attachment.fileLabel" :aria-label="attachment.fileLabel" class="attachment-item" @click="downloadFile(attachment.id)">
+                  <a v-for="(attachment, index) in attachments.slice(0, 3)" :key="index" :alt="attachment.fileLabel" :aria-label="attachment.fileLabel" class="attachment-item" @click="handleDownload()">
                     <div class="attachment-icon">
                       <img :src="getAttachmentIcon(attachment.fileName)" :alt="attachment.fileLabel" :aria-label="attachment.fileLabel" class="attachment-img"/>
                     </div>
@@ -170,13 +169,20 @@
                 <div style="margin-right: 10px;">
                   <McBtn text="编辑" @click="toEdit" v-if="data.user == userStore.user"/>
                 </div>
-                <McBtn text="收藏" padding="10px" v-if="!isCollect" @click="collect"/>
-                <McBtn :text="'已收藏 '+collectNum" padding="10px" height="25px" v-if="isCollect" @click="collect"/>
+                <McBtn text="收藏" :padding="10" v-if="!isCollect" @click="collect"/>
+                <McBtn :text="'已收藏 '+collectNum" :padding="10" v-if="isCollect" @click="collect"/>
               </div>
               <div class="operate" v-if="(data.belong == 'talk' && userStore.role == 'talk_moderator') || (data.belong == 'resource' && userStore.role == 'resource_moderator') || userStore.role == 'admin'">
                 <span>版主的权利：</span>
                 <McBtn :width="80" v-if="data.display == 1 || data.display == 0" text="提出整改" @click="onReport"/>
                 <McBtn :width="80" v-if="data.display == -1" text="撤销整改" @click="onUnReport"/>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="border-top: 1px solid #cfb78e; width: 780px; margin-left: -15px;">
+                <PersonSignature :data="props.data.signature" />
               </div>
             </td>
           </tr>
@@ -207,6 +213,7 @@ import { getAvatarApi } from '@/api/user'
 import { downloadFile } from '@/api/topic'
 import { ElDialog } from 'element-plus'
 import GoBack from '@/components/GoBack.vue'
+import PersonSignature from '@/components/PersonSignature.vue'
 const props = defineProps({
   id: String,
   data: {
@@ -348,6 +355,10 @@ const onLike = async (op) => {
 const isCollect = ref(false)
 const collectNum = ref(0)
 const initCollection = async()=>{
+  if(!userStore.isLogin){
+    isCollect.value = false
+    return
+  }
   await findCollectStatus(props.id)
   .then(res=>{
     let num = res.data.num
@@ -369,6 +380,14 @@ const initCollection = async()=>{
 initCollection()
 let repeatedCollect = false;
 const collect = async()=>{
+  if(!userStore.isLogin){
+    ElNotification({
+      title: '提示',
+      message: '请先登录',
+      type: 'error'
+    })
+    return
+  }
   if(repeatedCollect){
     return
   }
@@ -512,10 +531,12 @@ const initImageClick = () => {
     if (contentMd) {
       const images = contentMd.querySelectorAll('img')
       images.forEach(img => {
-        img.style.cursor = 'pointer'
-        img.addEventListener('click', () => {
-          openBigImg(img.src)
-        })
+        if(!img.className.includes('marked-emoji-img')){
+          img.style.cursor = 'pointer'
+          img.addEventListener('click', () => {
+            openBigImg(img.src)
+          })
+        }
       })
     }
   }, 100)
@@ -548,7 +569,6 @@ const getAttachmentIcon = (fileName) => {
     default: '/src/assets/img/icon/file/file.png'
   }
   let fileNameSplit = fileName.split(".")
-  console.log(fileNameSplit.length > 1 ? iconMap[fileNameSplit[fileNameSplit.length - 1].toLowerCase()] || iconMap.default : iconMap.default)
   return fileNameSplit.length > 1 ? iconMap[fileNameSplit[fileNameSplit.length - 1].toLowerCase()] || iconMap.default : iconMap.default
 }
 const initTopicFile = async ()=>{
@@ -568,6 +588,19 @@ const formatFileSize = (bytes) => {
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+const handleDownload = (id) => {
+  if(!userStore.isLogin){
+    ElNotification({
+      title: '提示',
+      message: '请先登录',
+      type: 'error'
+    })
+    return
+  }
+  
+  downloadFile(id)
 }
 
 </script>
@@ -730,6 +763,7 @@ const formatFileSize = (bytes) => {
   border-bottom: 1px dashed #c2a678;
   background-color: initial;
   display: flex;
+  left: -15px;
 }
 
 .contentTop div:nth-child(1) {
@@ -737,6 +771,7 @@ const formatFileSize = (bytes) => {
   text-align: left;
   display: flex;
   align-items: center;
+  margin-left: 5px;
 }
 .contentTop div:nth-child(2) {
   flex: 1;
@@ -746,8 +781,9 @@ const formatFileSize = (bytes) => {
 .contentTop img {
   position: relative;
   top: 3px;
+  margin-right: 5px;
 }
-.contentInf {
+.contentInfo {
   position: relative;
   top: 10px;
   border-collapse: collapse;
@@ -758,7 +794,7 @@ const formatFileSize = (bytes) => {
   font-size: 12px;
   border: 0;
 }
-.contentInf caption {
+.contentInfo caption {
   background: #e3c99e;
   border-top: 1px solid #99876c;
   font-size: 14px;
@@ -767,7 +803,7 @@ const formatFileSize = (bytes) => {
   border-bottom: 1px solid #99876c;
   text-align: left;
 }
-.contentInf th {
+.contentInfo th {
   padding: 5px;
   border: 0;
   border-bottom: 1px solid #99876c;
@@ -775,32 +811,17 @@ const formatFileSize = (bytes) => {
   font-weight: 400;
   background-color: initial;
 }
-.contentInf td {
+.contentInfo td {
   border: 0;
   border-bottom: 1px solid #99876c;
   background-color: initial;
 }
-.contentInf td a {
+.contentInfo td a {
   color: #131313;
   text-decoration: none;
 }
-.contentInf td a:hover {
+.contentInfo td a:hover {
   text-decoration: underline;
-}
-.contentMd {
-  position: relative;
-  width: 740px;
-  left: 20px;
-  top: 20px;
-  line-height: 2;
-  word-wrap: break-word;
-  font-size: 1rem;
-  font-weight: 400;
-  padding-bottom: 50px;
-  overflow: hidden;
-}
-.contentMd h2 {
-  color: #c2a678;
 }
 .likeDiv {
   right: 0;
@@ -1059,6 +1080,9 @@ const formatFileSize = (bytes) => {
 
 .gallery-image:hover {
   transform: scale(1.05);
+}
+.contentMd{
+  width: 740px;
 }
 .contentMd :deep(img){
   max-width: 740px !important;

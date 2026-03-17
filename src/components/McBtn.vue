@@ -2,6 +2,7 @@
   <div
     v-if="(type == null) | 'spruce'"
     class="btn"
+    :class="`btn${type ? ` ${type}` : ''}${disabled ? ' disabled' : ''}`"
     @click="OnClick"
     :style="{ margin: '0px ' + props.margin + 'px', padding: '0px ' + props.padding + 'px',fontSize: props.fontSize+'px',width: props.width+'px',height: props.height+'px' }"
   >
@@ -95,13 +96,6 @@ const OnClick = ()=>{
       if(!props.disabled){
          props.onClick()
       }
-      else{
-        ElMessage({
-          message: '按钮被禁用',
-          type: 'warning',
-          duration: 1000
-        })
-      }
     }
   }
 }
@@ -160,7 +154,6 @@ onMounted(()=>{
   border-bottom: 2px solid rgb(184, 147, 93);
   border-top: 2px solid rgb(59, 37, 3);
   border-left: 2px solid rgb(59, 37, 3);
-  line-height: 28px;
 }
 .oak {
   background-image: url(../assets/img/set/oak.png);
@@ -168,5 +161,15 @@ onMounted(()=>{
 .birch {
   background-image: url(../assets/img/set/birch.png);
   color: #131313;
+}
+.disabled{
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.disabled:hover{
+  border: 2px solid rgba(0, 0, 0, 0);
+}
+.disabled:active{
+  border: 2px solid rgba(0, 0, 0, 0);
 }
 </style>

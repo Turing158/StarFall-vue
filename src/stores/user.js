@@ -60,6 +60,8 @@ export const useUserStore = defineStore('user-Sf', () => {
     email.value = ''
     isLogin.value = false
     token.value = ''
+    unreadNum.value = 0
+    role.value = ''
   }
 
 

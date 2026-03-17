@@ -43,8 +43,8 @@
           </el-dialog>
           <div class="info">
             <span class="date">{{ date }}</span>
-            <span v-show="!isSignIn">今天暂未签到</span>
-            <span v-show="isSignIn">已连续签到{{ continueSignIn }}天</span>
+            <span v-show="!isSignIn" style="color: darkred;">未签到</span>
+            <span>已连续签到{{ continueSignIn }}天</span>
           </div>
           <div class="sign">
             <div v-show="!isSignIn">
@@ -84,7 +84,7 @@ import McBtn from '@/components/McBtn.vue'
 import Empty from '@/components/FitEmpty.vue'
 import { onMounted, ref } from 'vue'
 import useUserStore from '@/stores/user'
-import { countSignIn, findAllSignIn, getUserInfo, signIn, getAvatarApi } from '@/api/user'
+import { checkSignIn, findAllSignIn, getUserInfo, signIn } from '@/api/user'
 import { ElMessage, ElNotification, ElLoading } from 'element-plus'
 const isSignIn = ref(false)
 const continueSignIn = ref(0)
@@ -109,21 +109,20 @@ const getSignList = async() =>{
     if(msg == 'SUCCESS'){
       let data = res.data.object
       let num = res.data.num
-      if( data.length != 0 && date.value === data[0].date){
-        isSignIn.value = true
-      }
       signInList.value = data
-      continueSignIn.value = num
+      signInCount.value = num
       listLoading.value = false
     }
   }).catch(err=>{
     ElMessage.error('服务异常')
   })
-  await countSignIn().then(res=>{
+}
+const getSignInInfo = async() =>{
+  await checkSignIn().then(res=>{
     let msg = res.data.msg
-    
     if(msg == 'SUCCESS'){
-      signInCount.value = res.data.num
+      isSignIn.value = res.data.object
+      continueSignIn.value = res.data.num
     }
   }).catch(err=>{
     ElMessage.error('服务异常')
@@ -165,6 +164,7 @@ const confirmSignIn = async()=>{
         })
         isSignIn.value = true
         getSignList()
+        getSignInInfo()
         signPage.value = false
         await getUserInfo().then(res=>{
           let msg = res.data.msg
@@ -202,7 +202,10 @@ const confirmSignIn = async()=>{
   }
   
 }
-onMounted(getSignList)
+onMounted(()=>{
+  getSignList()
+  getSignInInfo()
+})
 
 </script>
 <style scoped>

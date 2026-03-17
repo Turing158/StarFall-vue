@@ -5,7 +5,8 @@
         router
         :background-color="isDark ? '#99876c' : '#fbf2db'"
         :text-color="isDark ? '#fff' : '#333'"
-        class="dark"
+        class="dark menu"
+        :unique-opened="true"
       >
       <el-menu-item index="/admin">
         <el-icon><House /></el-icon>
@@ -23,7 +24,7 @@
         <el-menu-item index="/admin/notice">
           <span>公告列表</span>
         </el-menu-item>
-        <el-sub-menu index="/admin/topic">
+        <el-sub-menu>
           <template #title>
             <span>主题管理</span>
           </template>
@@ -37,14 +38,31 @@
             <span>喜爱管理</span>
             </el-menu-item>
         </el-sub-menu>
-        <el-menu-item index="/admin/user">
-          <span>用户管理</span>
-        </el-menu-item>
+        <el-sub-menu index="/admin/user">
+          <template #title>
+            <span>用户管理</span>
+          </template>
+          <el-menu-item index="/admin/user">
+            <span>用户信息</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/personalized">
+            <span>个性管理</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/friend">
+            <span>好友管理</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/user/medal">
+            <span>勋章管理</span>
+          </el-menu-item>
+        </el-sub-menu>
         <el-menu-item index="/admin/signIn">
           <span>签到管理</span>
         </el-menu-item>
         <el-menu-item index="/admin/chat">
           <span>聊天管理</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/medal">
+          <span>勋章管理</span>
         </el-menu-item>
         <el-menu-item index="/">
           <span>返回主页</span>
@@ -110,6 +128,9 @@ onMounted(init)
     background-color: #f1f1f1;
     display: flex;
 }
+.menu{
+
+}
 .content{
   width: calc(100vw - 140px);
   height: calc(100vh - 20px);
@@ -120,8 +141,13 @@ onMounted(init)
 }
 .changeTheme{
   position: absolute;
-  bottom: 10px;
-  left: 35px;
+  bottom: 0px;
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
 }
 .changeTheme .title{
   font-size: 15px;

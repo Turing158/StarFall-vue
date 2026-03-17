@@ -179,7 +179,7 @@
 <script setup>
 import { addTopicComment, deleteTopicComment, findAllTopic, findAllTopicComment, findAllTopicForSelect, updateTopicComment } from '@/api/admin/topic'
 import { findAllUsersForSelect } from '@/api/admin/user'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import { inject, onMounted, reactive, ref } from 'vue'
 const isDark = inject('isDark')
 const collapse = ref()
@@ -222,6 +222,11 @@ const oldComment = ref({
 const commentKeyword = ref('')
 const keyword = ref('')
 const getTopicComments = async (id, page) => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '加载中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllTopicComment(id, page, commentKeyword.value)
     .then((res) => {
       let msg = res.data.msg
@@ -234,6 +239,9 @@ const getTopicComments = async (id, page) => {
     })
     .catch((err) => {
       ElMessage.error('服务错误')
+    })
+    .finally(() => {
+      loading.close()
     })
 }
 const change = (e) => {
@@ -273,6 +281,11 @@ const rules = reactive({
 const confirm = () => {
     formInput.value.validate(async(valid) => {
         if (valid && editComment.value.content.length > 0) {
+            const loading = ElLoading.service({
+                lock: true,
+                text: '处理中...',
+                background: 'rgba(0, 0, 0, 0.7)'
+            })
             if(dialogTitle.value == '添加评论'){
                 let comment = {
                 topicId: editComment.value.topicId,
@@ -298,6 +311,9 @@ const confirm = () => {
                 }).catch(err=>{
                     ElMessage.error('服务错误')
                 })
+                .finally(() => {
+                    loading.close()
+                })
             }
             else{
                 let comment = {
@@ -312,6 +328,7 @@ const confirm = () => {
                     oldWeight: oldComment.value.weight || 0
                 }
                 if(editComment.value.topicId == oldComment.value.topicId && editComment.value.user == oldComment.value.user && editComment.value.date == oldComment.value.date && editComment.value.content == oldComment.value.content && editComment.value.weight == oldComment.value.weight){
+                    loading.close()
                     ElMessage.error('未修改任何内容')
                 }
                 else{
@@ -331,6 +348,9 @@ const confirm = () => {
                         }
                     }).catch(err=>{
                         ElMessage.error('服务错误')
+                    })
+                    .finally(() => {
+                        loading.close()
                     })
                 }
             }
@@ -354,6 +374,11 @@ const onDel = (i) => {
     type: 'warning'
   })
     .then(async() => {
+        const loading = ElLoading.service({
+            lock: true,
+            text: '处理中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
         let comment = {
             topicId: i.topicId,
             user: i.user,
@@ -375,12 +400,20 @@ const onDel = (i) => {
         }).catch(err=>{
             ElMessage.error('服务错误')
         })
+        .finally(() => {
+            loading.close()
+        })
     })
     .catch(() => {
       ElMessage.info('已取消删除')
     })
 }
 const getTopicList = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '加载中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllTopic(pageTopic.value, keyword.value)
     .then((res) => {
       let msg = res.data.msg
@@ -394,6 +427,9 @@ const getTopicList = async () => {
     .catch((err) => {
       ElMessage.error('服务错误')
     })
+    .finally(() => {
+      loading.close()
+    })
 }
 const userSelect = ref([])
 const remoteMethod = async(queryString)=>{
@@ -401,6 +437,11 @@ const remoteMethod = async(queryString)=>{
     userSelect.value = [];
     return;
   }
+  const loading = ElLoading.service({
+      lock: true,
+      text: '搜索中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllUsersForSelect(queryString).then(res=>{
     if (res.data.msg === 'SUCCESS') {
       userSelect.value = res.data.object || [];
@@ -412,6 +453,9 @@ const remoteMethod = async(queryString)=>{
     console.log(err);
     ElMessage.error('服务异常');
   })
+  .finally(() => {
+      loading.close()
+  })
 }
 const topicSelect = ref([])
 const remoteMethodToTopic = async (queryString) => {
@@ -419,6 +463,11 @@ const remoteMethodToTopic = async (queryString) => {
     topicSelect.value = [];
     return;
   }
+  const loading = ElLoading.service({
+      lock: true,
+      text: '搜索中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllTopicForSelect(queryString).then(res=>{
     if (res.data.msg === 'SUCCESS') {
       topicSelect.value = res.data.object || [];
@@ -429,6 +478,9 @@ const remoteMethodToTopic = async (queryString) => {
   .catch(err=>{
     console.log(err);
     ElMessage.error('服务异常');
+  })
+  .finally(() => {
+      loading.close()
   })
 }
 const search = ()=>{

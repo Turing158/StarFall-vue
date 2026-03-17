@@ -4,13 +4,14 @@
       <img class="avatar" :src="getAvatarApi + props.item.avatar" alt="" />
       <div class="info">
         <div class="username">{{ props.item.alias ? props.item.alias : props.item.name }}</div>
-        <div class="content">{{ props.item.lastMsg }}</div>
+        <div class="content">{{ handleLastContent(props.item.lastMsg) }}</div>
       </div>
     </div>
     <div class="ItemBottom">
       <div class="status-icons">
         <img class="status-icon" v-if="props.item.alias" title="备注" src="@/assets/img/icon/alias.png"/>
         <img class="status-icon" v-if="props.item.isTop" title="顶置聊天" src="@/assets/img/icon/isTop.png"/>
+        <img class="status-icon" v-if="props.item.relation == 0" title="免打扰" src="@/assets/img/icon/DND.png"/>
         <img class="status-icon" v-if="props.item.relation == -1" title="拉黑" src="@/assets/img/icon/isBlack.png"/>
       </div>
       <div class="time">{{ handleTime(props.item.date) }}</div>
@@ -19,6 +20,7 @@
 </template>
 <script setup>
 import { getAvatarApi } from '@/api/user'
+import { handleLastContent } from '@/util/chatContent';
 import { handleTime } from '@/util/handleNotice';
 const props = defineProps({
   item: Object,

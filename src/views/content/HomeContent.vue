@@ -3,7 +3,7 @@
     <Book>
       <div class="content">
         <div class="daily">
-          <div class="datetime">
+          <div class="datetime" :title="`现在是${dateStr}${timeStr.split(' ')[0]} ${weekStr}`">
             <span>
               {{ dateStr }}
             </span>
@@ -14,9 +14,9 @@
         </div>
         <div class="divide"></div>
         <div class="firstTopic">
-          <HomeList class="firstTopicChild" title="最新回复" :data="replys" v-loading="replysLoading" :loading="replysLoading" element-loading-background="#11111100" element-loading-text="加载中..."/>
-          <HomeList class="firstTopicChild" title="最近更新" :data="updates" v-loading="updatesLoading" :loading="updatesLoading" element-loading-background="#11111100" element-loading-text="加载中..."/>
-          <HomeList class="firstTopicChild" title="最新发布" :data="publics" v-loading="publicsLoading" :loading="publicsLoading" element-loading-background="#11111100" element-loading-text="加载中..."/>
+          <HomeList class="firstTopicChild" title="最新回复" :data="replys" v-loading="replysLoading" :loading="replysLoading" element-loading-background="#f3debf" element-loading-text="加载中..."/>
+          <HomeList class="firstTopicChild" title="最近更新" :data="updates" v-loading="updatesLoading" :loading="updatesLoading" element-loading-background="#f3debf" element-loading-text="加载中..."/>
+          <HomeList class="firstTopicChild" title="最新发布" :data="publics" v-loading="publicsLoading" :loading="publicsLoading" element-loading-background="#f3debf" element-loading-text="加载中..."/>
         </div>
         <div class="divide"></div>
         <HomeTalk></HomeTalk>
@@ -70,7 +70,8 @@ const init = async()=>{
   publicsLoading.value = false
 }
 const dateStr = ref("0000-00-00")
-const timeStr = ref("00:00:00 星期日")
+const timeStr = ref("00:00:00 SUN")
+const weekStr = ref("")
 const timeInit = ()=>{
   let date = new Date()
   let year = date.getFullYear()
@@ -80,7 +81,8 @@ const timeInit = ()=>{
   let minute = date.getMinutes()
   let second = date.getSeconds()
   let week = date.getDay()
-  let weekArr = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六']
+  let weekArr = ['SUN','MON','TUE','WED','THU','FRI','SAT']
+  let weekCN = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六']
   if(month < 10){
     month = "0" + month
   }
@@ -98,6 +100,7 @@ const timeInit = ()=>{
   }
   dateStr.value = year + "-" + month + "-" + day
   timeStr.value = hour + ":" + minute + ":" + second + " " + weekArr[week]
+  weekStr.value = weekCN[week]
 }
 onMounted(init)
 onUnmounted(()=>{
@@ -116,12 +119,13 @@ onUnmounted(()=>{
   flex-direction: column;
   margin: 20px auto;
   padding: 16px;
-  background: linear-gradient(to bottom, #71a033 0%, #71a033 60%, #8b5a2b 60%, #8b5a2b 100%);
+  background: linear-gradient(to bottom, #71a033 0%, #71a033 40%, #8b5a2b 40%, #8b5a2b 100%);
   border: 4px solid #3c2e1c;
   box-shadow: 0 0 0 2px #000, inset 0 0 0 2px #000;
   min-width: 280px;
   text-align: center;
   position: relative;
+  animation: datetimeStartAnim 0.5s ease-in-out;
 }
 .datetime::before{
   content: '';
@@ -130,20 +134,43 @@ onUnmounted(()=>{
   border: 2px solid #d4c89d;
   pointer-events: none;
 }
+
+@keyframes datetimeStartAnim {
+  0%{
+    transform: scaleX(0) scaley(0.1);
+  }
+  25%{
+    transform: scaleX(1) scaley(0.1);
+  }
+  50%{
+    transform: scaleX(1.1) scaley(1);
+  }
+  75%{
+    transform: scaleX(1) scaley(1.1);
+  }
+  100%{
+    transform: scaleX(1) scaley(1);
+  }
+}
+
 .datetime span:first-child{
-  font-size: 28px;
+  font-size: 20px;
   font-weight: bold;
   color: #f1f1f1;
   text-shadow: 2px 2px 0 #333;
   margin-bottom: 8px;
-  font-family: 'Minecraft', monospace;
+  position: relative;
+  bottom: 5px;
+  font-family: 'Pixel', monospace;
   letter-spacing: 2px;
 }
 .datetime span:last-child{
-  font-size: 20px;
+
+  margin-top: 10px;
+  font-size: 30px;
   color: #e0e0e0;
   text-shadow: 2px 2px 0 #333;
-  font-family: 'Minecraft', monospace;
+  font-family: 'Pixel', monospace;
 }
 .firstTopic{
   height: 223px;

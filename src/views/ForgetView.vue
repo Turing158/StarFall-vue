@@ -217,6 +217,24 @@ const onClose = ()=>{
   background-repeat: no-repeat;
   background-size: cover;
 }
+.out::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(10px);  
+  animation: bgStartAnim 0.5s ease-in-out forwards;
+}
+@keyframes bgStartAnim {
+  0% {
+    backdrop-filter: blur(10px);  
+  }
+  100% {
+    backdrop-filter: blur(0px);  
+  }
+}
 .forgetDiv{
     position: relative;
     width: 500px;
@@ -225,6 +243,22 @@ const onClose = ()=>{
     border-radius: 10px;
     box-shadow: 0px 0px 10px black;
     backdrop-filter:blur(10px);
+    animation: divStartAnim 0.5s ease-in-out forwards;
+    overflow: hidden;
+}
+@keyframes divStartAnim {
+  0% {
+    width: 0;
+    height: 0;
+  }
+  50%{
+    width: 500px;
+    height: 20px;
+  }
+  100% {
+    width: 500px;
+    height: 350px;
+  }
 }
 .back{
     position: absolute;

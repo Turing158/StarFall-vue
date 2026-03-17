@@ -1,6 +1,6 @@
 <template>
   <tr class="comment">
-    <td style="width: 180px">
+    <td class="user_info">
       <div class="user">
         <div class="name">
           <a :href="'/personal/other/'+props.data.user"><img src="../assets/img/name_tag.png" alt="" />{{ props.data.name }}</a>
@@ -13,7 +13,6 @@
         <div class="exp">
           <ExpBar :lv="props.data.level" :exp="props.data.exp" :maxExp="props.data.maxExp" />
         </div>
-        <go-chat :user="props.data.user"/>
       </div>
     </td>
     <td>
@@ -27,12 +26,14 @@
         <div class="bottom">
           <slot name="bottom"></slot>
         </div>
+        <PersonSignature :data="props.data.signature" />
       </div>
     </td>
   </tr>
 </template>
 <script setup>
 import ExpBar from '@/components/ExpBar.vue'
+import PersonSignature from '@/components/PersonSignature.vue'
 const props = defineProps({
   data: Object,
 })
@@ -41,8 +42,12 @@ const props = defineProps({
 .comment {
   border-top: 1px solid #cfb78e;
 }
-.user {
+.user_info{
+  width: 180px;
   background-color: #e3c99e;
+  vertical-align: top;
+}
+.user {
   width: 180px;
   border: 0;
   border-right: 1px solid #cfb78e;
@@ -86,9 +91,12 @@ const props = defineProps({
 }
 .main .content {
   min-height: 220px;
+  max-height: 310px;
+  overflow: hidden;
 }
 .main .bottom {
   min-height: 28px;
   border-bottom: 1px solid #cfb78e;
 }
+
 </style>

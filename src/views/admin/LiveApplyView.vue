@@ -206,7 +206,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, inject } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import { deleteLive, findAllLive } from '@/api/admin/home'
 import { findAllUsersForSelect } from '@/api/admin/user'
 import { getLiveRoomInfo, getLiveUserInfo } from '@/api/home'
@@ -256,12 +256,20 @@ const init = () => {
 }
 
 const getLiveApplies = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '加载中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllLive(page.value)
   .then(res=>{
     if(res.data.msg == 'SUCCESS'){
       liveApplies.value = res.data.object
       total.value = res.data.num
     }
+  })
+  .finally(() => {
+    loading.close()
   })
 }
 
@@ -300,6 +308,11 @@ const onPage = (row) => {
 
 const save = async () => {
   console.log(liveApply.value);
+  const loading = ElLoading.service({
+    lock: true,
+    text: '处理中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
   if(model.value == 'add'){
     await appendLiveApply(liveApply.value).then(res=>{
       if(res.data.msg == 'SUCCESS'){
@@ -314,6 +327,9 @@ const save = async () => {
     .catch(err=>{
       console.log(err);
       ElMessage.error('服务异常');
+    })
+    .finally(() => {
+      loading.close()
     })
   }else{
     await updateLiveApply(liveApply.value).then(res=>{
@@ -330,6 +346,9 @@ const save = async () => {
       console.log(err);
       ElMessage.error('服务异常');
     })
+    .finally(() => {
+      loading.close()
+    })
   }
   
   infoPage.value = false
@@ -342,6 +361,11 @@ const onDel = async (row) => {
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async() => {
+    const loading = ElLoading.service({
+      lock: true,
+      text: '处理中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
     await deleteLive(row.id).then(res=>{
       if(res.data.msg == 'SUCCESS'){
         getLiveApplies()
@@ -354,6 +378,9 @@ const onDel = async (row) => {
     .catch(err=>{
       console.log(err);
       ElMessage.error('服务异常');
+    })
+    .finally(() => {
+      loading.close()
     })
   })
   .catch(() => {
@@ -371,6 +398,11 @@ const remoteMethodUser = async(queryString)=>{
     userSelect.value = [];
     return;
   }
+  const loading = ElLoading.service({
+    lock: true,
+    text: '搜索中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
   userLoading.value = true;
   await findAllUsersForSelect(queryString).then(res=>{
     if (res.data.msg === 'SUCCESS') {
@@ -385,6 +417,7 @@ const remoteMethodUser = async(queryString)=>{
   })
   .finally(() => {
     userLoading.value = false;
+    loading.close()
   });
 }
 
@@ -393,6 +426,11 @@ const remoteMethodOperator = async(queryString)=>{
     operatorSelect.value = [];
     return;
   }
+  const loading = ElLoading.service({
+    lock: true,
+    text: '搜索中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
   operatorLoading.value = true;
   await findAllUsersForSelect(queryString).then(res=>{
     if (res.data.msg === 'SUCCESS') {
@@ -407,6 +445,7 @@ const remoteMethodOperator = async(queryString)=>{
   })
   .finally(() => {
     operatorLoading.value = false;
+    loading.close()
   });
 }
 
@@ -433,6 +472,11 @@ const goToSpace = (uid) => {
 }
 
 const loadLiveTitle = async (playUuid) =>{
+  const loading = ElLoading.service({
+    lock: true,
+    text: '加载中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
   await getLiveRoomInfo(playUuid)
   .then(async res=>{
     if(res.data.msg == "ok"){
@@ -458,6 +502,9 @@ const loadLiveTitle = async (playUuid) =>{
     else{
       console.log(res)
     }
+  })
+  .finally(() => {
+    loading.close()
   })
 }
 

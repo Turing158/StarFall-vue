@@ -12,6 +12,7 @@
           <img :src="adPictureApi + row.file" style="width: 100px; height: 60px; object-fit: cover; border: 1px solid #ccc; cursor: pointer;" @click="previewImage(row.file)" />
         </template>
       </el-table-column>
+      <el-table-column label="广告标题" prop="title" width="200" />
       <el-table-column label="日期" prop="date" width="180" />
       <el-table-column label="链接" prop="link" min-width="200" />
       <el-table-column label="位置" prop="position" width="120">
@@ -63,6 +64,9 @@
             </div>
           </el-form-item>
           
+          <el-form-item label="广告标题" prop="title">
+            <el-input v-model="ad.title" placeholder="请输入广告标题" style="width: 400px;"></el-input>
+          </el-form-item>
           <el-form-item label="发布日期" prop="date">
             <el-date-picker
               type="date"
@@ -129,7 +133,7 @@
 
 <script setup>
 import { ref, reactive, inject, onMounted } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus';
 import { findAllAdvertisement, adPictureApi, updateAdvertisement, addAdvertisement, deleteAdvertisement } from '@/api/admin/home';
 import { useRouter } from 'vue-router';
 
@@ -158,7 +162,8 @@ const previewImageUrl = ref('');
 const positionOptions = {
   'home': '主页顶部',
   'resource': '资源',
-  'talk': '有话说'
+  'talk': '有话说',
+  'live': '直播'
 };
 
 const rules = reactive({
@@ -185,6 +190,11 @@ const handleCurrentChange = (e) => {
 };
 
 const getAdList = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '加载中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllAdvertisement(page.value).then(res=>{
     if (res.data.msg === 'SUCCESS') {
       ads.value = res.data.object || [];
@@ -195,6 +205,9 @@ const getAdList = async () => {
   })
   .catch(err=>{
     ElMessage.error('服务异常');
+  })
+  .finally(() => {
+    loading.close()
   })
 };
 
@@ -222,9 +235,13 @@ const openDialog = (e) => {
 const confirm = async () => {
   formInput.value.validate(async (valid) => {
     if (valid) {
+      const loading = ElLoading.service({
+          lock: true,
+          text: '处理中...',
+          background: 'rgba(0, 0, 0, 0.7)'
+      })
       if (model.value === 'add') {
         if (ad.value.file.includes('data:image/')) {
-          console.log(ad.value)
           await addAdvertisement(ad.value)
           .then(res=>{
             console.log(res)
@@ -239,6 +256,9 @@ const confirm = async () => {
           .catch(err=>{
             console.log(err) 
             ElMessage.error('服务异常');
+          })
+          .finally(() => {
+              loading.close()
           })
           clear();
           getAdList();
@@ -260,6 +280,9 @@ const confirm = async () => {
           console.log(err) 
           ElMessage.error('服务异常');
         })
+        .finally(() => {
+            loading.close()
+        })
         clear();
         getAdList();
       }
@@ -273,6 +296,11 @@ const onDel = (id) => {
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
+    const loading = ElLoading.service({
+        lock: true,
+        text: '处理中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     await deleteAdvertisement(id).then(res=>{
       let msg = res.data.msg
       if(msg === 'SUCCESS'){
@@ -285,6 +313,9 @@ const onDel = (id) => {
     .catch(err=>{
       console.log(err) 
       ElMessage.error('服务异常');
+    })
+    .finally(() => {
+        loading.close()
     })
     getAdList();
   })

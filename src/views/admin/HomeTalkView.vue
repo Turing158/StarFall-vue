@@ -124,7 +124,7 @@
 
 <script setup>
 import { ref, reactive, inject, onMounted } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus';
 import { findAllHomeTalk, addHomeTalk, updateHomeTalk, deleteHomeTalk } from '@/api/admin/home';
 import { findAllUsersForSelect } from '@/api/admin/user';
 
@@ -177,6 +177,11 @@ const rules = reactive({
 
 // 获取每日一言列表 - 接口需手动填写
 const getHomeTalkListData = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '加载中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllHomeTalk(page.value,keyword.value).then(res=>{
     if (res.data.msg === 'SUCCESS') {
       homeTalks.value = res.data.object || [];
@@ -189,6 +194,9 @@ const getHomeTalkListData = async () => {
     console.log(err);
     ElMessage.error('服务异常');
   })
+  .finally(() => {
+    loading.close()
+  })
 };
 const handleCurrentChange = (e)=>{
   page.value = e
@@ -199,6 +207,11 @@ const remoteMethod = async(queryString)=>{
     userSelect.value = [];
     return;
   }
+  const loading = ElLoading.service({
+      lock: true,
+      text: '搜索中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+  })
   await findAllUsersForSelect(queryString).then(res=>{
     if (res.data.msg === 'SUCCESS') {
       userSelect.value = res.data.object || [];
@@ -209,6 +222,9 @@ const remoteMethod = async(queryString)=>{
   .catch(err=>{
     console.log(err);
     ElMessage.error('服务异常');
+  })
+  .finally(() => {
+      loading.close()
   })
 }
 
@@ -238,6 +254,11 @@ const openDialog = (e) => {
 const confirm = async () => {
   formRef.value.validate(async (valid) => {
     if (valid) {
+      const loading = ElLoading.service({
+          lock: true,
+          text: '处理中...',
+          background: 'rgba(0, 0, 0, 0.7)'
+      })
       if (model.value === 'add') {
         await addHomeTalk(homeTalk.value)
         .then(res=>{
@@ -252,6 +273,9 @@ const confirm = async () => {
         .catch(err=>{
           console.log(err);
           ElMessage.error('服务异常');
+        })
+        .finally(() => {
+            loading.close()
         });
         
         clear();
@@ -270,6 +294,9 @@ const confirm = async () => {
         .catch(err=>{
           console.log(err);
           ElMessage.error('服务异常');
+        })
+        .finally(() => {
+            loading.close()
         });
         
         clear();
@@ -286,6 +313,11 @@ const onDel = (id) => {
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
+    const loading = ElLoading.service({
+        lock: true,
+        text: '处理中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
     await deleteHomeTalk(id).then(res=>{
       let msg = res.data.msg;
       if(msg === 'SUCCESS'){
@@ -297,6 +329,9 @@ const onDel = (id) => {
     .catch(err=>{
       console.log(err);
       ElMessage.error('服务异常');
+    })
+    .finally(() => {
+        loading.close()
     });
     
     getHomeTalkListData();

@@ -43,7 +43,7 @@ import { SubAnSup ,Mark} from '@/util/markedExtension.js'
 const emojis = {...itemEmojis}
 const emojiOptions = {
 	emojis,
-	renderer: (token) => `<img alt="${token.name}" src="${token.emoji}" class="marked-emoji-img">`
+	renderer: (token) => `<img alt="${token.name}" src="${token.emoji.src}" title="${token.emoji.name}" class="marked-emoji-img">`
 };
 const highlightOptions = {
 	emptyLangClass: 'hljs',

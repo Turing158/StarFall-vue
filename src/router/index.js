@@ -7,6 +7,7 @@ import EditTopicView from '../views/EditTopicView.vue'
 import NoticeView from '@/views/NoticeView.vue'
 import SearchView from '@/views/SearchView.vue'
 import FriendView from '@/views/FriendView.vue'
+import MedalView from '@/views/MedalView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -70,6 +71,12 @@ const router = createRouter({
           name: 'friends',
           component: FriendView,
           meta: { title: '好友' }
+        },
+        {
+          path: '/medals/:id?',
+          name: 'medals',
+          component: MedalView,
+          meta: { title: '勋章' }
         },
         {
           path: '/topic/detail/:id?',
@@ -210,6 +217,30 @@ const router = createRouter({
           name: 'adminUser',
           component: () => import('../views/admin/UserView.vue'),
           meta: { title: '管理面板-用户' }
+        },
+        {
+          path: '/admin/personalized',
+          name: 'adminPersonalized',
+          component: () => import('../views/admin/PersonalizedView.vue'),
+          meta: { title: '管理面板-个性化' }
+        },
+        {
+          path: '/admin/friend',
+          name: 'adminFriend',
+          component: () => import('../views/admin/FriendView.vue'),
+          meta: { title: '管理面板-好友' }
+        },
+        {
+          path: '/admin/user/medal',
+          name: 'adminUserMedal',
+          component: () => import('../views/admin/UserMedalView.vue'),
+          meta: { title: '管理面板-用户勋章' }
+        },
+        {
+          path: '/admin/medal',
+          name: 'adminMedal',
+          component: () => import('../views/admin/MedalView.vue'),
+          meta: { title: '管理面板-勋章' }
         },
         {
           path: '/admin/signIn',

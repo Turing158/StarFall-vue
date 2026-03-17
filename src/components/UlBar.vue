@@ -21,9 +21,10 @@
       <span class="username">{{ userStore.name }}</span>
       <div class="menu">
         <div class="challage">
-          <div class="medal">勋章1</div>
-          <div class="medal">勋章1</div>
-          <div class="medal">勋章1</div>
+          <div class="medal" v-for="(item,index) in medals" :key="index" :title="`${item.description}\n获得: ${item.gainTime}${item.expireTime ? `\n过期: ${item.expireTime}` : ''}`">
+            <img :src="'/src/assets/img'+item.icon" alt="" class="medal_img" />
+            <div class="medal_name">{{ item.name }}</div>
+          </div>
         </div>
         <div class="exp">
           <ExpBar :lv="userStore.level" :exp="userStore.exp" :maxExp="userStore.maxExp" />
@@ -41,7 +42,7 @@
     </div>
     <router-link to="/login">
       <div v-show="!isLogin" class="unuser ul_border">
-        <span>请登录，谢谢</span>
+        <span>登 录</span>
         <br /><br />
         <span>Login</span>
       </div>
@@ -107,7 +108,7 @@ const PageIndex = ref(props.pageIndex)
 
 import useUserStore from '@/stores/user'
 import { ElMessage, ElNotification } from 'element-plus'
-import { exit } from '@/api/user'
+import { exit, getMedalOnMenu } from '@/api/user'
 import router from '@/router'
 import { findLastNoticeAndUnreadNum } from '@/api/notice'
 import { handleNotification, handleNoticeNum } from '../util/handleNotice'
@@ -132,18 +133,24 @@ const toNotices = () => {
   router.push('/notices')
 }
 const initNoticeNum = async ()=>{
-  if(!userStore.isLogin){
-      return
-    }
   await findLastNoticeAndUnreadNum()
   .then(res=>{
     userStore.setUnreadNum(res.data.num)
-    if(!router.currentRoute.value.path == '/notices'){
+    if(router.currentRoute.value.path != '/notices'){
       handleNotification(res.data.object, true,res.data.num)
     }
   })
   .catch(e=>{
     ElMessage.error('服务异常')
+  })
+}
+const medals = ref([])
+const getMedal = async()=>{
+  await getMedalOnMenu()
+  .then(res=>{
+    if(res.data.msg == 'SUCCESS'){
+      medals.value = res.data.object
+    }
   })
 }
 const onExit = async () => {
@@ -173,7 +180,11 @@ const onExit = async () => {
   isLogin.value = false
 }
 onMounted(()=>{
+    if(!userStore.isLogin){
+      return
+    }
   initNoticeNum()
+  getMedal()
 })
 </script>
 
@@ -356,25 +367,56 @@ ul .avatar_img {
 .menu .challage{
   display: flex;
   height: 35px;
-  width: 188px;
+  width: 100%;
   margin-top: 2px;
-  margin-left: 8px;
+  justify-content: center;
 }
 
 .medal{
   position: relative;
-  width: 50px;
-  height: 25px;
-  margin: 5px;
+  width: 55px;
+  height: 30px;
+  margin: 3px;
   margin-top: 6px;
-  background: #d4c599;
   border: 1px solid #3f3a2c;
   border-radius: 5px;
   font-size: 15px;
-  display: block;
   cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
+.medal:hover{
+  border: 1px solid #3f3a2c;
+}
+.medal_img{
+  width: 57px;
+  margin-left: -1px;
+  image-rendering:auto;
+  z-index: -1;
+}
+.medal_name{
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 55px;
+  height: 30px;
+  top: 0px;
+  color: #1a1712;
+  background-color: #fbf2dba1;
+  font-size: 12px;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.2s;
+  backdrop-filter: blur(1px);
+  z-index: -1;
+}
+.medal:hover .medal_name{
+  transform: translateY(0px);
+  opacity: 1;
+}
 .menu .exp {
   position: relative;
   width: 185px;
@@ -451,7 +493,7 @@ ul .avatar_img {
   right: 12px;
   top: 2px;
   background-image: url(../assets/img/set/spruce.png);
-  width: 140px;
+  width: 80px;
   height: 45px;
   color: #f1f1f1;
   cursor: pointer;
@@ -472,7 +514,7 @@ ul .avatar_img {
   position: relative;
   top: 0;
   color: #131313;
-  font-size: 35px;
+  font-size: 25px;
   font-stretch: expanded;
   transition: all 250ms;
 }
@@ -480,7 +522,7 @@ ul .avatar_img {
   top: -40px;
 }
 .unuser:hover span:nth-child(4) {
-  top: -40px;
+  top: -42px;
 }
 .ul_border {
   border-top: 2px solid #8f8568;
