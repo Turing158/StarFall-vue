@@ -135,7 +135,7 @@
               </tr>
               <tr>
                 <td style="border: 0; background-color: initial">
-                  <ContentEditor ref="ContentEditorRef" class="contentInput" :value="content" v-show="!isMd" :switchHandler="initImageClick"/>
+                  <ContentEditor ref="ContentEditorRef" class="contentInput" :value="content" :switchHandler="initImageClick"/>
                   <Empty :height="10" />
                   <div class="gallery">
                     <div class="gallery-header">
@@ -173,7 +173,7 @@
                       </div>
                       <div class="attachment-container">
                         <div v-for="(attachment, index) in attachments.slice(0, 3)" :key="index" class="attachment-item-wrapper">
-                          <a :href="attachment.path" class="attachment-item" @click="downloadFile(attachment.id)">
+                          <a class="attachment-item" @click="downloadFile(attachment.id)">
                             <div class="attachment-icon">
                               <img :src="getAttachmentIcon(attachment.fileName)" :alt="attachment.fileLabel" class="attachment-img"/>
                             </div>
@@ -326,7 +326,6 @@ let talkLabels = ['问答', '闲聊', '服务器推荐', '教程', '视频']
 let resourceLabels = ['模组', '服务端', '客户端', '插件', '材质包', '地图', '光影', '皮肤','数据包']
 const labels = ref(route.params.belong == "resource" ? resourceLabels : talkLabels)
 const label = ref()
-const isMd = ref(false)
 const ContentEditorRef = ref(null)
 const codeImg = ref()
 const code = ref('')
@@ -418,7 +417,6 @@ const getAttachmentIcon = (fileName) => {
     default: '/src/assets/img/icon/file/file.png'
   }
   let fileNameSplit = fileName.split(".")
-  console.log(fileNameSplit.length > 1 ? iconMap[fileNameSplit[fileNameSplit.length - 1].toLowerCase()] || iconMap.default : iconMap.default)
   return fileNameSplit.length > 1 ? iconMap[fileNameSplit[fileNameSplit.length - 1].toLowerCase()] || iconMap.default : iconMap.default
 }
 const tmpFile = ref(null)
@@ -499,6 +497,7 @@ const confirmFileUpload = async() => {
         fileLabel: "",
         fileBase64: ""
       }
+      attachments.value.push(res.data.object)
       fileUploadInput.value.value = null
     }
     else{

@@ -17,7 +17,7 @@
         :value="content" 
         :minHeight="220" 
         :maxHeight="220" 
-        editBtnPosition="right"
+        editBtnPosition="right: -80px"
         previewPadding="10px"
         />
       </template>

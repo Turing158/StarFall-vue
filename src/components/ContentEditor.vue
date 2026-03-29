@@ -34,7 +34,7 @@
             </template>
         </mavon-editor>
         <div class="content-container" :class="isMd ? 'show' : 'hide'" :style="{ padding: previewPadding }">
-          <div class="hide-btn" :style="props.editBtnPosition == 'right' ? 'right:-80px' : 'margin-left:-80px'">
+          <div class="hide-btn" :style="props.editBtnStyle">
             <McBtn text="编辑" @click="switchMd"/>
           </div>
           <div id="contentMd" class="contentMd"  v-html="contentMd"></div>
@@ -108,9 +108,9 @@ const props = defineProps({
     type: Function,
     default: () => {}
   },
-  editBtnPosition: {
+  editBtnStyle: {
     type: String,
-    default: 'left'
+    default: 'margin-left:-80px'
   }
 })
 const content = ref(props.value)

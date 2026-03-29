@@ -7,7 +7,7 @@
             :key="index" 
             @click="insertEmoji(item)"
             :title="item.name" alt="">
-                <img :src="item.src">
+                <img :src="item.src" loading="lazy">
                 <span>{{item.name}}</span>
             </div>
           </div>
@@ -52,7 +52,7 @@ changeList()
 .emoji-container{
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  max-height: 280px;
+  height: 280px;
   overflow-y: auto;
   overflow-x: hidden;
 }

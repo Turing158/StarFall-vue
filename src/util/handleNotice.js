@@ -69,8 +69,8 @@ export const initWebSocket = async () => {
           return
       })
   }
-  let url = 'ws://' + window.location.href.split('/')[2] + '/api/message/' + userStroe.token
   if (userStroe.isLogin) {
+    let url = `ws://${window.location.href.split('/')[2]}/api/message/${userStroe.token}`
     webSocket.value = new WebSocket(url)
     webSocket.value.onopen = onOpen
     webSocket.value.onerror = onError
@@ -170,7 +170,7 @@ export const handleNotification = (notice, isLast, num) => {
     }
     const messageHtml = `
             <div class="notice-message">
-                <div class="notice-content">${getNoticeContent(notice) || ''}</div>
+                <div class="notice-content">${notice.type == 'tmp' ? notice.content : getNoticeContent(notice)}</div>
                 <div class="notice-footer">
                     <img class="notice-icon" src="${getNoticeIcon(notice.type)}" title="${gettypeTitle(notice.type)}"/>
                     <span class="notice-time">${handleTime(notice.createTime, true)}</span>
@@ -288,8 +288,10 @@ export const handleNotification = (notice, isLast, num) => {
       dangerouslyUseHTMLString: true,
       message: messageHtml
     })
-    const userStroe = useUserStore()
-    userStroe.setUnreadNum(userStroe.unreadNum + 1)
+    if(!isLast){
+      const userStroe = useUserStore()
+      userStroe.setUnreadNum(userStroe.unreadNum + 1)
+    }
   } else {
     ElNotification({
       title: notice.fromName,

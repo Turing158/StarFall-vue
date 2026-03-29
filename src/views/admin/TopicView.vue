@@ -56,7 +56,7 @@
             :total="total"/>
         </div>
         
-        <el-dialog :class="isDark ? 'dark' : ''" v-model="dialog" align-center :title="dialogTitle" :width="800" :close-on-click-modal="false" :show-close="false">
+        <el-dialog :class="isDark ? 'dark' : ''" v-model="dialog" align-center :title="dialogTitle" :width="850" :close-on-click-modal="false" :show-close="false">
             <div class="dialog" >
                 <el-form inline ref="formInput" :rules="rules" :model="topic">
                     <el-form-item label="id" prop="id">
@@ -149,27 +149,7 @@
                 </el-form>
                 <el-form label-position="top" :rules="rules" :model="topic">
                     <el-form-item prop="content" class="contentMain">
-                        <template #label>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                内容
-                                <el-button size="small" type="primary" plain @click="switchMd" style="margin-left: 10px;">
-                                    预览|编辑
-                                </el-button>
-                            </div>
-                        </template>
-                        <div style="width: 730px;" >
-                            <mavon-editor v-model="topic.content" 
-                                    style="z-index: 100; max-height: 800px;" 
-                                    :subfield="false" 
-                                    :boxShadow="false"
-                                    toolbarsBackground="#e3c99e"
-                                    previewBackground="#fbf2db"
-                                    :toolbars="toolbars" 
-                                    :minHeight="200"
-                                    @imgAdd="imgAdd"
-                                    v-if="!isMd"/>
-                        </div>
-                        <div class="contentMd" id="contentMd" v-highlight v-html="contentMd" v-if="isMd"/>
+                        <ContentEditor ref="ContentEditorRef" class="contentInput" :value="topic.content" :switchHandler="initImageClick" editBtnStyle="top: -30px;"/>
                     </el-form-item>
                 </el-form>
             </div>
@@ -389,17 +369,16 @@ import { ElLoading, ElMessage, ElMessageBox } from 'element-plus';
 import {inject, onMounted, reactive, ref, computed, watch} from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import ContentEditor from '@/components/ContentEditor.vue'
+
+
 
 const router = useRouter()
 const userStore = useUserStore()
 const isDark = inject('isDark')
 const keyword = ref('')
 const topics = ref([])
-const isMd = ref(false)
-const switchMd = () => {
-  isMd.value = !isMd.value
-  toMd(topic.value.content)
-}
+const ContentEditorRef = ref(null)
 const topic = ref({
     id:'',
     title:'',
@@ -451,15 +430,6 @@ const search = ()=>{
 import { marked } from 'marked'
 import { downloadFile } from '@/api/topic';
 const contentMd = ref('')
-const toMd = (content) => {
-  if (content == null) return
-  contentMd.value =  marked(content)
-}
-const isEditLook = ref(false)
-const editLook = (i)=>{
-    isEditLook.value = !isEditLook.value
-    toMd(i)
-}
 const userSelect = ref([])
 const page = ref(1)
 const total = ref(0)
@@ -469,6 +439,7 @@ const handleCurrentChange = (e)=>{
 }
 const dialogTitle = ref('添加主题')
 const dialog = ref(false)
+const loading = ref(false)
 // 根据归属字段动态计算分类选项
 const topicLabel = computed(() => {
   if (topic.value.belong === 'resource') {
@@ -518,6 +489,8 @@ watch(() => topic.value.belong, (newBelong, oldBelong) => {
   }
 })
 const openDialog = async(e)=>{
+    if (loading.value) return // 防止重复提交
+    loading.value = true
     if(e == 0){
         dialogTitle.value = '添加主题'
     }
@@ -527,21 +500,35 @@ const openDialog = async(e)=>{
         tempTopic.isFirstPublic = tempTopic.isFirstPublic.toString()
         tempTopic.display = tempTopic.display.toString()
         topic.value = tempTopic
-
+        ElLoading.service({
+            lock: true,
+            text: '加载中...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
         await getTopicContent(topic.value.user,topic.value.id)
         .then(res=>{
             topic.value.content = res.data
         })
         .catch(err=>{
             ElMessage.error("获取文章内容失败")
+        }).finally(() => {
+            ElLoading.service().close()
         })
     }
     dialog.value = true
+    loading.value = false
 }
 const formInput = ref(null)
 const confirm = ()=>{
+    if (loading.value) return // 防止重复提交
+    ElLoading.service({
+      lock: true,
+      text: '数据提交中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
     formInput.value.validate(async(valid)=>{
         if(valid){
+            loading.value = true
             if(dialogTitle.value == '添加主题'){
                 await addTopic(topic.value).then(res=>{
                     let msg = res.data.msg
@@ -558,6 +545,8 @@ const confirm = ()=>{
                     }
                 }).catch(err=>{
                     ElMessage.error("服务错误")
+                }).finally(() => {
+                    loading.value = false
                 })
             }
             else{
@@ -576,10 +565,13 @@ const confirm = ()=>{
                     }
                 }).catch(err=>{
                     ElMessage.error("服务错误")
+                }).finally(() => {
+                    loading.value = false
                 }) 
             }
         }
     })
+    ElLoading.service().close()
 }
 const clear = ()=>{
     dialog.value = false
@@ -602,11 +594,13 @@ const clear = ()=>{
     }
 }
 const onDel = (i)=>{
+    if (loading.value) return // 防止重复提交
     ElMessageBox.confirm(i.title, '确定删除该主题吗?', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async() => {
+        loading.value = true
         await deleteTopic(i.id).then(res=>{
             let msg = res.data.msg
             if(msg == 'SUCCESS'){
@@ -618,24 +612,32 @@ const onDel = (i)=>{
             }
         }).catch(err=>{
             ElMessage.error("服务错误")
+        }).finally(() => {
+            loading.value = false
         })
       }).catch(() => {
         ElMessage.info('已取消删除')
       });
 }
 const getTopicList = async()=>{
-    await findAllTopic(page.value,keyword.value).then(res=>{
-        let msg = res.data.msg
-        if(msg == 'SUCCESS'){
-            topics.value = res.data.object
-            total.value = res.data.num
-        }
-        else{
-            ElMessage.error("获取主题列表失败")
-        }
-    }).catch(err=>{
-        ElMessage.error("服务错误")
-    })
+  ElLoading.service({
+    lock: true,
+    text: '加载中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
+  await findAllTopic(page.value,keyword.value).then(res=>{
+      let msg = res.data.msg
+      if(msg == 'SUCCESS'){
+          topics.value = res.data.object
+          total.value = res.data.num
+      }
+      else{
+          ElMessage.error("获取主题列表失败")
+      }
+  }).catch(err=>{
+      ElMessage.error("服务错误")
+  })
+  ElLoading.service().close()
 }
 const remoteMethod = async(queryString)=>{
   if (!queryString) {
@@ -1037,32 +1039,21 @@ const deleteAttachment = (id) => {
     
 }
 
-const toolbars = ref({
-  bold: true, // 粗体
-    italic: true, // 斜体
-    header: true, // 标题
-    underline: true, // 下划线
-    strikethrough: true, // 中划线
-    mark: true, // 标记
-    superscript: true, // 上角标
-    subscript: true, // 下角标
-    quote: true, // 引用
-    ol: true, // 有序列表
-    ul: true, // 无序列表
-    link: true, // 链接
-    imagelink: true, // 图片链接
-    code: true, // code
-    table: true, // 表格
-    help: true, // 帮助
-    undo: true, // 上一步
-    redo: true, // 下一步
-    trash: true, // 清空
-    alignleft: true, // 左对齐
-    aligncenter: true, // 居中
-    alignright: true
-})
-const imgAdd = ()=>{
-  ElMessage.warning('此图片上传功能暂未开放，请使用画廊添加图片')
+const initImageClick = () => {
+  setTimeout(() => {
+    const contentMd = document.getElementById('contentMd')
+    if (contentMd) {
+      const images = contentMd.querySelectorAll('img')
+      images.forEach(img => {
+        if(!img.className.includes('marked-emoji-img')){
+          img.style.cursor = 'pointer'
+          img.addEventListener('click', () => {
+            openBigImg(img.src)
+          })
+        }
+      })
+    }
+  }, 100)
 }
 const init = ()=>{
     getTopicList()
@@ -1091,7 +1082,7 @@ onMounted(init)
 }
 .dialog{
     height: 500px;
-    width: 780px;
+    width: 820px;
     overflow: auto;
 }
 .page{
@@ -1250,20 +1241,12 @@ onMounted(init)
 .contentMain{
     background-color: #fbf2db;
 }
-.contentMd {
+.contentInput {
   position: relative;
-  width: 740px;
-  left: 20px;
-  top: 20px;
-  line-height: 2;
-  word-wrap: break-word;
-  font-size: 1rem;
-  font-weight: 400;
-  padding-bottom: 50px;
-  color: #131313 !important;
-}
-.contentMd h2 {
-  color: #c2a678;
+  padding-right: 24px;
+  margin: 20px 0 5px 0;
+  min-height: 300px;
+  width: 776px;
 }
 
 .form-item {

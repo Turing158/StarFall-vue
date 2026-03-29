@@ -4,21 +4,21 @@ import { ElMessage } from 'element-plus'
 
 export const url = window.location.href.split("/").slice(0,3).join("/") + "/api"
 export const getUrl = ()=>url
-const request = axios.create({
+const api = axios.create({
   baseURL: "/api",
-  timeout: 3000,
+  timeout: 10000,
   withCredentials: true
 })
 
-request.interceptors.request.use((config) => {
+api.interceptors.request.use((config) => {
   const userStore = useUserStore()
   if (userStore.token) {
-    config.headers.Authorization = userStore.token
+    config.headers.Authorization = `Bearer ${userStore.token}`
   }
   return config
 })
 
-request.interceptors.response.use(res=>{
+api.interceptors.response.use(res=>{
   let msg = res.data.msg
   if(msg == "NOT_PERMISSION"){
     ElMessage.error("权限不足，你想干嘛？")
@@ -28,8 +28,16 @@ request.interceptors.response.use(res=>{
 
 export const bilibiliApi = axios.create({
   baseURL: "/bilibiliApi",
-  timeout: 3000,
+  timeout: 10000,
   withCredentials: true
 })
 
-export default request
+export const request = axios.create({
+  timeout: 10000
+})
+export const minecraftApi = axios.create({
+  baseURL: "/minecraftApi",
+  timeout: 10000,
+  withCredentials: true
+})
+export default api

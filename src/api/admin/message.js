@@ -1,4 +1,4 @@
-import request from "@/util/request";
+import api from "@/util/request";
 
 const urlHead = "/starfall/console/chat";
 
@@ -6,11 +6,11 @@ export const findAllMessage = (page,keyword)=>{
     let params = new URLSearchParams();
     params.append("page",page);
     params.append("keyword",keyword);
-    return request.post(urlHead+"/adminFindAllMessage",params)
+    return api.post(urlHead+"/adminFindAllMessage",params)
 }
 
-export const insertMessage = (message)=>request.post(urlHead+"/adminInsertMessage",message)
+export const insertMessage = (message)=>api.post(urlHead+"/adminInsertMessage",message)
 
-export const updateMessage = (messages)=>request.post(urlHead+"/adminUpdateMessage",messages)
+export const updateMessage = (messages)=>api.post(urlHead+"/adminUpdateMessage",messages)
 
-export const deleteMessage = (message)=>request.post(urlHead+"/adminDeleteMessage",message)
+export const deleteMessage = (message)=>api.post(urlHead+"/adminDeleteMessage",message)

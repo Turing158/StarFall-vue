@@ -102,7 +102,7 @@
             <div class="setting-row">
               <span class="setting-label">正版ID：</span>
               <el-input v-model="privacySettings.onlineName" placeholder="请输入正版ID" style="width: 200px" maxlength="20" />
-              <McBtn text="正版验证" :margin="10" @click="verifyOnlineName()" />
+              <McBtn text="正版验证" :margin="10" @click="openVerifyOnlineName = true" />
             </div>
             <div class="setting-row">
               <span class="setting-label">显示正版ID：</span>
@@ -165,6 +165,73 @@
         <span></span>
         <McBtn text="保存" @click="saveSignature()" />
       </div>
+      <el-dialog 
+      title="正版验证" 
+      v-model="openVerifyOnlineName" 
+      width="50%"
+      :close-on-click-modal="false"
+      >
+      <div class="verify-container">
+        <transition name="step-transition" mode="out-in">
+          <div :key="verifyStep">
+            <!-- 步骤 1 -->
+            <div v-if="verifyStep === 1" class="verify-item">
+              <h2>欢迎使用论坛正版登录验证</h2>
+              <p>此次验证并不会记录你的任何账号信息</p>
+              <p>请点击下方按钮，获取该次验证的代码</p>
+              <el-button type="primary" @click="handleDeviceCode" :loading="verifyLoading">点击获取机器码</el-button>
+              <p v-show="verifyLoading">正在获取该次验证的代码...</p>
+            </div>
+            
+            <!-- 步骤 2 -->
+            <div v-if="verifyStep === 2" class="verify-item">
+              <p>已将代码复制至剪切板，若未复制，请直接点击下方代码复制</p>
+              <p>现在请点击下面链接，输入并验证代码，完成微软登录</p>
+              <a href="https://www.microsoft.com/link" target="_blank">https://www.microsoft.com/link</a>
+              <p class="click-anim can-select" style="font-size: 28px;" @click="copyCode">{{ verifyCode }}</p>
+              <p>验证完成后，点击下方按钮确认,并检测此次验证</p>
+              <el-button type="primary" @click="handleVerifyDeviceCode" :loading="verifyLoading">点击验证</el-button>
+            </div>
+            
+            <!-- 步骤 3 -->
+            <div v-if="verifyStep === 3" class="verify-item">
+              <h2>验证成功！</h2>
+              <p>正在处理剩下的验证步骤...({{ lastVerifyStep }}/4)</p>
+              <transition name="step-transition" mode="out-in">
+                <div :key="lastVerifyStep">
+                  <p v-if="lastVerifyStep === 1">XBox身份验证...</p>
+                  <p v-if="lastVerifyStep === 2">XSTS 身份验证...</p>
+                  <p v-if="lastVerifyStep === 3">获取MinecraftToken...</p>
+                  <p v-if="lastVerifyStep === 4">正在获取Minecraft正版信息...</p>
+                </div>
+              </transition>
+            </div>
+
+            <div v-if="verifyStep === 4" class="verify-item">
+              <h2>获取成功！</h2>
+              <p>你好！尊贵的正版玩家</p>
+              <p class="click-anim" style="font-size: 20px; font-weight: bold;">{{ privacySettings.onlineName }}</p>
+              <p>若未获取“正版玩家”勋章，会自动颁发此勋章</p>
+              <p>若已获取“正版玩家”勋章，无需重复验证</p>
+            </div>
+
+            <div v-if="verifyStep === 5" class="verify-item">
+              <h2>获取失败！</h2>
+              <p>请检查你的Minecraft正版账号是否绑定到Microsoft账号</p>
+              <p>又或者你暂时还未获取正版Minecraft</p>
+              <p>可通过以下链接登录微软账号刷新一下正版Minecraft账户的数据</p>
+              <a href="https://www.minecraft.net/zh-hans" target="_blank">https://www.minecraft.net/zh-hans</a>
+            </div>
+          </div>
+        </transition>
+      </div>
+        
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button @click="resetVerify" v-if="verifyError">重试</el-button>
+          </div>
+        </template>
+      </el-dialog>
     </div>
   </Book>
 </template>
@@ -177,10 +244,11 @@ import Empty from '@/components/FitEmpty.vue'
 import McBtn from '@/components/McBtn.vue'
 import useUserStore from '@/stores/user'
 import { ElMessage, ElNotification, ElLoading } from 'element-plus'
-import { saveInfo, settingAvatar, getAvatarApi, getSelfPersonalized, updatePersonalized, updateSignature } from '@/api/user'
+import { saveInfo, settingAvatar, getAvatarApi, getSelfPersonalized, updatePersonalized, updateSignature, getDeviceCode, verifyDeviceCode, getMinecraftInfo } from '@/api/user'
 import Code from '@/components/Code.vue'
 import ContentEditor from '@/components/ContentEditor.vue'
 import { useRouter } from 'vue-router';
+import { minecraftApi, request } from '@/util/request';
 const codeImg = ref()
 const codeImgPrivacy = ref(null)
 const codeImgSignature = ref(null)
@@ -248,10 +316,8 @@ const personalized = ref({})
 const getPersonalized = async() =>{
   await getSelfPersonalized()
   .then(res=>{
-    console.log(res)
     personalized.value = res.data.object
     resetPrivacySettings()
-
   })
   .catch(err=>{
     ElMessage.error('获取个人化设置失败')
@@ -405,7 +471,6 @@ const init = ()=>{
 
 const setAvatarPage = ref(false)
 const confirmAvatar = async()=>{
-  console.log(avatar.value)
   if(avatar.value == userStore.avatar){
     ElMessage.error('请先选择图片')
   }
@@ -488,9 +553,230 @@ const saveSignature = async()=>{
     }
   })
 }
-const verifyOnlineName = ()=>{
-  console.log('正版验证')
+// =============正版验证==========================
+const openVerifyOnlineName = ref(false)
+const verifyStep = ref(1)
+const lastVerifyStep = ref(0)
+const verifyLoading = ref(false)
+const deviceCode = ref('')
+const verifyCode = ref('')
+const verifyError = ref(false)
+
+const resetVerify = () => {
+  verifyStep.value = 1
+  lastVerifyStep.value = 0
+  deviceCode.value = ''
+  verifyCode.value = ''
+  verifyError.value = false
 }
+
+const handleDeviceCode = async()=>{
+  console.log('handleDeviceCode')
+  verifyLoading.value = true
+  await getDeviceCode()
+  .then(res=>{
+    if(res.data.msg == 'SUCCESS'){
+      console.log(res)
+      let data = JSON.parse(res.data.object)
+      verifyCode.value = data.user_code
+      deviceCode.value = data.device_code
+      verifyStep.value++
+    }
+    else{
+      ElMessage.error('获取验证码失败')
+    }
+  })
+  .catch(err=>{
+    ElMessage.error('获取验证码失败')
+  })
+
+  verifyLoading.value = false
+}
+const handleVerifyDeviceCode = async()=>{
+  console.log('handleVerifyDeviceCode')
+  verifyLoading.value = true
+  let isSuccess = false
+  await verifyDeviceCode(deviceCode.value).then(res=>{
+    if(res.data.msg == 'SUCCESS'){
+      console.log(res)
+      let token = JSON.parse(res.data.object).access_token
+      XBoxVerify(token)
+      verifyStep.value++
+      isSuccess = true
+    }
+    else if(res.data.msg == 'AUTHORIZATION_PENDING'){
+      ElMessage.error('请先完成授权')
+    }
+    else if(res.data.msg == 'SLOW_DOWN'){
+      ElMessage.error('请求过于频繁，请稍后再试')
+    }
+    else if(res.data.msg == 'GET_TOKEN_ERROR'){
+      ElMessage.error('获取token失败')
+    }
+    else{
+      ElMessage.error('验证失败,请完成验证步骤再试')
+    }
+  })
+  .catch(err=>{
+    ElMessage.error('验证失败,请点击下方重试')
+  })
+  if(!isSuccess){
+    verifyError.value = true
+  }
+
+  verifyLoading.value = false
+  verifyDeviceCode.value = ''
+}
+const XBoxVerify = async(token)=>{
+  console.log('XBoxVerify')
+  lastVerifyStep.value = 1
+  let isSuccess = false
+  await request.post(
+    "https://user.auth.xboxlive.com/user/authenticate",
+    {
+      "Properties": {
+          "AuthMethod": "RPS",
+          "SiteName": "user.auth.xboxlive.com",
+          "RpsTicket": `d=${token}`
+      },
+      "RelyingParty": "http://auth.xboxlive.com",
+      "TokenType": "JWT"
+    }
+  )
+  .then(res=>{
+    let data = res.data
+    console.log(res)
+    if(data){
+      let token = data.Token
+      XSTSVerify(token)
+      isSuccess = true
+    }
+    else{
+      ElMessage.error('验证失败,请点击下方重试')
+    }
+  })
+  .catch(err=>{
+    console.log(err)
+    ElMessage.error('验证失败,请点击下方重试')
+  })
+  if(!isSuccess){
+    verifyError.value = true
+  }
+}
+const XSTSVerify = async(token)=>{
+  console.log('XSTSVerify')
+  lastVerifyStep.value = 2
+  let isSuccess = false
+  await request.post(
+    "https://xsts.auth.xboxlive.com/xsts/authorize",
+    {
+      "Properties": {
+          "SandboxId": "RETAIL",
+          "UserTokens": [
+              token
+          ]
+      },
+      "RelyingParty": "rp://api.minecraftservices.com/",
+      "TokenType": "JWT"
+    }
+  )
+  .then(res=>{
+    console.log(res)
+    if(!res.data){
+      ElMessage.error('验证失败,请点击下方重试')
+      return 
+    }
+    let data = res.data
+    if(data.XErr){
+      ElMessage.error('验证失败,请点击下方重试')
+      return 
+    }
+    getMinecraftToken(data.Token,data.DisplayClaims.xui[0].uhs)
+    isSuccess = true
+  })
+  .catch(err=>{
+    ElMessage.error('验证失败,请点击下方重试')
+  })
+  if(!isSuccess){
+    verifyError.value = true
+  }
+}
+const getMinecraftToken = async(token, uhs) =>{
+  console.log('getMinecraftToken')
+  if(!uhs){
+    ElMessage.error('验证失败,请点击下方重试')
+    verifyError.value = true
+    return 
+  }
+  let isSuccess = false
+  lastVerifyStep.value = 3
+  await minecraftApi.post(
+    "",
+    {
+      "identityToken": `XBL3.0 x=${uhs};${token}`
+    }
+  )
+  .then(res=>{
+    console.log(res)
+    let data = res.data
+    if(data.error){
+      ElMessage.error('验证失败,请点击下方重试')
+      return 
+    }
+    verifyMinecraftToken(data.access_token)
+    isSuccess = true
+  })
+  .catch(err=>{
+    ElMessage.error('验证失败,请点击下方重试')
+  })
+  if(!isSuccess){
+    verifyError.value = true
+  }
+  verifyLoading.value = false
+}
+const verifyMinecraftToken = async(token) =>{
+  console.log('verifyMinecraftToken')
+  let isSuccess = false
+  lastVerifyStep.value = 4
+  await getMinecraftInfo(token).then(res=>{
+    console.log(res)
+    if(res.data.msg == 'SUCCESS'){
+      let info = JSON.parse(res.data.object)
+      if(!info.id){
+        ElMessage.error('获取失败,请查看详情')
+        verifyStep.value = 5
+        return 
+      }
+      ElMessage.success('验证成功')
+      privacySettings.onlineName = info.name
+      verifyStep.value = 4
+      isSuccess = true
+    }
+    else if(res.data.msg == 'VERIFY_FAILED'){
+      ElMessage.error('获取失败,请查看详情')
+      verifyStep.value = 5
+    }
+    else{
+      ElMessage.error('验证失败,请点击下方重试')
+    }
+  })
+  .catch(err=>{
+    console.log(err)
+    ElMessage.error('验证失败,请点击下方重试')
+  })
+  if(!isSuccess){
+    verifyError.value = true
+  }
+}
+const copyCode = ()=>{
+  if(!verifyCode.value){
+    ElMessage.error('请先获取验证码')
+    return
+  }
+  navigator.clipboard.writeText(verifyCode.value)
+  ElMessage.success('复制成功')
+}
+// =============正版验证==========================
 onMounted(init)
 </script>
 <style scoped>
@@ -600,5 +886,84 @@ onMounted(init)
   display: flex;
   justify-content: center;
   margin-top: 20px;
+}
+
+.success {
+  color: #67C23A;
+  font-weight: bold;
+}
+
+.error {
+  color: #F56C6C;
+  font-weight: bold;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.verify-container {
+  position: relative;
+  overflow: hidden;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.verify-item{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.verify-item * {
+  margin: 2px 0;
+}
+.verify-item .click-anim{
+  transition: all 0.2s ease;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 5px;
+}
+.verify-item .can-select{
+  user-select: text;
+}
+.verify-item .click-anim:hover{
+  transform: scale(1.05);
+}
+.verify-item .click-anim:active{
+  background-color: #8b7d6d;
+  color: #fff;
+}
+/* 步骤切换动画 */
+.step-transition-enter-active,
+.step-transition-leave-active {
+  transition: all 0.5s ease;
+}
+
+.step-transition-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.step-transition-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.step-transition-enter-to,
+.step-transition-leave-from {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.verify-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 </style>
