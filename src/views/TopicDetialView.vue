@@ -118,7 +118,7 @@ import useUserStore from '@/stores/user'
 import McBtn from '@/components/McBtn.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
-import { findCommentByTopic, getTopicInfo, appendComment, deleteComment,getTopicContent, topTopicComment } from '@/api/topic'
+import { findCommentByTopic, getTopicInfo, appendComment, deleteComment,getTopicContent, topTopicComment, getTopTopicComment } from '@/api/topic'
 import { getAvatarApi } from '@/api/user'
 import { ElLoading, ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 const userStore = useUserStore()
@@ -128,6 +128,7 @@ const topicInfo = ref() // 存储主题帖详细信息
 const error = ref(true) // 主题帖不存在或已被删除时为true
 const comments = ref([]) // 存储评论列表
 const commentsCount = ref(0) // 评论总数
+const topComments = ref([]) // 置顶评论列表
 const loading = ElLoading.service({
   lock: true,
   text: '加载中...',
@@ -157,35 +158,40 @@ const init = async () => {
         topicInfo.value = data
         error.value = false
         getComment()
+        getTopComment()
+        
       }
     })
     .catch((err) => {
       ElMessage.error('服务异常')
     })
+  // 加载完成后页面滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
   loading.close()
+}
+const getTopComment = async ()=>{
+  await getTopTopicComment(route.params.id)
+    .then(res=>{
+      console.log(res)
+      topComments.value = res.data.object
+    })
+    .catch(e=>{
+      console.log(e)
+      ElMessage.info("获取置顶评论失败")
+    })
 }
 const page = ref(1)
 const changePage = (e) => {
-  page.value = e
+  page.value = parseInt(e)
   getComment()
 }
-const topComments = ref([]) // 置顶评论列表
-const needLoadTopComments = ref(true)
 // 获取评论列表
 const getComment = async () => {
   await findCommentByTopic(route.params.id, page.value)
     .then((res) => {
       let msg = res.data.msg
       if (msg == 'SUCCESS') {
-        var tmp = res.data.object
-        tmp.forEach(item=>{
-          item.avatar = getAvatarApi+item.avatar
-        })
-        if(needLoadTopComments.value){
-          topComments.value = tmp.filter(item=>item.weight != 0)
-        }
-        needLoadTopComments.value = false
-        comments.value = tmp
+        comments.value = res.data.object
         commentsCount.value = res.data.num
       } else {
         ElMessage.error('获取评论失败')
@@ -222,6 +228,7 @@ const onComment = async () => {
           })
           editComment.value.content = ''
           editComment.value.code = ''
+          window.scrollTo({ bottom: 0, behavior: 'smooth' })
           changePage(((res.data.num + 9) / 10).toString().split('.')[0]) 
 
         }
@@ -308,7 +315,7 @@ const setTopComment = async (item) => {
             message: '评论已置顶',
             type: 'success'
           })
-          getComment()
+          topComments.value.push(item)
         }
         else if(msg == 'TOP_FULL'){
           item.weight = originWeight
@@ -352,7 +359,9 @@ const setTopComment = async (item) => {
             message: '评论已取消置顶',
             type: 'success'
           })
-          getComment()
+          console.log(topComments.value)
+          topComments.value = topComments.value.filter(comment => comment != item)
+          console.log(topComments.value)
         }
         else{
           item.weight = originWeight

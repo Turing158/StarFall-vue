@@ -56,7 +56,7 @@
           </div>
         </div>
         <div class="right">
-          <el-table :data="signInList" empty-text="未找到签到记录">
+          <el-table :data="signInList" empty-text="未找到签到记录" v-loading="listLoading" element-loading-background="#f3debf" element-loading-text="加载中...">
             <el-table-column prop="date" label="日期" width="120" />
             <el-table-column prop="message" label="消息" />
             <el-table-column prop="emotion" label="心情" width="60" align="center" />
@@ -104,6 +104,8 @@ const date = ref(
 const pageNum = ref(1)
 const signInCount = ref(0)
 const getSignList = async() =>{
+  listLoading.value = true
+
   await findAllSignIn(pageNum.value).then(res=>{
     let msg = res.data.msg
     if(msg == 'SUCCESS'){
@@ -111,10 +113,11 @@ const getSignList = async() =>{
       let num = res.data.num
       signInList.value = data
       signInCount.value = num
-      listLoading.value = false
     }
   }).catch(err=>{
     ElMessage.error('服务异常')
+  }).finally(() => {
+    listLoading.value = false
   })
 }
 const getSignInInfo = async() =>{

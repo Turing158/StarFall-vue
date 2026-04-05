@@ -168,7 +168,13 @@ export const deleteTopicGallery = (id, topicId) => {
   return api.post(urlHead + '/gallery/delete', param)
 }
 
-export const topTopicComment = (comment) => api.post(urlHead + '/comment/top', comment)
+export const topTopicComment = (comment) => api.post(urlHead + '/comment/top/update', comment)
+
+export const getTopTopicComment = (id) => {
+  let param = new URLSearchParams()
+  param.append('id', id)
+  return api.post(urlHead + '/comment/top/find', param)
+}
 
 export const getTopicFile = (id) => {
   let param = new URLSearchParams()
