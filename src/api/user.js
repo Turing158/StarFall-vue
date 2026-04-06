@@ -143,7 +143,18 @@ export const getMedalById = (id) => {
   return api.post(urlHead + '/medal/find', param)
 }
 //获取链接，但是只保留域名
-export const getAvatarApi = url + '/file/url/origin/'
+const getAvatarApi = url + '/file/url/origin/'
+export const getAvatarSrc = (avatar) => {
+  if(!avatar){
+    return avatar
+  }
+  if(avatar.startsWith("http") || avatar.startsWith("https")){
+        return avatar
+    } else if(avatar.startsWith("/")) {
+        return getAvatarApi + avatar.slice(1)
+    }
+    return getAvatarApi + avatar
+}
 
 export const getDeviceCode = () => api.post(urlHead + '/minecraft/code/get')
 

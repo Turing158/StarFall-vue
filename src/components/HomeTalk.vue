@@ -7,9 +7,18 @@
                     <tr class="item" v-for="(item,index) in data" :key="index">
                         <td>
                             <div class="user">
-                                <img class="avatar" :src="getAvatarApi + item.avatar" alt="">
+                                <img class="avatar" :src="getAvatarSrc(item.avatar)" alt="">
                                 <span class="username" @click="handleClickUser(item.user)">{{ item.name }}</span>
-                                <span class="date">{{ item.date }}</span>
+                                <div class="date-wrapper">
+                                    <button 
+                                        v-if="canDelete(item.user)" 
+                                        class="delete-btn"
+                                        @click="handleDelete(index, item.id)"
+                                        :disabled="deleteLoading === index">
+                                        ×
+                                    </button>
+                                    <span class="date">{{ formatDate(item.date) }}</span>
+                                </div>
                             </div>
                             <span class="content">{{ item.content }}</span>
                             <div class="divide"></div>
@@ -35,7 +44,10 @@
             </div>
             <div class="daySayBottom">
                 <div v-if="userStore.isLogin" class="talkContainer">
-                    <el-input v-model="newTalkContent" class="talkInput" placeholder="输入每日一言..."/>
+                    <el-input 
+                    v-model="newTalkContent" 
+                    class="talkInput" 
+                    placeholder="输入每日一言..."/>
                     <McBtn class="publishBtn" @click="handlePublish">发布</McBtn>
                 </div>
                 <div v-else class="loginPrompt">请登录</div>
@@ -45,18 +57,18 @@
 </template>
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { findAllHomeTalk,publicHomeTalk } from '@/api/home'
+import { findAllHomeTalk,publicHomeTalk,deleteHomeTalk } from '@/api/home'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import McBtn from '@/components/McBtn.vue'
-import { getAvatarApi } from '@/api/user';
+import { getAvatarSrc } from '@/api/user';
 import { ElLoading } from 'element-plus'
 const userStore = useUserStore()
 const tableContainer = ref(null)
 const isLoading = ref(false)
 const hasMoreData = ref(true)
-
+const deleteLoading = ref(-1)
 const router = useRouter()
 const data = ref([])
 const newTalkContent = ref('')
@@ -64,6 +76,20 @@ const handlePublish = async () => {
     if (!newTalkContent.value.trim()) {
         ElMessage({
             message: '请输入内容',
+            type: 'warning'
+          })
+        return;
+    }
+    if (newTalkContent.value.trim().length < 5) {
+        ElMessage({
+            message: '内容不能少于5个字符',
+            type: 'warning'
+          })
+        return;
+    }
+    if (newTalkContent.value.trim().length > 80) {
+        ElMessage({
+            message: '内容不能超过80个字符',
             type: 'warning'
           })
         return;
@@ -90,6 +116,12 @@ const handlePublish = async () => {
                 message: '你今天发话过了',
                 type: 'warning'
             })
+        }
+        else if(msg == "SENSITIVE_ERROR"){
+            ElMessage({
+                message: '包含敏感内容',
+                type: 'warning'
+            })
         } else {
             ElMessage({
                 message: '发布失败',
@@ -107,7 +139,6 @@ const handlePublish = async () => {
 
 const refreshData = async()=>{
     if (isLoading.value) return
-    
     isLoading.value = true
     await findAllHomeTalk(data.value.length)
     .then(res=>{
@@ -142,6 +173,54 @@ const handleRefreshNoMore = () => {
 
 const handleClickUser = (user)=>{
     router.push("/personal/other/"+user)
+}
+
+const canDelete = (user) => {
+    return userStore.isLogin && userStore.user === user
+}
+
+const formatDate = (dateStr) => {
+    if (!dateStr) return ''
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diff = now - date
+    const minutes = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    const days = Math.floor(diff / 86400000)
+    
+    if (minutes < 1) return '刚刚'
+    if (minutes < 60) return `${minutes}分钟前`
+    if (hours < 24) return `${hours}小时前`
+    if (days < 7) return `${days}天前`
+    
+    return dateStr.split(' ')[0]
+}
+
+const handleDelete = async (index, id) => {
+    deleteLoading.value = index
+    await deleteHomeTalk(id)
+        .then(res => {
+            let msg = res.data.msg
+            if (msg === 'SUCCESS') {
+                data.value.splice(index, 1)
+                ElMessage({
+                    message: '删除成功',
+                    type: 'success'
+                })
+            } else {
+                ElMessage({
+                    message: '删除失败',
+                    type: 'error'
+                })
+            }
+        })
+        .catch(e => {
+            ElMessage({
+                message: '删除失败',
+                type: 'error'
+            })
+        })
+    deleteLoading.value = -1
 }
 
 onMounted(() => {
@@ -283,6 +362,40 @@ onUnmounted(()=>{
     background-color: #a58960;
     padding: 2px 8px;
     border-radius: 12px;
+}
+
+.date-wrapper {
+    margin-left: auto;
+    margin-right: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.delete-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #a58960;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    transition: background-color 0.2s;
+}
+
+.delete-btn:hover {
+    background-color: #d64545;
+}
+
+.delete-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
 .content {

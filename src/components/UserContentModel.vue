@@ -34,19 +34,11 @@
 <script setup>
 import ExpBar from '@/components/ExpBar.vue'
 import PersonSignature from '@/components/PersonSignature.vue'
-import { getAvatarApi } from '@/api/user'
+import { getAvatarSrc } from '@/api/user'
 const props = defineProps({
   data: Object,
 })
-const getAvatarSrc = (avatar)=>{
-  if(avatar.startsWith("http") || avatar.startsWith("https")){
-    return avatar
-  }
-  if(avatar.startsWith("/")){
-    return getAvatarApi + avatar.slice(1)
-  }
-  return getAvatarApi + avatar
-}
+
 </script>
 <style scoped>
 .comment {

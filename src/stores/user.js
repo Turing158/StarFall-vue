@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { getAvatarApi } from '@/api/user'
+import { getAvatarSrc } from '@/api/user'
 
 export const useUserStore = defineStore('user-Sf', () => {
   const user = ref('')
@@ -27,7 +27,7 @@ export const useUserStore = defineStore('user-Sf', () => {
     maxExp.value = MaxExp
     gender.value = Gender
     birthday.value = Birthday
-    avatar.value = getAvatarApi + Avatar
+    avatar.value = getAvatarSrc(Avatar)
     email.value = Email
     role.value = Role
   }
@@ -35,7 +35,7 @@ export const useUserStore = defineStore('user-Sf', () => {
     email.value = Email
   }
   const setAvatar = (Avatar)=>{
-    avatar.value = getAvatarApi + Avatar
+    avatar.value = getAvatarSrc(Avatar)
   }
   const setLogin = (bool)=>{
     isLogin.value = bool

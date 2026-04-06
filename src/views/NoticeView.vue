@@ -35,7 +35,7 @@
                         v-if="notice.type === 'friend' && notice.action.name"
                         class="noticeContent friendType"
                       >
-                        <img :src="getAvatarApi + notice.action.avatar" class="friendAvatar" />
+                        <img :src="getAvatarSrc(notice.action.avatar)" class="friendAvatar" />
                         <div class="friendInfo">
                           <div class="friendName">{{ notice.action.name }}</div>
                           <div class="friendReason">{{ notice.action.reason }}</div>
@@ -191,7 +191,7 @@ import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import { getNoticeIcon, handleTime, registerMessageCallback, unregisterMessageCallback } from '@/util/handleNotice.js'
 import { findAllUserNotice, readNotice } from '@/api/notice'
-import { getAvatarApi } from '@/api/user'
+import { getAvatarSrc } from '@/api/user'
 import { handleFriendApplication } from '@/api/friend'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adjustTopicDisplayAgain, completeAdjustTopic } from '@/api/topic'

@@ -5,7 +5,7 @@
             <tr class="item" v-for="(item,index) in props.data" :key="index">
                 <span class="num"><span>{{ index+1 }}</span></span>
                 <span class="title" @click="goDetail(item.id)" :title="item.title">{{ item.title }}</span>
-                <img class="avatar" :src="getAvatarApi + item.avatar" :title="item.name" @click="goUser(item.user)" />
+                <img class="avatar" :src="getAvatarSrc(item.avatar)" :title="item.name" @click="goUser(item.user)" />
             </tr>
             <tr class="item empty" v-if="!loading && (props.data == null || props.data.length == 0)">
                 暂无数据
@@ -18,7 +18,7 @@
 </template>
 <script setup>
 import router from '@/router'
-import { getAvatarApi } from '@/api/user';
+import { getAvatarSrc } from '@/api/user';
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()

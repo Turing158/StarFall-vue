@@ -1,7 +1,7 @@
 import { ElNotification, ElMessage } from 'element-plus'
 import { ref, h } from 'vue'
 import { useUserStore } from '@/stores/user'
-import { getAvatarApi, isExpire } from '@/api/user'
+import { getAvatarSrc, isExpire } from '@/api/user'
 import request from '@/util/request'
 import { useRouter } from 'vue-router'
 import { handleLastContent } from './chatContent'
@@ -296,7 +296,7 @@ export const handleNotification = (notice, isLast, num) => {
     ElNotification({
       title: notice.fromName,
       icon: () => h('img', { 
-        src: `${getAvatarApi}${notice.fromAvatar}`, 
+        src: getAvatarSrc(notice.fromAvatar), 
         style: { 
           width: '35px', 
           height: '35px' , 

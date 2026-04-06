@@ -36,7 +36,7 @@
           </div>
           <div class="authorHead">
             <a :href="'/personal/other/' + data.user"
-              ><img :src="getAvatarApi + data.avatar" alt=""
+              ><img :src="getAvatarSrc(data.avatar)" alt=""
             /></a>
           </div>
           <div class="authorInf">
@@ -209,7 +209,6 @@ import { onMounted, ref, onUpdated } from 'vue'
 import { useRouter } from 'vue-router'
 import McBtn from '@/components/McBtn.vue'
 import ExpBar from '@/components/ExpBar.vue'
-import { getAvatarApi } from '@/api/user'
 import { downloadFile } from '@/api/topic'
 import { ElDialog } from 'element-plus'
 import GoBack from '@/components/GoBack.vue'

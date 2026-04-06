@@ -1,7 +1,7 @@
 <template>
   <div class="item" :class="handleClass()">
     <div class="ItemTop">
-      <img class="avatar" :src="getAvatarApi + props.item.avatar" alt="" />
+      <img class="avatar" :src="getAvatarSrc(props.item.avatar)" alt="" />
       <div class="info">
         <div class="username">{{ props.item.alias ? props.item.alias : props.item.name }}</div>
         <div class="content">{{ handleLastContent(props.item.lastMsg) }}</div>
@@ -19,7 +19,7 @@
   </div>
 </template>
 <script setup>
-import { getAvatarApi } from '@/api/user'
+import { getAvatarSrc } from '@/api/user'
 import { handleLastContent } from '@/util/chatContent';
 import { handleTime } from '@/util/handleNotice';
 const props = defineProps({

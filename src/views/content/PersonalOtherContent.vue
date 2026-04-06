@@ -3,7 +3,7 @@
     <Empty :height="30" />
     <div class="basicInfo">
       <div class="avatarOut">
-        <img class="avatar" :src="getAvatarApi + userInfo.avatar" alt="" width="100%" height="100%"/>
+        <img class="avatar" :src="getAvatarSrc(userInfo.avatar)" alt="" width="100%" height="100%"/>
       </div>
       <div class="info">
         <div class="exp">
@@ -115,7 +115,7 @@ import ExpBar from '../../components/ExpBar.vue'
 import Empty from '../../components/FitEmpty.vue'
 import TopicList from '@/components/TopicList.vue'
 import TopicItem from '@/components/TopicItem.vue'
-import { findUserinfo, getAvatarApi, getMedalOnPerson } from '@/api/user'
+import { findUserinfo, getAvatarSrc, getMedalOnPerson } from '@/api/user'
 import Book from '@/components/Book.vue'
 import { onMounted, reactive, ref } from 'vue'
 import { findAllTopicByUser } from '@/api/topic'

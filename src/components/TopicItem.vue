@@ -22,7 +22,7 @@
     </td>
     <td style="width: 40px">
       <div class="avatar">
-        <img class="img" :src="getAvatarApi + props.item.avatar" alt="" />
+        <img class="img" :src="getAvatarSrc(props.item.avatar)" alt="" />
       </div>
     </td>
     <td v-show="isEdit" class="operate" style="width: 130px">
@@ -38,7 +38,7 @@ import { useRouter } from 'vue-router'
 import McBtn from './McBtn.vue'
 import { deleteTopic } from '@/api/topic';
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
-import { getAvatarApi } from '@/api/user';
+import { getAvatarSrc } from '@/api/user';
 const props = defineProps({
   item: Object,
   titleMaxWidth:String,

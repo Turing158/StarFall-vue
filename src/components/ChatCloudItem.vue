@@ -6,7 +6,7 @@
     <div v-for="(item, index) in props.chats.contents" :key="index">
       <div class="item" v-if="props.chats.fromUser != userStore.user">
         <div class="avatar">
-          <img :src="(props.chats.fromAvatar.includes('http') ? '' : getAvatarApi) + props.chats.fromAvatar" alt="" />
+          <img :src="getAvatarSrc(props.chats.fromAvatar)" alt="" />
         </div>
         <div class="chatCloud" v-html="handleContent(item)"></div>
       </div>
@@ -26,7 +26,7 @@
 import useUserStore from '@/stores/user'
 import { ref } from 'vue'
 import { marked } from 'marked'
-import { getAvatarApi } from '@/api/user'
+import { getAvatarSrc } from '@/api/user'
 import { handleTime } from '@/util/handleNotice'
 import { handleContent } from '@/util/chatContent'
 const props = defineProps({

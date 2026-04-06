@@ -119,7 +119,6 @@ import McBtn from '@/components/McBtn.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
 import { findCommentByTopic, getTopicInfo, appendComment, deleteComment,getTopicContent, topTopicComment, getTopTopicComment } from '@/api/topic'
-import { getAvatarApi } from '@/api/user'
 import { ElLoading, ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 const userStore = useUserStore()
 const route = useRoute()

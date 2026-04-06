@@ -244,7 +244,7 @@ import Empty from '@/components/FitEmpty.vue'
 import McBtn from '@/components/McBtn.vue'
 import useUserStore from '@/stores/user'
 import { ElMessage, ElNotification, ElLoading } from 'element-plus'
-import { saveInfo, settingAvatar, getAvatarApi, getSelfPersonalized, updatePersonalized, updateSignature, getDeviceCode, verifyDeviceCode, getMinecraftInfo } from '@/api/user'
+import { saveInfo, settingAvatar, getSelfPersonalized, updatePersonalized, updateSignature, getDeviceCode, verifyDeviceCode, getMinecraftInfo, getAvatarSrc } from '@/api/user'
 import Code from '@/components/Code.vue'
 import ContentEditor from '@/components/ContentEditor.vue'
 import { useRouter } from 'vue-router';
@@ -490,7 +490,7 @@ const confirmAvatar = async()=>{
         })
         let fileName = res.data.object
         userStore.setAvatar(fileName)
-        avatar.value =  getAvatarApi + fileName
+        avatar.value =  getAvatarSrc(fileName)
       }
       else{
         ElMessage.error('更改头像失败')

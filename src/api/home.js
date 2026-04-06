@@ -14,6 +14,12 @@ export const publicHomeTalk = (content) => {
   return api.post(homeApi + '/talk/insert', params)
 }
 
+export const deleteHomeTalk = (id) => {
+  let params = new URLSearchParams()
+  params.append('id', id)
+  return api.post(homeApi + '/talk/delete', params)
+}
+
 export const findAdvertisementByPosition = (position) => {
   let params = new URLSearchParams()
   params.append('position', position)
