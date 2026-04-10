@@ -33,7 +33,17 @@ export const handleContent = (content) => {
     if (!item) {
       return emoji
     }
-    return `<img class="chat_emoji" src="${item.src}" alt="${emoji}" draggable="true" title="${item.name}"/>`
+    return `<img class="chat_emoji" 
+              src="${item.src}" 
+              alt="${emoji}" 
+              draggable="true" 
+              style="
+                width: ${item.width ? item.width*1.5 : '20'}px; 
+                height: ${item.height ? item.height*1.5 : '20'}px;
+                image-rendering: ${item.rendering ? item.rendering : 'pixelated'};
+              " 
+              title="${item.name}"
+            />`
   })
 
   return escaped

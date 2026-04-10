@@ -11,7 +11,10 @@
             </div>
             <div class="medal-container">
               <div class="medal-item" v-for="(medal, index) in medals" :key="index" @click="getMedal(medal.id)">
-                <img class="medal-img" :src="`/src/assets/img${medal.icon}`" alt="">
+                <span v-if="isExpired(medal.expireTime)" class="expired-badge" :class="{ 'hide-badge': hoverMedalIndex === index }">过期</span>
+                <img class="medal-img" :src="`/src/assets/img${medal.icon}`" alt=""
+                     @mouseenter="hoverMedalIndex = index"
+                     @mouseleave="hoverMedalIndex = -1">
                 <div class="medal-name">{{ medal.name }}</div>
                 <div class="medal-description">{{ medal.description }}</div>
                 <div class="medal-source">{{ medal.source }}</div>
@@ -70,6 +73,7 @@ import { getMedalById, getMedalOnAll } from '@/api/user'
 const userStore = useUserStore()
 const timerStore = useTimerStore()
 const router = useRouter()
+const hoverMedalIndex = ref(-1)
 const goBack = () => {
   router.back()
 }
@@ -124,6 +128,13 @@ const dialogClose = ()=>{
     router.push('/medals')
   }
 }
+
+const isExpired = (expireTime) => {
+  if (!expireTime) return false
+  const now = new Date()
+  const expire = new Date(expireTime)
+  return now > expire
+}
 onMounted(()=>{
   getMedals()
   if(router.currentRoute.value.params.id){
@@ -173,9 +184,28 @@ onMounted(()=>{
   align-items: center;
   overflow: hidden;
   transition: all 0.2s ease-in-out;
+  position: relative;
 }
 .medal-item:hover{
   transform: translateY(-5px);
+}
+
+.expired-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #998862;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 10;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.hide-badge {
+  opacity: 0;
 }
 .medal-name{
   font-size: 18px;

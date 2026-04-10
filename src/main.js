@@ -47,7 +47,17 @@ import { SubAnSup ,Mark} from '@/util/markedExtension.js'
 const emojis = {...itemEmojis}
 const emojiOptions = {
 	emojis,
-	renderer: (token) => `<img alt="${token.name}" src="${token.emoji.src}" title="${token.emoji.name}" class="marked-emoji-img">`
+	renderer: (token) => 
+    `<img alt="${token.name}" 
+          src="${token.emoji.src}" 
+          title="${token.emoji.name}" 
+          style="
+            width: ${token.emoji.width ? token.emoji.width : '20'}px; 
+            height: ${token.emoji.height ? token.emoji.height : '20'}px;
+            image-rendering: ${token.emoji.rendering ? token.emoji.rendering : 'pixelated'};
+          " 
+          class="marked-emoji-img"
+    >`
 };
 const highlightOptions = {
 	emptyLangClass: 'hljs',

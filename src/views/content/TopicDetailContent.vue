@@ -213,6 +213,7 @@ import { downloadFile } from '@/api/topic'
 import { ElDialog } from 'element-plus'
 import GoBack from '@/components/GoBack.vue'
 import PersonSignature from '@/components/PersonSignature.vue'
+import { getAvatarSrc } from '@/api/user'
 const props = defineProps({
   id: String,
   data: {

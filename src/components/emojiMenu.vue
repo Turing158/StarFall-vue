@@ -27,7 +27,7 @@ import { itemEmojis } from '@/assets/img/emoji/getItemEmoji.js'
 const emit = defineEmits(['insertEmoji'])
 const currentList = ref([])
 const currentType = ref('Minecraft-物品')
-const options = ref(['Minecraft-物品','2025年周年庆','2026年周年庆','史蒂夫'])
+const options = ref(['Minecraft-物品','2026年周年庆','2025年周年庆','史蒂夫'])
 const changeList = ()=>{
     currentList.value = Object.entries(itemEmojis)
     .filter(([key, value]) => value.type === currentType.value)

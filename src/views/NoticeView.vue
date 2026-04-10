@@ -103,7 +103,7 @@
                           </div>
                         </div>
                         <div class="topicOperate" :class="!notice.action.operator ? 'againOperate' : ''">
-                          <button v-if="!notice.action.handle && notice.action.operator" class="actionButton" @click="completeAdjust(notice)">已整改</button>
+                          <button v-if="!notice.action.handle && notice.action.operator && notice.action.status == -1" class="actionButton" @click="completeAdjust(notice)">已整改</button>
                           <button v-if="notice.action.handle && notice.action.operator" class="actionButton disableBtn">已通知</button>
                           <button v-if="!notice.action.handle && !notice.action.operator" class="actionButton" @click="operateTopic(notice)">操作</button>
                           <button v-if="notice.action.handle && !notice.action.operator" class="actionButton disableBtn">已处理</button>
@@ -218,6 +218,7 @@ const init = async () => {
 const getNotice = async (index) => {
   await findAllUserNotice(index).then((res) => {
     let datas = res.data.object
+    isEnd.value = datas.length == 0
     for (let item of datas) {
       item.action = JSON.parse(item.action)
       notices.value.push(item)
@@ -408,14 +409,12 @@ const handleScroll = (event) => {
   }
 }
 const loadMoreNotices = async () => {
+  console.log("触发loadMoreNotices")
   if (isEnd.value) {
     return
   }
-  let noticeLength = notices.value.length
+  console.log("获取")
   await getNotice(notices.value.length)
-  if (noticeLength == notices.value.length) {
-    isEnd.value = true
-  }
 }
 const getImageUrl = (img) => {
   return img.includes(':') ? img : `/src/assets/img${img}`
