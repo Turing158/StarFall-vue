@@ -15,7 +15,7 @@
               <span class="titleComment">置顶评论</span>
             </div>
           </div>
-          <table class="comment">
+          <table class="comment" v-loading="topLoading">
             <TopicCommentContent
               v-for="(item, index) in topComments"
               :key="index"
@@ -51,7 +51,7 @@
               ></el-pagination>
             </div>
           </div>
-          <table class="comment">
+          <table class="comment" v-loading="commentLoading">
             <TopicCommentContent
               v-for="(item, index) in comments"
               :key="index"
@@ -133,6 +133,24 @@ const loading = ElLoading.service({
   text: '加载中...',
   background: 'rgba(0, 0, 0, 0.7)'
 })
+const contentLoading = ref(true)
+const topLoading = ref(true)
+const commentLoading = ref(true)
+
+const initContent = async (data)=>{
+  
+  let content = ''
+  await getTopicContent(data.user,data.id)
+    .then(res=>{
+      content = res.data
+    })
+    .catch(e=>{
+      console.log(e)
+      ElMessage.info("获取主题内容失败")
+    })
+    contentLoading.value = false
+    return content
+}
 
 const init = async () => {
   // 初始化时获取主题帖详细信息
@@ -146,14 +164,7 @@ const init = async () => {
       } else {
         let data = res.data.object
         document.title = data.title+" - StarFall"
-        await getTopicContent(data.user,data.id)
-        .then(res=>{
-          data.content = res.data
-        })
-        .catch(e=>{
-          console.log(e)
-          ElMessage.info("获取主题内容失败")
-        })
+        data.content = await initContent(data)
         topicInfo.value = data
         error.value = false
         getComment()
@@ -169,6 +180,7 @@ const init = async () => {
   loading.close()
 }
 const getTopComment = async ()=>{
+  topLoading.value = true
   await getTopTopicComment(route.params.id)
     .then(res=>{
       console.log(res)
@@ -178,6 +190,7 @@ const getTopComment = async ()=>{
       console.log(e)
       ElMessage.info("获取置顶评论失败")
     })
+    topLoading.value = false
 }
 const page = ref(1)
 const changePage = (e) => {
@@ -186,6 +199,7 @@ const changePage = (e) => {
 }
 // 获取评论列表
 const getComment = async () => {
+  commentLoading.value = true
   await findCommentByTopic(route.params.id, page.value)
     .then((res) => {
       let msg = res.data.msg
@@ -199,6 +213,7 @@ const getComment = async () => {
     .catch((err) => {
       ElMessage.error('服务异常')
     })
+    commentLoading.value = false
 }
 onMounted(init)
 const editComment = ref() // 评论输入框内容

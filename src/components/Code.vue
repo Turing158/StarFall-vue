@@ -1,11 +1,12 @@
 <template>
-    <div @click="changeCode()" class="code" :style="{width:width,height:height,margin:margin}">
+    <div v-loading="loading" @click="changeCode()" class="code" :style="{width:width,height:height,margin:margin}">
         <img width="100%" height="100%" :src="codeImg" alt="">
     </div>
 </template>
 <script setup>
 import { ref } from 'vue'
 import request from '@/util/request';
+const loading = ref(false)
 const getRandomCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -21,20 +22,29 @@ const getRandomCode = () => {
     return result;
 }
 const initCode = () => {
+    loading.value = true
+    let codeResult; 
     if(localStorage.getItem('code')){
         let oldKey = localStorage.getItem('code')
         localStorage.setItem('code',random.value)
-        return request.getUri()+'/code/image/find?' + random.value + '&' + oldKey
+        codeResult = request.getUri()+'/code/image/find?' + random.value + '&' + oldKey
     }
-    return request.getUri()+'/code/image/find?' + random.value
+    else{
+        codeResult = request.getUri()+'/code/image/find?' + random.value
+    }
+    loading.value = false
+    return codeResult
 }
 const random = ref(getRandomCode())
 const codeImg = ref(initCode())
+
 const changeCode = () => {
+  loading.value = true
   let newKey = getRandomCode()
   codeImg.value = request.getUri()+'/code/image/find?' + newKey + '&' + random.value
   random.value = newKey
   localStorage.setItem('code',newKey)
+  loading.value = false
 }
 defineExpose({
     random,changeCode

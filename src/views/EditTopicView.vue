@@ -135,7 +135,13 @@
               </tr>
               <tr>
                 <td style="border: 0; background-color: initial">
-                  <ContentEditor ref="ContentEditorRef" class="contentInput" :value="content" :switchHandler="initImageClick"/>
+                  <ContentEditor 
+                    ref="ContentEditorRef" 
+                    class="contentInput" 
+                    :value="content" 
+                    :switchHandler="initImageClick"
+                    v-loading="contentLoading"
+                    element-loading-text="加载中..."/>
                   <Empty :height="10" />
                   <div class="gallery">
                     <div class="gallery-header">
@@ -143,7 +149,7 @@
                       <input style="display: none" ref="fileInput" type="file" accept="image/jpeg, image/png, image/jpg" @change="handleFileChange"/>
                       <McBtn class="gallery-add-btn" @click="selectImg">+</McBtn>
                     </div>
-                    <div class="gallery-container">
+                    <div class="gallery-container" v-loading="galleryLoading">
                       <div v-for="(img, index) in galleryImages" :key="index" class="gallery-item">
                         <img 
                           :src="getTopicGalleryUrl(img.path)" 
@@ -171,7 +177,7 @@
                         <input type="file" ref="fileUploadInput" accept="*.*" style="display: none" @change="handleFileUploadChange"/>
                         <McBtn text="上传附件" @click="showUploadAttachment"/>
                       </div>
-                      <div class="attachment-container">
+                      <div class="attachment-container" v-loading="fileLoading">
                         <div v-for="(attachment, index) in attachments.slice(0, 3)" :key="index" class="attachment-item-wrapper">
                           <a class="attachment-item" @click="downloadFile(attachment.id)">
                             <div class="attachment-icon">
@@ -194,7 +200,7 @@
                         <input type="file" ref="fileUploadInput" accept="*.*" style="display: none" @change="handleFileUploadChange"/>
                         <McBtn text="上传附件" @click="showUploadAttachment"/>
                       </div>
-                      <div class="attachment-empty">
+                      <div class="attachment-empty" v-loading="fileLoading">
                         暂无附件
                       </div>
                     </div>
@@ -268,10 +274,10 @@
                   </div>
                   <Empty :height="10" />
                   <div class="operate">
-                    <el-input
-                      v-model="code"
+                    <input
+                      class="codeInput"
+                      ref="codeInput"
                       placeholder="验证码"
-                      style="width: 80px"
                       maxlength="4"
                     />
                     <Code ref="codeImg" width="75px" height="30px" margin="0 5px" />
@@ -328,7 +334,7 @@ const labels = ref(route.params.belong == "resource" ? resourceLabels : talkLabe
 const label = ref()
 const ContentEditorRef = ref(null)
 const codeImg = ref()
-const code = ref('')
+const codeInput = ref(null)
 const title = ref('')
 const subtitle = ref('')
 const subtitleEn = ref('')
@@ -344,6 +350,12 @@ const galleryImages = ref([])
 const galleryImageTmp = ref('')
 const galleryAddImage = ref(false)
 const galleryImageTmpLabel = ref('')
+
+//加载变量
+const contentLoading = ref(true)
+const galleryLoading = ref(true)
+const fileLoading = ref(true)
+
 
 // 图片放大查看相关
 const dialogVisible = ref(false)
@@ -374,16 +386,17 @@ const initImageClick = () => {
 // 附件相关数据和方法
 const attachments = ref([])
 
-const initTopicFile = async ()=>{
-  await getTopicFile(route.params.id)
+const initTopicFile = async (id)=>{
+  await getTopicFile(id)
   .then(res=>{
     if(res.data.msg == 'SUCCESS'){
       console.log(res.data.object)
       attachments.value = res.data.object
     }
   })
+  fileLoading.value = false
 }
-initTopicFile()
+
 // 格式化文件大小
 const formatFileSize = (bytes) => {
   if (!bytes) return '未知大小'
@@ -538,7 +551,18 @@ const deleteAttachment = (id) => {
     ElMessage.info('已取消删除')
   })
 }
-
+const initGallery = async (id)=>{
+  await findTopicGallery(id)
+    .then(res=>{
+      galleryImages.value = res.data.object
+    })
+    .catch(e=>{
+      galleryImages.value = []
+      ElMessage.error("获取画廊图片失败")
+      console.log(e)
+    })
+    galleryLoading.value = false
+}
 const userStore = useUserStore()
 const fileInput = ref(null)
 // 处理文件选择
@@ -603,27 +627,22 @@ const init = async () => {
               language.value = data.language
               address.value = data.address
               download.value = data.download
-              await getTopicContent(data.user,data.id)
+              getTopicContent(data.user,data.id)
               .then(res=>{
                 content.value = res.data
+                contentLoading.value = false
               })
               .catch(e=>{
                 content.value = ""
                 ElMessage.error("获取主题帖内容失败")
                 console.log(e)
+                contentLoading.value = false
               })
               if(route.params.belong != data.belong){
                 router.push('/topic/'+data.belong+'/'+data.id)
               }
-              await findTopicGallery(data.id)
-              .then(res=>{
-                galleryImages.value = res.data.object
-              })
-              .catch(e=>{
-                galleryImages.value = []
-                ElMessage.error("获取画廊图片失败")
-                console.log(e)
-              })
+              initGallery(data.id)
+              initTopicFile(data.id)
             }
             else{
               ElNotification({
@@ -666,7 +685,7 @@ const append = async (data) => {
         })
       } else if (msg == 'CODE_ERROR') {
         ElMessage.error('验证码错误')
-        code.value = ''
+        codeInput.value.value = ''
       }else if(msg == 'APPEND_DAY_MAX_ERROR'){
         ElMessage.error('今日添加主题帖上限')
       } else if(msg == 'SUCCESS'){
@@ -773,7 +792,7 @@ const edit = async (data) => {
     }
     else if(msg == 'CODE_ERROR'){
       ElMessage.error('验证码错误')
-      code.value = ''
+      codeInput.value.value = ''
     }
     else if(msg == 'REJECT'){
       errorPromise()
@@ -861,7 +880,7 @@ const onConfirm = async (display) => {
       type: 'warning',
       duration: 2000
     })
-  } else if (code.value.length == 0) {
+  } else if (codeInput.value.value.length == 0) {
     ElNotification({
       title: '验证码为空',
       message: '请输入验证码输入框左边图片的字母或数字',
@@ -882,7 +901,7 @@ const onConfirm = async (display) => {
       address: address.value,
       download: download.value,
       content: ContentEditorRef.value.content,
-      code: codeImg.value.random+":"+code.value,
+      code: codeImg.value.random+":"+codeInput.value.value,
       belong: route.params.belong,
       display: display
     }
@@ -1682,5 +1701,21 @@ onMounted(() => {
 
 .contentMd :deep(img){
   max-width: 740px !important;
+}
+.codeInput{
+  width: 80px; 
+  height: 32px; 
+  border: 1px solid #dcdfe6; 
+  border-radius: 4px; 
+  padding: 0 8px; 
+  font-size: 14px; 
+  outline: none;
+  transition: all 0.2s;
+}
+.codeInput:hover{
+  border: 1px solid #c0c3c9; 
+}
+.codeInput:focus, .codeInput:active{
+  border: 1px solid #99876c; 
 }
 </style>

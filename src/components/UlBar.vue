@@ -200,7 +200,7 @@ onMounted(()=>{
   font-family: cool_font;
   font-weight: bold;
   box-shadow: 0px 1px 5px #131313;
-  z-index: 999;
+  z-index: 2001;
 }
 .ul_li {
   float: left;

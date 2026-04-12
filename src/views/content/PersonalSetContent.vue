@@ -156,14 +156,18 @@
     </div>
     <div class="set_signature">
       <div style="width: 780px;">
-        <ContentEditor ref="contentEdit" :value="personalized.signature" :maxHeight="200" :maxLength="500" />
+        <ContentEditor ref="contentEdit" :value="personalized.signature" :maxHeight="200" :maxLength="500" editBtnStyle="right: 100px"/>
       </div>
       <div style="width: 1px; border-right: 1px solid #6e5d3e; margin: 0 2px;"></div>
-      <div style="display: grid; grid-template-columns: repeat(2, 2fr); gap: 10px; margin-top: 10px; height: 80px;">
-        <el-input v-model="signatureCode" style="width: 80px" placeholder="验证码" />
-        <Code ref="codeImgSignature" class="code" width="75px" height="30px" />
-        <span></span>
-        <McBtn text="保存" @click="saveSignature()" />
+      <div class="signature-operate">
+        <div class="signature-operate-item">
+          <el-input v-model="signatureCode" style="width: 80px" placeholder="验证码" />
+          <Code ref="codeImgSignature" class="code" width="75px" height="30px" />
+          <span></span>
+          <div style="display: flex; justify-content: center;">
+            <McBtn text="保存" @click="saveSignature()"/>
+          </div>
+        </div>
       </div>
       <el-dialog 
       title="正版验证" 
@@ -965,5 +969,17 @@ onMounted(init)
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+.signature-operate{
+  display: flex;
+  align-items: flex-end;
+}
+.signature-operate-item{
+  margin-left: 10px; 
+  display: grid; 
+  grid-template-columns: repeat(2, 2fr); 
+  gap: 5px; 
+  margin-top: 10px; 
+  height: 80px;
 }
 </style>

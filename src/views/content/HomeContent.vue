@@ -14,9 +14,9 @@
         </div>
         <div class="divide"></div>
         <div class="firstTopic">
-          <HomeList class="firstTopicChild" title="最新回复" :data="replys" v-loading="replysLoading" :loading="replysLoading" element-loading-background="#f3debf" element-loading-text="加载中..."/>
-          <HomeList class="firstTopicChild" title="最近更新" :data="updates" v-loading="updatesLoading" :loading="updatesLoading" element-loading-background="#f3debf" element-loading-text="加载中..."/>
-          <HomeList class="firstTopicChild" title="最新发布" :data="publics" v-loading="publicsLoading" :loading="publicsLoading" element-loading-background="#f3debf" element-loading-text="加载中..."/>
+          <HomeList class="firstTopicChild" title="最新回复" :data="replys" v-loading="replysLoading" element-loading-background="#f3debf" element-loading-text="加载中..."/>
+          <HomeList class="firstTopicChild" title="最近更新" :data="updates" v-loading="updatesLoading" element-loading-background="#f3debf" element-loading-text="加载中..."/>
+          <HomeList class="firstTopicChild" title="最新发布" :data="publics" v-loading="publicsLoading" element-loading-background="#f3debf" element-loading-text="加载中..."/>
         </div>
         <div class="divide"></div>
         <HomeTalk></HomeTalk>

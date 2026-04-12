@@ -219,6 +219,10 @@ hr {
   image-rendering: auto !important;
 }
 
+.el-loading-mask{
+  background-color: #f3debfee !important;
+}
+
 .el-loading-spinner .el-loading-text {
   color: #fbf2db !important;
   font-size: 16px !important;

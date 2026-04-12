@@ -56,9 +56,9 @@
                   >
                 </div>
               </div>
-              <div>
-                <div class="noLike likeDiv" v-show="isLike == 0">
-                  <a class="like" @click="onLike(1)"></a>
+              <div v-loading="likeLoading">
+                <div class="noLike likeDiv" v-show="isLike == 0" >
+                  <a class="like" @click="onLike(1)" ></a>
                   <a class="dislike" @click="onLike(2)"></a>
                 </div>
                 <div class="alreadyLike likeDiv" v-show="isLike == 1">
@@ -130,7 +130,7 @@
                 <div class="gallery-header">
                   <span class="gallery-title">画廊</span>
                 </div>
-                <div class="gallery-container">
+                <div class="gallery-container" v-loading="galleryLoading">
                   <div v-for="(img, index) in galleryImages" :key="index" class="gallery-item">
                     <img 
                       :src="getTopicGalleryUrl(img.path)" 
@@ -149,8 +149,13 @@
                 <div class="attachment-header">
                   <span class="attachment-title">附件</span>
                 </div>
-                <div class="attachment-container">
-                  <a v-for="(attachment, index) in attachments.slice(0, 3)" :key="index" :alt="attachment.fileLabel" :aria-label="attachment.fileLabel" class="attachment-item" @click="handleDownload()">
+                <div class="attachment-container" v-loading="fileLoading">
+                  <a v-for="(attachment, index) in attachments.slice(0, 3)" 
+                    :key="index" 
+                    :aria-label="attachment.fileLabel" 
+                    class="attachment-item" 
+
+                    @click="handleDownload(attachment.id)">
                     <div class="attachment-icon">
                       <img :src="getAttachmentIcon(attachment.fileName)" :alt="attachment.fileLabel" :aria-label="attachment.fileLabel" class="attachment-img"/>
                     </div>
@@ -169,8 +174,10 @@
                 <div style="margin-right: 10px;">
                   <McBtn text="编辑" @click="toEdit" v-if="data.user == userStore.user"/>
                 </div>
-                <McBtn text="收藏" :padding="10" v-if="!isCollect" @click="collect"/>
-                <McBtn :text="'已收藏 '+collectNum" :padding="10" v-if="isCollect" @click="collect"/>
+                <div v-loading="collectLoading">
+                  <McBtn text="收藏" :padding="10" v-if="!isCollect" @click="collect"/>
+                  <McBtn :text="'已收藏 '+collectNum" :padding="10" v-if="isCollect" @click="collect"/>
+                </div>
               </div>
               <div class="operate" v-if="(data.belong == 'talk' && userStore.role == 'talk_moderator') || (data.belong == 'resource' && userStore.role == 'resource_moderator') || userStore.role == 'admin'">
                 <span>版主的权利：</span>
@@ -248,6 +255,11 @@ const props = defineProps({
 const data = ref(props.data)
 const router = useRouter()
 
+const galleryLoading = ref(true)
+const fileLoading = ref(true)
+const collectLoading = ref(true)
+const likeLoading = ref(true)
+
 const galleryImages = ref([])
 import ClipboardJS from 'clipboard'
 import { ElMessageBox , ElMessage, ElNotification } from 'element-plus'
@@ -272,8 +284,6 @@ const toMd = () => {
   if (data.value.content == null) return
   content.value = marked(data.value.content)
 }
-toMd()
-onMounted(copyText)
 const userStore = useUserStore()
 const isLike = ref(0)
 const likeNum = ref(0)
@@ -297,8 +307,8 @@ const initLike = async () => {
   } else {
     isLike.value = 0
   }
+  likeLoading.value = false
 }
-initLike()
 let repeatedLike = false
 const onLike = async (op) => {
   if(repeatedLike){
@@ -376,8 +386,9 @@ const initCollection = async()=>{
   }).catch(e=>{
     isCollect.value = false
   })
+  collectLoading.value = false
 }
-initCollection()
+
 let repeatedCollect = false;
 const collect = async()=>{
   if(!userStore.isLogin){
@@ -513,8 +524,8 @@ const initGallery = async()=>{
   .catch(e=>{
     ElMessage.error('获取画廊图片失败')
   })
+  galleryLoading.value = false
 }
-initGallery()
 
 // 图片放大查看相关
 const dialogVisible = ref(false)
@@ -541,8 +552,16 @@ const initImageClick = () => {
     }
   }, 100)
 }
-
-onMounted(initImageClick)
+const init = ()=>{
+  initImageClick()
+  initTopicFile()
+  initGallery()
+  initCollection()
+  initLike()
+  copyText()
+  toMd()
+}
+onMounted(init)
 onUpdated(initImageClick)
 
 // 附件相关数据和方法
@@ -578,8 +597,12 @@ const initTopicFile = async ()=>{
       attachments.value = res.data.object
     }
   })
+  .catch(e=>{
+    ElMessage.error('获取附件失败')
+  })
+  fileLoading.value = false
 }
-initTopicFile()
+
 // 格式化文件大小（自动转换单位）
 const formatFileSize = (bytes) => {
   if (!bytes) return '未知大小'

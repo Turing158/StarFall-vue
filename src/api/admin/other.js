@@ -60,3 +60,15 @@ export const deleteAdImg = (imgName)=>{
     param.append("imgName", imgName);
     return api.post(urlHead+"/other/deleteAdImg",param);
 }
+
+export const getRedisStatus = () => api.get(urlHead + "/other/redis/status");
+export const getNacosStatus = () => api.get(urlHead + "/other/nacos/status");
+export const getMinioStatus = () => api.get(urlHead + "/other/minio/status");
+export const getMinioBuckets = (bucketName, page, pageSize) => {
+    let param = new URLSearchParams();
+    param.append("bucketName", bucketName);
+    param.append("startAfter", '');
+    param.append("page", page);
+    param.append("pageSize", pageSize);
+    return api.post(urlHead + "/other/minio/buckets",param);
+};

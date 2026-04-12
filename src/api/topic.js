@@ -104,7 +104,7 @@ export const adjustTopicDisplayAgain = (id, reason, display, noticeId) => {
   return api.post(urlHead + '/adjust/again', param)
 }
 
-export const completeAdjustTopic = (noticeId ,topicId) => {
+export const completeAdjustTopic = (noticeId, topicId) => {
   let param = new URLSearchParams()
   param.append('topicId', topicId)
   param.append('noticeId', noticeId)
@@ -199,8 +199,36 @@ export const deleteTopicFile = (id, topicId) => {
 }
 
 export const downloadFile = (id) => {
-  if(!id){
+  if (!id) {
     return
   }
-  window.open(url + '/file/url/download/' + id)
+  api
+    .get('/file/url/download/' + id, {
+      responseType: 'blob'
+    })
+    .then((res) => {
+      const blob = new Blob([res.data], { type: res.headers['content-type'] })
+      const contentDisposition = res.headers['content-disposition']
+      let filename = '未知文件'
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1].replace(/['"]/g, '')
+          filename = new TextDecoder('utf-8').decode(
+            new Uint8Array([...filename].map((c) => c.charCodeAt(0)))
+          )
+        }
+      }
+      else{
+        return
+      }
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    })
 }

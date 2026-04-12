@@ -303,7 +303,7 @@ onUnmounted(()=>{
 }
 
 .table-container {
-    height: 150px;
+    height: 250px;
     overflow-y: auto;
     border-radius: 8px;
     border: 1px solid #a58960;
