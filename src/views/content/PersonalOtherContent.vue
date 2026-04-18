@@ -37,7 +37,7 @@
         :key="index" 
         :title="`${item.description}\n获得: ${item.gainTime}${item.expireTime ? `\n过期: ${item.expireTime}` : ''}`"
         @click="goToMedal(item.id)">
-          <img class="medal-img" :src="`/src/assets/img${item.icon}`" alt="" />
+          <img class="medal-img" :src="`/img${item.icon}`" alt="" />
           <div class="medal-name">{{ item.name }}</div>
         </div>
       </div>

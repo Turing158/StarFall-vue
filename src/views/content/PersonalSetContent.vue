@@ -714,6 +714,7 @@ const getMinecraftToken = async(token, uhs) =>{
   }
   let isSuccess = false
   lastVerifyStep.value = 3
+  console.log(token, uhs)
   await minecraftApi.post(
     "",
     {

@@ -22,7 +22,7 @@
       <div class="menu">
         <div class="challage">
           <div class="medal" v-for="(item,index) in medals" :key="index" :title="`${item.description}\n获得: ${item.gainTime}${item.expireTime ? `\n过期: ${item.expireTime}` : ''}`">
-            <img :src="'/src/assets/img'+item.icon" alt="" class="medal_img" />
+            <img :src="'/img'+item.icon" alt="" class="medal_img" />
             <div class="medal_name">{{ item.name }}</div>
           </div>
         </div>

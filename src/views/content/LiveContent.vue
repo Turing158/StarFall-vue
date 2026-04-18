@@ -323,6 +323,9 @@ const submitForm = async () => {
     else if(res.data.msg == 'LIVE_APPLY_EXIST'){
       ElMessage.error("申请已存在或其他人已申请")
     }
+    else if(res.data.msg == 'LIVE_APPLY_DAY_MAX'){
+      ElMessage.error("今日申请次数已达上限")
+    }
     else{
       ElMessage.error("申请提交失败")
     }

@@ -61,6 +61,8 @@
           <el-tag :type="row.role == 'admin' ? 'danger' : row.role.includes('moderator') ? 'warning' : 'primary'">{{ getRowRoleName(row.role) }}</el-tag>
         </template>
       </el-table-column>
+      <el-table-column label="创建时间" prop="createTime" width="180" />
+      <el-table-column label="更新时间" prop="updateTime" width="180" />
       <el-table-column width="390" align="center" fixed="right">
         <template #header>
           <el-input v-model="keyword" size="small" placeholder="Type to search" @input="search" title="可搜用户名、昵称和邮箱"/>
@@ -159,6 +161,27 @@
             <el-option label="资源区版主" value="resource_moderator"></el-option>
             <el-option label="有话说版主" value="talk_moderator"></el-option>
           </el-select>
+        </el-form-item>
+        <el-form-item label="创建时间" required>
+          <el-date-picker
+            v-model="user.createTime"
+            type="datetime"
+            style="width: 200px"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            placeholder="请选择创建时间"
+          ></el-date-picker>
+        </el-form-item>
+        <el-form-item label="更新时间">
+          <el-date-picker
+            v-model="user.updateTime"
+            type="datetime"
+            style="width: 200px"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            placeholder="请选择更新时间"
+            :disabled="model === 'edit'"
+          ></el-date-picker>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -575,7 +598,7 @@
 
               <div v-else-if="row.type === 'msg'" class="noticeContent">
                         <div class="medal-notice" v-if="row.action && row.action.medal">
-                          <img class="medal-icon" :src="`/src/assets/img${row.action.icon}`" alt="">
+                          <img class="medal-icon" :src="`/img${row.action.icon}`" alt="">
                           <div class="medal-info">
                             <span>
                               恭喜你获得了 <span class="medan-name">{{ row.action.medal }}</span> 勋章！
@@ -593,7 +616,7 @@
 
               <div v-else-if="row.type === 'all'" class="noticeContent allType">
                 <img
-                  :src="`/src/assets/img${row.action.img}`"
+                  :src="`/img${row.action.img}`"
                   class="allImage"
                 />
                 <div class="allDetail">
@@ -661,20 +684,23 @@
             <el-input v-model="messageForm.id" disabled />
           </el-form-item>
           <el-form-item label="用户" v-if="!isEditMessage && messageForm.type !== 'all'">
-            <el-select 
-              v-model="messageForm.user" 
-              placeholder="请选择用户"
-              filterable
-              remote
-              reserve-keyword
-              :remote-method="remoteMethodToUser"
-              :disabled="isEditMessage"
-              style="width: 100%">
-              <el-option v-for="item in userSelect" :key="item.user" :label="item.user" :value="item.user">
-                <span style="float: left">{{ item.user }}</span>
-                <span style="float: right; color: var(--el-text-color-secondary); font-size: 12px;">{{ item.name }}</span>
-              </el-option>
-            </el-select>
+            <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+              <el-select 
+                v-model="messageForm.user" 
+                placeholder="请选择用户"
+                filterable
+                remote
+                reserve-keyword
+                :remote-method="remoteMethodToUser"
+                :disabled="isEditMessage"
+                style="flex: 1">
+                <el-option v-for="item in userSelect" :key="item.user" :label="item.user" :value="item.user">
+                  <span style="float: left">{{ item.user }}</span>
+                  <span style="float: right; color: var(--el-text-color-secondary); font-size: 12px;">{{ item.name }}</span>
+                </el-option>
+              </el-select>
+              <el-checkbox v-model="messageForm.sendNotice">发送消息</el-checkbox>
+            </div>
           </el-form-item>
           <el-form-item label="创建时间">
             <el-date-picker
@@ -808,6 +834,20 @@ const dialogTitle = ref('')
 const infoPage = ref(false)
 const onPage = (e) => {
   if (e === null) {
+    const now = new Date().toISOString().replace('T', ' ').split('.')[0]
+    user.value = {
+      user: '',
+      password: '',
+      email: '',
+      name: '',
+      gender: 0,
+      birthday: '',
+      exp: 0,
+      level: 0,
+      role: 'user',
+      createTime: now,
+      updateTime: ''
+    }
     model.value = 'add'
     dialogTitle.value = '添加用户'
   } else {
@@ -820,7 +860,9 @@ const onPage = (e) => {
       birthday: e.birthday,
       exp: e.exp,
       level: e.level,
-      role: e.role
+      role: e.role,
+      createTime: e.createTime,
+      updateTime: e.updateTime
     }
     oldUser.value = e.user
     oldEmail.value = e.email
@@ -928,7 +970,9 @@ const editUser = async () => {
       birthday: user.value.birthday,
       exp: user.value.exp,
       level: user.value.level,
-      role: user.value.role
+      role: user.value.role,
+      createTime: user.value.createTime,
+      updateTime: user.value.updateTime
     },
     oldUser: oldUser.value,
     oldEmail: oldEmail.value
@@ -1619,7 +1663,8 @@ const messageForm = ref({
   title: '',
   type: '',
   status: 0,
-  action: ''
+  action: '',
+  sendNotice: true
 })
 
 // 模板配置
@@ -1683,12 +1728,13 @@ const openAddMessageDialog = () => {
   messageEditDialogTitle.value = '添加通知'
   messageForm.value = {
     id: '',
-    user: '',
-    createTime: '',
+    user: messageUser.value,
+    createTime: new Date().toISOString().replace('T', ' ').split('.')[0],
     title: '',
     type: '',
     status: 0,
-    action: ''
+    action: '',
+    sendNotice: true
   }
   selectedTemplate.value = ''
   addMessageDialog.value = true
@@ -1737,7 +1783,8 @@ const handleAddMessage = async () => {
       title: messageForm.value.title,
       type: messageForm.value.type,
       status: messageForm.value.status,
-      action: messageForm.value.action
+      action: messageForm.value.action,
+      sendNotice: messageForm.value.sendNotice
     })
       .then(res => {
         if (res.data.msg === 'SUCCESS') {
@@ -1761,7 +1808,8 @@ const handleAddMessage = async () => {
       title: messageForm.value.title,
       type: messageForm.value.type,
       status: messageForm.value.status,
-      action: messageForm.value.action
+      action: messageForm.value.action,
+      sendNotice: messageForm.value.sendNotice
     })
       .then(res => {
         if (res.data.msg === 'SUCCESS') {

@@ -1,4 +1,4 @@
-const DEFAULT_IMG_PATH = '/src/assets/img/no-image.png';
+const DEFAULT_IMG_PATH = '/img/no-image.png';
 
 
 export const imgErrorDirective = {

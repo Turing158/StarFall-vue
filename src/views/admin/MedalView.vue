@@ -8,7 +8,7 @@
             <el-table-column label="id" prop="id" width="220"/>
             <el-table-column label="图标" prop="icon" width="200">
                 <template #default="{row}">
-                    <el-image v-if="row.icon" :src="`/src/assets/img${row.icon}`" style="width: 80px; height: 80px" fit="contain"/>
+                    <el-image v-if="row.icon" :src="`/img${row.icon}`" style="width: 80px; height: 80px" fit="contain"/>
                 </template>
             </el-table-column>
             <el-table-column label="名称" prop="name" width="150"/>
@@ -50,12 +50,16 @@
                             style="flex: 1; min-width: 300px;">
                             <el-option v-for="item in medalImages" :key="item.value" :label="item.label" :value="item.value">
                                 <span style="float: left">{{ item.label }}</span>
-                                <el-image :src="`/src/assets/img${item.value}`" style="width: 30px; height: 30px; float: right; margin-top: 5px" fit="contain"/>
+                                <el-image :src="`/img${item.value}`" style="width: 30px; height: 30px; float: right; margin-top: 5px" fit="contain"/>
                             </el-option>
                         </el-select>
                         <el-button @click="refreshMedalImages" size="small" type="primary" plain>
                             <el-icon><Refresh /></el-icon>
                         </el-button>
+                        <el-button @click="triggerUploadMedalImg" size="small" type="success" plain>
+                            <el-icon><Plus /></el-icon>
+                        </el-button>
+                        <input ref="uploadInputRef" type="file" accept="image/png" style="display: none" @change="handleUploadMedalImg"/>
                     </div>
                 </el-form-item>
                 <el-form-item label="名称">
@@ -67,7 +71,7 @@
                 <el-form-item label="来源">
                     <el-input v-model="medalSource"/>
                 </el-form-item>
-                <el-form-item label="创建时间">
+                <el-form-item label="创建时间" required>
                     <el-date-picker
                         v-model="medalCreateTime"
                         type="datetime"
@@ -88,8 +92,9 @@
 </template>
 <script setup>
 import { findAllMedal, insertMedal, updateMedal, deleteMedal } from '@/api/admin/user';
+import { uploadMedalImg, getMedalImg } from '@/api/admin/other';
 import { ElMessage, ElMessageBox, ElLoading, ElIcon } from 'element-plus';
-import { Refresh } from '@element-plus/icons-vue';
+import { Refresh, Plus } from '@element-plus/icons-vue';
 import {inject, onMounted, ref} from 'vue'
 const isDark = inject('isDark')
 const medals = ref([])
@@ -109,32 +114,25 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const medalImages = ref([])
 const imageLoading = ref(false)
+const medalFileNames = ref([])
 
-const medalImageFiles = [
-  '2025year.png',
-  '2026year.png',
-  'admin.png',
-  'already3year.png',
-  'continual30day.png',
-  'continual365day.png',
-  'liveManager.png',
-  'mapCreator.png',
-  'modCreator.png',
-  'newPlayer.png',
-  'onlinePlayer.png',
-  'packCreator.png',
-  'skinCreator.png',
-  'talkMaster.png',
-  'textureCreator.png',
-  'translator.png',
-  'villageHero.png'
-]
+const loadMedalFileNames = async ()=>{
+    try{
+        const res = await getMedalImg()
+        if(res.data.msg == 'SUCCESS'){
+            console.log(res.data.object)
+            medalFileNames.value = res.data.object || []
+        }
+    }catch(err){
+        medalFileNames.value = []
+    }
+}
 
 const searchMedalImages = (query)=>{
     if(query){
         imageLoading.value = true
         setTimeout(()=>{
-            medalImages.value = medalImageFiles
+            medalImages.value = medalFileNames.value
                 .filter(file => file.toLowerCase().includes(query.toLowerCase()))
                 .map(file => ({
                     label: file,
@@ -143,7 +141,7 @@ const searchMedalImages = (query)=>{
             imageLoading.value = false
         }, 300)
     }else{
-        medalImages.value = medalImageFiles.map(file => ({
+        medalImages.value = medalFileNames.value.map(file => ({
             label: file,
             value: `/medal/${file}`
         }))
@@ -157,7 +155,7 @@ const onAdd = ()=>{
     medalName.value = ''
     medalDescription.value = ''
     medalSource.value = ''
-    medalCreateTime.value = ''
+    medalCreateTime.value = new Date().toISOString().replace('T', ' ').split('.')[0]
     refreshMedalImages()
     dialogVisible.value = true
 }
@@ -179,6 +177,10 @@ const confirmAction = async()=>{
         ElMessage.error("名称不能为空！")
         return
     }
+    if(!medalCreateTime.value){
+        ElMessage.error("创建时间不能为空！")
+        return
+    }
     const loading = ElLoading.service({
         lock: true,
         text: '处理中...',
@@ -192,13 +194,14 @@ const confirmAction = async()=>{
         source: medalSource.value,
         createTime: medalCreateTime.value
     }
-    if(isEdit.value){
-        await updateMedal(obj).then(res=>{
+    let success = false
+    try{
+        if(isEdit.value){
+            const res = await updateMedal(obj)
             let msg = res.data.msg
             if(msg == 'SUCCESS'){
                 ElMessage.success("修改成功！")
-                clear()
-                getMedalList()
+                success = true
             }
             else if(msg == 'NOT_EXIST_ERROR'){
                 ElMessage.error("勋章不存在！")
@@ -206,29 +209,25 @@ const confirmAction = async()=>{
             else{
                 ElMessage.error("修改失败！")
             }
-        }).catch(err=>{
-            ElMessage.error("服务异常")
-        })
-        .finally(() => {
-            loading.close()
-        })
-    }else{
-        await insertMedal(obj).then(res=>{
+        }else{
+            const res = await insertMedal(obj)
             let msg = res.data.msg
             if(msg == 'SUCCESS'){
                 ElMessage.success("添加成功！")
-                clear()
-                getMedalList()
+                success = true
             }
             else{
                 ElMessage.error("添加失败！")
             }
-        }).catch(err=>{
-            ElMessage.error("服务异常")
-        })
-        .finally(() => {
-            loading.close()
-        })
+        }
+    }catch(err){
+        ElMessage.error("服务异常")
+    }finally{
+        loading.close()
+    }
+    if(success){
+        clear()
+        await getMedalList()
     }
 }
 
@@ -242,19 +241,69 @@ const clear = ()=>{
     medalCreateTime.value = ''
 }
 
-const refreshMedalImages = ()=>{
-    const asyncModules = import.meta.glob('/src/assets/img/medal/*.png')
-    medalImages.value = []
-    for (const path in asyncModules) {
-        asyncModules[path]().then((module) => {
-            medalImages.value.push({
-                label: path.split('/').pop(),
-                value: module.default
-            })
-        })
-    }
+const refreshMedalImages = async ()=>{
+    await loadMedalFileNames()
+    medalImages.value = medalFileNames.value.map(file => ({
+        label: file,
+        value: `/medal/${file}`
+    }))
 }
 refreshMedalImages()
+const uploadInputRef = ref(null)
+const triggerUploadMedalImg = ()=>{
+    uploadInputRef.value.click()
+}
+const handleUploadMedalImg = async(e)=>{
+    const file = e.target.files[0]
+    if(!file) return
+    if(!file.name.endsWith('.png')){
+        ElMessage.error('仅支持PNG格式图片')
+        uploadInputRef.value.value = ''
+        return
+    }
+    const defaultName = file.name.replace(/\.png$/i, '')
+    ElMessageBox.prompt('请输入图片名称（不含扩展名）', '上传勋章图片', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputValue: defaultName,
+        inputPattern: /^[a-zA-Z0-9_\-\u4e00-\u9fa5]+$/,
+        inputErrorMessage: '名称只能包含字母、数字、下划线、横线和中文'
+    }).then(async({ value })=>{
+        const imgName = value + '.png'
+        const reader = new FileReader()
+        reader.onload = async(ev)=>{
+            const base64 = ev.target.result
+            const loading = ElLoading.service({
+                lock: true,
+                text: '上传中...',
+                background: 'rgba(0, 0, 0, 0.7)'
+            })
+            try{
+                const res = await uploadMedalImg(imgName, base64)
+                if(res.data.msg == 'SUCCESS'){
+                    ElMessage.success('上传成功')
+                    if(!medalFileNames.value.includes(imgName)){
+                        medalFileNames.value.push(imgName)
+                    }
+                    medalImages.value = medalFileNames.value.map(f => ({
+                        label: f,
+                        value: `/medal/${f}`
+                    }))
+                    medalIcon.value = `/medal/${imgName}`
+                }else{
+                    ElMessage.error('上传失败')
+                }
+            }catch(err){
+                ElMessage.error('服务异常')
+            }finally{
+                loading.close()
+            }
+        }
+        reader.readAsDataURL(file)
+    }).catch(()=>{
+    })
+    uploadInputRef.value.value = ''
+}
 const onDel = (i)=>{
     ElMessageBox.confirm(i.name, '确定删除该勋章吗?', {
         confirmButtonText: '确定',
@@ -266,11 +315,13 @@ const onDel = (i)=>{
             text: '处理中...',
             background: 'rgba(0, 0, 0, 0.7)'
         })
-        await deleteMedal(i.id).then(res=>{
+        let success = false
+        try{
+            const res = await deleteMedal(i.id)
             let msg = res.data.msg
             if(msg == 'SUCCESS'){
                 ElMessage.success("删除成功！")
-                getMedalList()
+                success = true
             }
             else if(msg == 'NOT_EXIST_ERROR'){
                 ElMessage.error("勋章不存在！")
@@ -278,13 +329,14 @@ const onDel = (i)=>{
             else{
                 ElMessage.error("删除失败！")
             }
-        }).catch(err=>{
+        }catch(err){
             ElMessage.error("服务异常")
-        
-        })
-        .finally(() => {
+        }finally{
             loading.close()
-        })
+        }
+        if(success){
+            await getMedalList()
+        }
       }).catch(() => {
         ElMessage.info('已取消删除')
       });

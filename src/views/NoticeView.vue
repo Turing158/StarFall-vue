@@ -32,10 +32,10 @@
                       <div class="noticeTitle">{{ notice.title }}</div>
 
                       <div
-                        v-if="notice.type === 'friend' && notice.action.name"
+                        v-if="notice.type === 'friend' && notice.action.name && !notice.action.delete"
                         class="noticeContent friendType"
                       >
-                        <img :src="getAvatarSrc(notice.action.avatar)" class="friendAvatar" />
+                        <img :src="getAvatarSrc(notice.action.avatar)" class="friendAvatar"/>
                         <div class="friendInfo">
                           <div class="friendName">{{ notice.action.name }}</div>
                           <div class="friendReason">{{ notice.action.reason }}</div>
@@ -74,6 +74,18 @@
                         <span class="green" v-if="notice.action.status == 1">同意</span>
                         <span class="red" v-else>不同意</span>
                         添加你为好友
+                      </div>
+
+                      <div
+                        v-else-if="notice.type === 'friend' && notice.action.delete"
+                        class="noticeContent"
+                      >
+                        对方<a
+                          :href="`/personal/other/${notice.action.user}`"
+                          target="_blank"
+                          title="点击跳转"
+                          >{{ notice.action.name }}</a
+                        >（{{ notice.action.user }}）已将你删除好友{{ notice.action.deleteAllMsg ? '，并清空了聊天记录！' : '！' }}
                       </div>
 
                       <div v-else-if="notice.type === 'topic'" class="noticeContent topicType">
@@ -133,7 +145,7 @@
 
                       <div v-else-if="notice.type === 'msg'" class="noticeContent">
                         <div class="medal-notice" v-if="notice.action && notice.action.medal">
-                          <img class="medal-icon" :src="`/src/assets/img${notice.action.icon}`" alt="">
+                          <img class="medal-icon" :src="`/img${notice.action.icon}`" alt="">
                           <div class="medal-info">
                             <span>
                               恭喜你获得了 <span class="medan-name">{{ notice.action.medal }}</span> 勋章！
@@ -377,6 +389,7 @@ const toRead = async (notice) => {
   await readNotice([tmp])
     .then((res) => {
       ElMessage.success('已读成功')
+      userStore.setUnreadNum(userStore.unreadNum - 1)
     })
     .catch((e) => {
       ElMessage.error('已读失败')
@@ -417,7 +430,7 @@ const loadMoreNotices = async () => {
   await getNotice(notices.value.length)
 }
 const getImageUrl = (img) => {
-  return img.includes(':') ? img : `/src/assets/img${img}`
+  return img.includes(':') ? img : `/img${img}`
 }
 onMounted(init)
 onUnmounted(()=>{

@@ -12,7 +12,7 @@
             <div class="medal-container">
               <div class="medal-item" v-for="(medal, index) in medals" :key="index" @click="getMedal(medal.id)">
                 <span v-if="isExpired(medal.expireTime)" class="expired-badge" :class="{ 'hide-badge': hoverMedalIndex === index }">过期</span>
-                <img class="medal-img" :src="`/src/assets/img${medal.icon}`" alt=""
+                <img class="medal-img" :src="`/img${medal.icon}`" alt=""
                      @mouseenter="hoverMedalIndex = index"
                      @mouseleave="hoverMedalIndex = -1">
                 <div class="medal-name">{{ medal.name }}</div>
@@ -44,7 +44,7 @@
             </template>
             <div class="medal-dialog-content" v-if="medal">
               <div class="medal-dialog-img">
-                <img :src="`/src/assets/img${medal.icon}`" alt="">
+                <img :src="`/img${medal.icon}`" alt="">
               </div>
               <div class="medal-dialog-info">
                 <div class="medal-dialog-name">{{ medal.name }}</div>

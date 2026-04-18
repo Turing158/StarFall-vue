@@ -13,7 +13,7 @@
         <br /><br />
         <h1>登&emsp;录</h1>
         <br /><br />
-        <input type="text" class="user_input" name="user" required v-model="account" maxlength="15"/>
+        <input type="text" class="user_input" name="user" required v-model="account"/>
         <span class="user_span">用户名：</span>
         <div class="user_underline"></div>
         <br />

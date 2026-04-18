@@ -111,7 +111,7 @@ onUnmounted(()=>{
 .daily{
   display: inline-flex;
   width: 100%;
-  background-image: url(src/assets/img/Header-background.png);
+  background-image: url(/img/Header-background.png);
   background-size: auto 100%;
 }
 .datetime{

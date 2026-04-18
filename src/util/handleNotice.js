@@ -103,7 +103,7 @@ const gettypeTitle = (type) => {
       return '其他'
   }
 }
-const getIconPath = (name) => `/src/assets/img/emoji/item/${name}.png`
+const getIconPath = (name) => `/img/emoji/item/${name}.png`
 export const getNoticeIcon = (type) => {
   switch (type) {
     case 'friend':
@@ -125,13 +125,13 @@ const getNoticeContent = (notice) => {
   let type = notice.type
   console.log(ope)
   if (type == 'live') {
-    return `直播申请${ope.url ? `(<a href="${ope.url}" target="_blank" title="点击跳转">${ope.url}</a>)` : ''}<span class="${ope.status == 1 ? 'green' : 'red'}"> ${ope.status == 1 ? '已通过' : ope.status == -1 ? '未通过' : '暂未审核'}</span><br/>原因：${ope.reason}`
+    return `直播申请${ope.url ? `(<a href="${ope.url}" target="_blank" title="点击跳转">${ope.url}</a>)` : ''}<span class="${ope.status == 1 ? 'green' : 'red'}"> ${ope.status ? '已通过' : '未通过'}</span><br/>原因：${ope.reason}`
   } else if (type == 'topic') {
     return ope.operator ? `主题帖(<a href="/topic/detail/${ope.id}" target="_blank" title="点击跳转">${ope.title}</a>)状态已更新：<span class="${ope.status == -1 ? 'red' : 'green'}">${ope.status == -1 ? '待整改' : '正常发布'}</span><br/>审核员：<a href="/personal/other/${ope.operator}">${ope.operator}</a>${ope.status == -1 ? `<br/>原因：${ope.reason}` : ''}`
     : `主题帖(<a href="/topic/detail/${ope.id}" target="_blank" title="点击跳转">${ope.title}</a>)已修改完毕！请审核员审核！`
   } else if (type == 'friend') {
-    if(ope.alias){
-      return `${ope.alias}[${ope.name}](${ope.user})已把你删除好友${ope.deleteAllMsg ? '，并清空了聊天记录' : ''}！`
+    if(ope.delete){
+      return `${ope.name}(${ope.user})已把你删除好友${ope.deleteAllMsg ? '，并清空了聊天记录' : ''}！`
     }
     return ope.name
       ? `<a href="/personal/other/${ope.user}" target="_blank" title="点击跳转">${ope.name}(${ope.user})</a> 向你发出好友申请 !<br/>[${ope.reason}]`
@@ -143,7 +143,7 @@ const getNoticeContent = (notice) => {
     if(ope.medal){
       return `
       <div style="display: flex; margin-right: 4px;">
-        <img class="medal" src="/src/assets/img${ope.icon}">
+        <img class="medal" src="/img${ope.icon}">
         <div class="medal-info">
           <span>${ope.medal}</span>
           <span>${ope.description}</span>
@@ -293,6 +293,9 @@ export const handleNotification = (notice, isLast, num) => {
       userStroe.setUnreadNum(userStroe.unreadNum + 1)
     }
   } else {
+    if(!notice.canNotice){
+      return
+    }
     ElNotification({
       title: notice.fromName,
       icon: () => h('img', { 
@@ -305,7 +308,7 @@ export const handleNotification = (notice, isLast, num) => {
           imageRendering: 'auto' } 
         }),
       message: handleLastContent(notice.content),
-      duration: 0,
+      duration: 1000,
     })
   }
 }

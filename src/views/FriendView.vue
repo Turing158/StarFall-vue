@@ -94,7 +94,7 @@
                     <div class="operate-left">
                       <el-dropdown ref="emojiDropdown" trigger="hover" :hide-timeout="300">
                         <button class="actionBtn">
-                        <img src="/src/assets/img/Cicon.gif" alt="">
+                        <img src="/img/Cicon.gif" alt="">
                         </button>
                         <template #dropdown>
                           <EmojiMenu @insertEmoji="insertEmoji"></EmojiMenu>
@@ -186,6 +186,24 @@ const handleChangeFriendList = async (data) => {
     friendList.value.unshift(item)
   } else {
     const lastTopIndex = friendList.value.findLastIndex((item) => item.isTop === true)
+    if (lastTopIndex === -1) {
+      friendList.value.unshift(item)
+    } else {
+      friendList.value.splice(lastTopIndex + 1, 0, item)
+    }
+  }
+}
+const updateFriendLastMsg = (friendUser, lastMsg, date) => {
+  let index = friendList.value.findIndex((i) => i.user == friendUser)
+  if (index == -1) return
+  let item = friendList.value[index]
+  item.lastMsg = lastMsg
+  item.date = date
+  friendList.value.splice(index, 1)
+  if (item.isTop) {
+    friendList.value.unshift(item)
+  } else {
+    const lastTopIndex = friendList.value.findLastIndex((i) => i.isTop === true)
     if (lastTopIndex === -1) {
       friendList.value.unshift(item)
     } else {
@@ -567,7 +585,7 @@ const send = async () => {
         console.log(res.data.object)
         let data = res.data.object
         data.contents = [data.content]
-        let index = chats.value.findIndex(i => i.fromUser == data.fromUser && i.toUser == data.toUser && i.date == data.date)
+        let index = chats.value.findIndex(i => i.fromUser == data.fromUser && i.toUser == data.toUser)
         if (index != -1) {
           chats.value.splice(chats.value.indexOf(tmp), 1)
           chats.value[index].contents.push(data.content)
@@ -576,6 +594,7 @@ const send = async () => {
           data.content = undefined
           chats.value[chats.value.indexOf(tmp)] = data
         }
+        updateFriendLastMsg(currentFriend.value.user, historyContent, data.date)
         setViewBottom()
       } else if (msg == 'DISABLE_TO_SELF') {
         ElMessage.error('不允许发送消息至自己')
@@ -682,6 +701,15 @@ const addFriend = () => {
           else if(msg == 'APPLICATION_EXIST'){
             ElMessage.error('好友申请已存在')
           }
+          else if(msg == 'SENSITIVE_ERROR'){
+            ElMessage.error('申请原因包含敏感内容')
+          }
+          else if(msg == 'CANNOT_ADD_SELF'){
+            ElMessage.error('不允许添加自己')
+          }
+          else{
+            ElMessage.error('添加好友失败')
+          }
         })
         .catch(e=>{
           ElMessage.error('服务异常')
@@ -714,6 +742,7 @@ const loadingHistoryMsg = async () => {
     isLoadingHistory.value = false
   },20)
 }
+
 const init = async () => {
   await getUserList()
   registerMessageCallback(handleFriendMessage)

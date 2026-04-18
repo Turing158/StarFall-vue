@@ -14,7 +14,7 @@
             </el-table-column>
             <el-table-column label="勋章图标" prop="icon" width="250" align="center">
                 <template #default="{ row }">
-                    <img class="medal-icon" :src="`/src/assets/img${row.icon}`" />
+                    <img class="medal-icon" :src="`/img${row.icon}`" />
                 </template>
             </el-table-column>
             <el-table-column label="来源" prop="source" width="280" />
@@ -80,7 +80,7 @@
                             :value="item.id"
                         >
                             <div style="display: flex; align-items: center;">
-                                <img :src="`/src/assets/img${item.icon}`" style="width: 30px; height: 30px; margin-right: 10px;" />
+                                <img :src="`/img${item.icon}`" style="width: 30px; height: 30px; margin-right: 10px;" />
                                 <span>{{ item.name }}</span>
                             </div>
                         </el-option>

@@ -94,14 +94,15 @@
                         </el-form-item>
                         <el-form-item label="关系">
                             <el-select v-model="friendFormA.relation" placeholder="请选择关系">
-                                <el-option label="正常" :value="0" />
+                                <el-option label="正常" :value="1" />
+                                <el-option label="免打扰" :value="0" />
                                 <el-option label="拉黑" :value="-1" />
                             </el-select>
                         </el-form-item>
                         <el-form-item label="备注">
                             <el-input v-model="friendFormA.alias" placeholder="请输入备注" />
                         </el-form-item>
-                        <el-form-item label="创建时间">
+                        <el-form-item label="创建时间" required>
                             <el-date-picker
                                 v-model="friendFormA.createTime"
                                 type="datetime"
@@ -154,14 +155,15 @@
                         </el-form-item>
                         <el-form-item label="关系">
                             <el-select v-model="friendFormB.relation" placeholder="请选择关系">
-                                <el-option label="正常" :value="0" />
+                                <el-option label="正常" :value="1" />
+                                <el-option label="免打扰" :value="0" />
                                 <el-option label="拉黑" :value="-1" />
                             </el-select>
                         </el-form-item>
                         <el-form-item label="备注">
                             <el-input v-model="friendFormB.alias" placeholder="请输入备注" />
                         </el-form-item>
-                        <el-form-item label="创建时间">
+                        <el-form-item label="创建时间" required>
                             <el-date-picker
                                 v-model="friendFormB.createTime"
                                 type="datetime"
@@ -205,7 +207,8 @@
                 </el-form-item>
                 <el-form-item label="关系">
                     <el-select v-model="editForm.relation" placeholder="请选择关系">
-                        <el-option label="正常" :value="0" />
+                        <el-option label="正常" :value="1" />
+                        <el-option label="免打扰" :value="0" />
                         <el-option label="拉黑" :value="-1" />
                     </el-select>
                 </el-form-item>
@@ -330,20 +333,21 @@ watch(() => friendFormB.value.createTime, (val) => {
 })
 
 const openAddDialog = () => {
+    const now = new Date().toISOString().replace('T', ' ').split('.')[0]
     friendFormA.value = {
         fromUser: '',
         toUser: '',
-        relation: 0,
+        relation: 1,
         alias: '',
-        createTime: '',
+        createTime: now,
         isTop: 0
     }
     friendFormB.value = {
         fromUser: '',
         toUser: '',
-        relation: 0,
+        relation: 1,
         alias: '',
-        createTime: '',
+        createTime: now,
         isTop: 0
     }
     addDialog.value = true

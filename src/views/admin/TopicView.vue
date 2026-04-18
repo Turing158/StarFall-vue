@@ -462,8 +462,7 @@ const look = async (i)=>{
     lookDialog.value = true
     await getTopicContent(lookTopic.value.user,lookTopic.value.id)
     .then(res=>{
-      toMd(res.data)
-      console.log()
+      contentMd.value = marked.parse(res.data)
     })
     .catch(err=>{
         ElMessage.error("获取文章内容失败")
@@ -902,24 +901,24 @@ const formatFileSize = (bytes) => {
 // 获取附件图标
 const getAttachmentIcon = (fileName) => {
   const iconMap = {
-    "pdf": '/src/assets/img/icon/file/pdf.png',
-    "doc": '/src/assets/img/icon/file/doc.png',
-    "docx": '/src/assets/img/icon/file/docx.png',
-    "xls": '/src/assets/img/icon/file/xls.png',
-    "xlsx": '/src/assets/img/icon/file/xlsx.png',
-    "ppt": '/src/assets/img/icon/file/ppt.png',
-    "pptx": '/src/assets/img/icon/file/pptx.png',
-    "zip": '/src/assets/img/icon/file/zip.png',
-    "rar": '/src/assets/img/icon/file/rar.png',
-    "7z": '/src/assets/img/icon/file/7z.png',
-    "png": '/src/assets/img/icon/file/png.png',
-    "jpg": '/src/assets/img/icon/file/jpg.png',
-    "jpeg": '/src/assets/img/icon/file/jpeg.png',
-    "gif": '/src/assets/img/icon/file/gif.png',
-    "txt": '/src/assets/img/icon/file/txt.png',
-    "json": '/src/assets/img/icon/file/json.png',
-    "jar": '/src/assets/img/icon/file/jar.png',
-    default: '/src/assets/img/icon/file/file.png'
+    "pdf": '/img/icon/file/pdf.png',
+    "doc": '/img/icon/file/doc.png',
+    "docx": '/img/icon/file/docx.png',
+    "xls": '/img/icon/file/xls.png',
+    "xlsx": '/img/icon/file/xlsx.png',
+    "ppt": '/img/icon/file/ppt.png',
+    "pptx": '/img/icon/file/pptx.png',
+    "zip": '/img/icon/file/zip.png',
+    "rar": '/img/icon/file/rar.png',
+    "7z": '/img/icon/file/7z.png',
+    "png": '/img/icon/file/png.png',
+    "jpg": '/img/icon/file/jpg.png',
+    "jpeg": '/img/icon/file/jpeg.png',
+    "gif": '/img/icon/file/gif.png',
+    "txt": '/img/icon/file/txt.png',
+    "json": '/img/icon/file/json.png',
+    "jar": '/img/icon/file/jar.png',
+    default: '/img/icon/file/file.png'
   }
   let fileNameSplit = fileName.split(".")
   console.log(fileNameSplit.length > 1 ? iconMap[fileNameSplit[fileNameSplit.length - 1].toLowerCase()] || iconMap.default : iconMap.default)

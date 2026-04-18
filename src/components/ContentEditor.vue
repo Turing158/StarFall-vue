@@ -24,7 +24,7 @@
                     class="op-icon fa fa-smile-o center"
                     title="表情"
                     @click="emojiClick">
-                  <img src="/src/assets/img/Cicon.gif"
+                  <img src="/img/Cicon.gif"
                    style="margin: 3px;">
                   </button>
                     <template #dropdown>
